@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071b3d">
+<title>Rhymo | Dashboard</title>
+
+<style>
+:root{
+ --bg:#030b20;
+ --panel:rgba(12,32,68,.88);
+ --panel2:#142f59;
+ --border:rgba(143,183,255,.17);
+ --text:#edf4ff;
+ --muted:#a5b7d4;
+ --accent:#609bff;
+ --accent2:#3779ee;
+ --radius:17px
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+ margin:0;min-height:100vh;
+ font-family:Arial,Helvetica,sans-serif;color:var(--text);
+ background:
+ radial-gradient(ellipse at 12% 0%,#173d79,transparent 38%),
+ radial-gradient(ellipse at 90% 40%,#211854,transparent 35%),
+ linear-gradient(135deg,#030b20,#071b3d 60%,#101338);
+ background-attachment:fixed;background-size:140% 140%;
+ animation:bgDrift 22s ease-in-out infinite alternate
+}
+@keyframes bgDrift{to{background-position:100% 100%}}
+@keyframes softRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes glowPulse{
+ 0%,100%{box-shadow:0 12px 35px #0002}
+ 50%{box-shadow:0 16px 42px #0004,0 0 28px #609bff18}
+}
+@keyframes shimmer{to{background-position:-200% 0}}
+button,input,select,textarea{font:inherit}
+button,a{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+ outline:2px solid var(--accent);outline-offset:3px
+}
+a{color:inherit;text-decoration:none}
+button,.btn{
+ border:1px solid var(--border);border-radius:11px;
+ padding:11px 15px;color:var(--text);background:var(--panel2);
+ font-weight:600;display:inline-flex;align-items:center;
+ justify-content:center;gap:8px;text-decoration:none;
+ transition:transform .2s,filter .2s,box-shadow .2s,border-color .2s
+}
+button:hover,.btn:hover{
+ filter:brightness(1.13);transform:translateY(-2px);
+ box-shadow:0 8px 22px #0003
+}
+button:active,.btn:active{transform:scale(.985)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{
+ background:linear-gradient(135deg,var(--accent2),var(--accent));
+ border-color:transparent;color:white
+}
+.topbar{
+ height:74px;position:sticky;top:0;z-index:30;
+ display:flex;align-items:center;gap:13px;padding:0 22px;
+ background:rgba(3,11,32,.91);border-bottom:1px solid var(--border);
+ backdrop-filter:blur(16px)
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;white-space:nowrap}
+.avatar{
+ width:40px;height:40px;border-radius:13px;object-fit:cover;
+ background:#10284d;border:1px solid var(--border);
+ transition:transform .28s,box-shadow .28s
+}
+.brand:hover .avatar{transform:rotate(-4deg) scale(1.06);box-shadow:0 0 18px #609bff55}
+.iconbtn{width:42px;height:42px;padding:0;display:grid;place-items:center;flex-shrink:0}
+.hamb{display:flex;flex-direction:column;gap:5px}
+.hamb i{width:19px;height:2px;background:currentColor;display:block;transition:.22s}
+#menuToggle[aria-expanded="true"] .hamb i:first-child{transform:translateY(7px) rotate(45deg)}
+#menuToggle[aria-expanded="true"] .hamb i:nth-child(2){opacity:0}
+#menuToggle[aria-expanded="true"] .hamb i:last-child{transform:translateY(-7px) rotate(-45deg)}
+.top-search{
+ display:flex;gap:8px;align-items:center;margin-left:auto;
+ width:min(300px,30vw);background:#10274a;
+ border:1px solid var(--border);border-radius:11px;padding:0 12px
+}
+.top-search input{min-width:0;width:100%;height:40px;border:0;outline:0;background:transparent;color:var(--text)}
+.top-search input::placeholder{color:var(--muted)}
+.top-actions{display:flex;align-items:center;gap:8px}
+.layout{display:flex;min-height:calc(100vh - 74px)}
+.sidebar{
+ width:242px;flex-shrink:0;padding:22px 14px;
+ border-right:1px solid var(--border);background:#030b2025
+}
+.nav-label{padding:15px 10px 8px;color:var(--muted);font-size:11px;letter-spacing:1.4px;text-transform:uppercase}
+.navbtn{
+ width:100%;text-align:left;justify-content:flex-start;display:flex;
+ gap:12px;align-items:center;margin:3px 0;background:transparent;
+ border-color:transparent;color:var(--muted);font-size:13px;padding:11px
+}
+.navbtn .ns{width:20px;text-align:center;color:var(--accent);font-weight:700}
+.navbtn.active,.navbtn:hover{background:#609bff1b;border-color:var(--border);color:var(--text);transform:translateX(3px)}
+main{flex:1;min-width:0;padding:clamp(18px,4vw,46px)}
+.content{max-width:1200px;margin:auto}
+.page{display:none}
+.page.active{display:block;animation:softRise .32s cubic-bezier(.2,.7,.2,1)}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:var(--accent);font-weight:700}
+h1{font-size:clamp(28px,4vw,39px);letter-spacing:-.8px;margin:10px 0}
+h2{font-size:19px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 8px}
+p{line-height:1.65}
+.sub,.muted{color:var(--muted)}
+.sub{max-width:760px;margin:0 0 24px}
+.hero{
+ padding:clamp(25px,5vw,45px);border-radius:22px;
+ border:1px solid #8bb7ff30;background:linear-gradient(120deg,#19417eeb,#101f48ed);
+ margin-bottom:18px;overflow:hidden;position:relative;animation:glowPulse 8s ease-in-out infinite
+}
+.hero p{max-width:650px;color:#c3d4ed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.panel{
+ grid-column:span 6;background:var(--panel);border:1px solid var(--border);
+ border-radius:var(--radius);padding:21px;min-width:0;
+ box-shadow:0 12px 35px #0000000c;transition:border-color .2s,transform .2s
+}
+.panel:hover{border-color:#609bff45}
+.panel.full{grid-column:span 12}
+.panel.third{grid-column:span 4}
+.panel p{color:var(--muted)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+.panel-head h2{margin:0}
+.stat{font-size:24px;font-weight:700;margin:12px 0}
+.pill{display:inline-block;border:1px solid var(--border);border-radius:30px;padding:5px 9px;color:var(--muted);font-size:12px}
+.field{display:block;margin:12px 0}
+.field span{display:block;font-size:13px;margin-bottom:7px;color:var(--muted)}
+input,select,textarea{
+ width:100%;background:#07172f;border:1px solid var(--border);
+ color:var(--text);padding:12px;border-radius:10px
+}
+select option{background:#07172f;color:var(--text)}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;align-items:center;gap:13px}
+.profile-pic{width:64px;height:64px;border-radius:18px;object-fit:cover;background:#10284d;border:1px solid var(--border)}
+.profile-name{font-size:18px;font-weight:700}
+.notice{padding:14px;border:1px solid var(--border);border-radius:12px;background:#0a1d3b;color:var(--muted);line-height:1.65}
+.empty{padding:20px;text-align:center;border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px}
+.result{width:100%;display:block;text-align:left;margin:8px 0}
+.result small{display:block;color:var(--muted);font-weight:400;margin-top:4px}
+.list-item{padding:14px 0;border-bottom:1px solid var(--border)}
+.list-item:last-child{border-bottom:0}
+.hidden{display:none!important}
+footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
+#drawer{
+ position:fixed;inset:74px auto 0 0;width:min(300px,86vw);z-index:41;
+ background:#07152d;border-right:1px solid var(--border);padding:18px;
+ overflow:auto;visibility:hidden;transform:translateX(-105%);
+ transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s
+}
+#drawer.open{visibility:visible;transform:translateX(0)}
+#scrim{
+ position:fixed;inset:74px 0 0;z-index:40;background:#0008;
+ opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s
+}
+#scrim.open{visibility:visible;opacity:1}
+#toast{
+ position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+ background:#142f59;border:1px solid var(--border);padding:13px 17px;
+ border-radius:12px;z-index:80;max-width:90vw;box-shadow:0 10px 35px #0005;
+ animation:softRise .22s ease
+}
+#scrollProgress{
+ position:fixed;top:0;left:0;width:0;height:3px;z-index:100;
+ background:linear-gradient(90deg,var(--accent2),#b6d2ff);
+ box-shadow:0 0 12px var(--accent);transition:width .08s
+}
+#backTop{
+ position:fixed;right:18px;bottom:18px;z-index:50;width:44px;height:44px;
+ border-radius:50%;opacity:0;visibility:hidden;transform:translateY(10px);
+ transition:.2s;background:linear-gradient(135deg,var(--accent2),var(--accent))
+}
+#backTop.visible{opacity:1;visibility:visible;transform:none}
+kbd{padding:2px 6px;background:#07172f;border:1px solid var(--border);border-radius:5px;font-size:11px}
+@media(max-width:900px){.sidebar{display:none}.panel.third{grid-column:span 6}}
+@media(max-width:600px){
+ .topbar{padding:0 10px;gap:8px}
+ .brand{font-size:16px}.brand .avatar{width:36px;height:36px}
+ .top-search{width:auto;flex:1;margin-left:auto}
+ .top-actions{gap:5px}.top-actions button{font-size:12px;padding:9px}
+ .panel,.panel.third{grid-column:span 12}
+ main{padding:20px 13px}.hero{padding:24px 19px}
+ .profile-pic{width:53px;height:53px}
+ #loginBtn{max-width:92px;white-space:normal;line-height:1.2}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="scrollProgress"></div>
+
+<header class="topbar">
+ <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false">
+  <span class="hamb"><i></i><i></i><i></i></span>
+ </button>
+ <a href="#home" class="brand" data-go="home">
+  <img class="avatar" id="brandAvatar" alt="Rhymo bot avatar">
+  <span>Rhymo</span>
+ </a>
+ <label class="top-search">
+  <span aria-hidden="true">⌕</span>
+  <input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo">
+ </label>
+ <div class="top-actions">
+  <button class="primary" id="loginBtn">Login with Discord</button>
+  <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account">
+   <img id="headerAvatar" class="avatar" alt="Your Discord avatar">
+  </button>
+ </div>
+</header>
+
+<div id="scrim"></div>
+<div id="drawer" aria-label="Mobile navigation"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main><div class="content">
+
+<section class="page active" id="page-home">
+ <div class="hero">
+  <div class="eyebrow">Discord bot dashboard</div>
+  <h1>Welcome to Rhymo.</h1>
+  <p>Your central place to explore Rhymo, review service information, manage your account, and access available tools.</p>
+  <div class="actions">
+   <button class="primary" data-go="dashboard">Open dashboard</button>
+   <button data-go="status">View system status</button>
+   <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1534695566846726204&amp;permissions=0&amp;scope=bot%20applications.commands" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+  </div>
+ </div>
+ <div class="grid">
+  <article class="panel third"><h2>System Status</h2><p>Review service health when a real monitoring source is connected.</p><button data-go="status">View status</button></article>
+  <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
+  <article class="panel third"><h2>Server Management</h2><p>Access the planned server configuration interface.</p><button data-go="servers">Open servers</button></article>
+  <article class="panel full"><h2>Your workspace</h2><p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p><button class="primary" id="homeLoginBtn">Login with Discord</button></article>
+ </div>
+</section>
+
+<section class="page" id="page-dashboard">
+ <div class="eyebrow">Workspace</div><h1>Your dashboard</h1><p class="sub">Your account information is retrieved from the configured backend.</p>
+ <div class="grid">
+  <article class="panel full">
+   <div class="row">
+    <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
+    <div><div class="profile-name" id="profileName">Not signed in</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div>
+   </div>
+   <hr>
+   <p id="accountMessage" class="muted">Checking your login session...</p>
+   <div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
+  </article>
+  <article class="panel"><h2>Account</h2><p>Your profile is loaded from the authenticated session, not browser storage.</p><button data-go="settings">Account settings</button></article>
+  <article class="panel"><h2>Help and support</h2><p>Find information about Rhymo's website and login.</p><button data-go="help">Open Help Center</button></article>
+ </div>
+</section>
+
+<section class="page" id="page-status">
+ <div class="eyebrow">Monitoring</div><h1>System Status</h1><p class="sub">Live figures appear only after a real monitoring endpoint is connected.</p>
+ <div class="grid">
+  <article class="panel third"><h3>Bot uptime</h3><div class="stat">--</div><span class="pill">Not connected</span><p>Requires bot uptime data from a backend endpoint.</p></article>
+  <article class="panel third"><h3>API latency</h3><div class="stat">--</div><span class="pill">Not connected</span><p>Requires actual measured latency.</p></article>
+  <article class="panel third"><h3>Service health</h3><div class="stat">Unknown</div><span class="pill">Not connected</span><p>No health check has been configured.</p></article>
+  <article class="panel full"><h2>Incident history</h2><div class="empty">No incident source is connected. This does not mean that no incidents exist.</div></article>
+  <article class="panel full"><h2>Monitoring integration</h2><p>Connect a server-side health endpoint to display uptime, latency, service availability, and incidents here.</p></article>
+ </div>
+</section>
+
+<section class="page" id="page-search">
+ <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages, help articles, settings, and available command information.</p>
+ <div class="panel full"><label class="field"><span>Search Rhymo</span><input id="searchPageInput" type="search" placeholder="Try settings, login, privacy..."></label><div id="searchResults" aria-live="polite"></div></div>
+</section>
+
+<section class="page" id="page-notifications">
+ <div class="eyebrow">Updates</div><h1>Notification Center</h1><p class="sub">Announcements, maintenance notices, and release updates will appear here when configured.</p>
+ <div class="grid">
+  <article class="panel full"><div class="panel-head"><h2>Announcements</h2><span class="pill">Feed not connected</span></div><div class="empty">No announcement feed has been configured yet.</div></article>
+  <article class="panel full"><div class="panel-head"><h2>Maintenance</h2><span class="pill">Feed not connected</span></div><div class="empty">Maintenance notices will appear here when published by a real source.</div></article>
+  <article class="panel full"><div class="panel-head"><h2>Release updates</h2><span class="pill">Feed not connected</span></div><div class="empty">Release notifications have not been configured.</div></article>
+ </div>
+</section>
+
+<section class="page" id="page-logs">
+ <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Interface prepared for real moderation events and recent actions from your backend.</p>
+ <div class="panel full">
+  <div class="panel-head"><h2>Recent activity</h2><span class="pill">Backend required</span></div>
+  <label class="field"><span>Filter event type</span><select id="logFilter"><option value="all">All events</option><option value="moderation">Moderation</option><option value="security">Security</option><option value="system">System</option></select></label>
+  <div class="empty">No activity source is connected. No moderation records are being retrieved or displayed.</div>
+  <p>Connect an authenticated, permission-checked API endpoint before displaying server logs.</p>
+ </div>
+</section>
+
+<section class="page" id="page-servers">
+ <div class="eyebrow">Administration</div><h1>Server Management</h1><p class="sub">A starting interface for server selection, configuration, moderation settings, and permissions.</p>
+ <div class="grid">
+  <article class="panel full">
+   <h2>Select a server</h2><p>Real Discord servers can only be listed after the backend implements authorization and the required Discord OAuth scope.</p>
+   <label class="field"><span>Server</span><select id="serverSelect"><option value="">No server data connected</option></select></label>
+   <button class="primary" id="loadServersBtn">Check server connection</button>
+   <div id="serverMessage" class="notice" style="margin-top:15px">Server listing is not connected.</div>
+  </article>
+  <article class="panel"><h2>Configuration</h2><p>Configure server-specific Rhymo behavior when a secure backend is available.</p><button id="configBtn">Check integration</button></article>
+  <article class="panel"><h2>Moderation settings</h2><p>Moderation settings must be loaded and saved through permission-checked backend routes.</p><button id="moderationBtn">Check integration</button></article>
+  <article class="panel full"><h2>Permissions</h2><p>Login with Discord does not automatically grant server administration permissions. Server-specific actions must verify the user's actual permissions on the server.</p></article>
+ </div>
+</section>
+
+<section class="page" id="page-commands">
+ <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Search a connected command catalog. No live bot command source is configured yet.</p>
+ <div class="panel full"><label class="field"><span>Find a command</span><input id="commandSearch" placeholder="Search commands..."></label><div id="commandResults" class="empty">No command catalog is connected. Connect a backend endpoint to show verified commands, descriptions, and permissions.</div></div>
+</section>
+
+<section class="page" id="page-language">
+ <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose a language. Only languages with available translations will translate the navigation labels.</p>
+ <div class="panel full">
+  <label class="field"><span>Interface language</span><select id="languageSelect"></select></label>
+  <div class="notice" id="languageMessage">English is selected.</div>
+  <p class="muted">The language menu includes a wide selection of languages. Untranslated content remains in English.</p>
+ </div>
+</section>
+
+<section class="page" id="page-help">
+ <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p>
+ <div class="grid">
+  <article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord. A secure backend must validate the callback and create a session before login can work.</p></article>
+  <article class="panel full"><h2>Why can't I log in?</h2><p>Confirm that the backend is deployed, the redirect URL exactly matches the Discord Developer Portal setting, and the frontend points to the correct backend origin.</p></article>
+  <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions on Discord before approving installation.</p></article>
+  <article class="panel full"><h2>Where can I find commands?</h2><p>Use Command Explorer to search a command catalog after a real data source is configured.</p></article>
+ </div>
+</section>
+
+<section class="page" id="page-changelog">
+ <div class="eyebrow">Version history</div><h1>Changelog</h1><p class="sub">Published releases and fixes will be listed here.</p>
+ <div class="panel full"><div class="empty">No release entries have been published yet.</div></div>
+</section>
+
+<section class="page" id="page-settings">
+ <div class="eyebrow">Preferences</div><h1>Settings</h1><p class="sub">Manage your account, website preferences, and bot installation.</p>
+ <div class="grid">
+  <article class="panel full">
+   <h2>Discord Account</h2><p id="settingsAccountText" class="muted">Sign in to view your Discord profile.</p>
+   <div class="row" id="settingsProfile" hidden><img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar"><div><div id="settingsName" class="profile-name"></div><div id="settingsId" class="muted"></div></div></div>
+   <div class="actions"><button class="primary" id="settingsLoginBtn">Login with Discord</button><button id="settingsLogoutBtn" class="hidden">Log out</button></div>
+  </article>
+  <article class="panel full">
+   <h2>Add Rhymo to Discord</h2><p>Install Rhymo on a server where you have permission. Review Discord's requested permissions before authorizing.</p>
+   <a class="btn primary" id="settingsInviteBtn" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+  </article>
+  <article class="panel">
+   <h2>Appearance</h2>
+   <label class="field"><span>Accent color</span><select id="accentSelect"><option value="#609bff">Blue</option><option value="#a78bfa">Purple</option><option value="#55d6a3">Green</option></select></label>
+   <label class="field"><span>Interface language</span><select id="settingsLanguage"></select></label>
+   <p class="muted">Your preferences are saved in this browser.</p>
+   <button id="resetPreferencesBtn">Reset preferences</button>
+  </article>
+  <article class="panel">
+   <h2>Keyboard shortcuts</h2>
+   <p><kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd> opens search.</p>
+   <p><kbd>/</kbd> focuses search when you're not typing in a field.</p>
+   <p><kbd>Esc</kbd> closes the navigation menu.</p>
+  </article>
+  <article class="panel full">
+   <h2>Privacy and security</h2>
+   <p>The Discord client secret must never be included in this HTML file. Use a secure backend for authentication and server operations.</p>
+   <div class="actions"><button data-go="privacy">Privacy Policy</button><button data-go="terms">Terms of Service</button></div>
+  </article>
+ </div>
+</section>
+
+<section class="page" id="page-terms">
+ <div class="eyebrow">Legal</div><h1>Terms of Service</h1>
+ <div class="panel full"><p>Use Rhymo responsibly and in accordance with Discord's applicable terms and community guidelines. Do not attempt to disrupt the service, access another person's account, or misuse bot features.</p><p>This is a starter draft, not legal advice. Replace it with terms that accurately describe the released service before publication.</p></div>
+</section>
+
+<section class="page" id="page-privacy">
+ <div class="eyebrow">Legal</div><h1>Privacy Policy</h1>
+ <div class="panel full"><p>When Discord login is enabled, Rhymo receives the profile information permitted by the configured OAuth2 scope. The backend stores a server-side session to recognize your login.</p><p>Before launch, document actual data retention, session expiration, hosting providers, contact information, and any additional data the service collects.</p></div>
+</section>
+
+<footer>Rhymo · Website interface and authentication integration</footer>
+</div></main>
+</div>
+
+<div id="toast" class="hidden" role="status" aria-live="polite"></div>
+<button id="backTop" aria-label="Back to top" title="Back to top">↑</button>
+
+<script>
+"use strict";
+
+/* Keep empty until the secure backend has been deployed.
+   Never put your Discord client secret or bot token here. */
+const API_BASE_URL = "https://rhymo-auth-backend.onrender.com";
+const APPLICATION_ID = "1534695566846726204";
+const BOT_AVATAR = "https://cdn.discordapp.com/attachments/1541449772865691728/1562289873921122404/IMG_1541.png?ex=6ad97353&is=6ad821d3&hm=06512c733f9273e37198b82cc474187b1f5f972c4802763a17f4c388a4bfa520";
+const INVITE_URL = "https://discord.com/oauth2/authorize?client_id="+encodeURIComponent(APPLICATION_ID)+"&permissions=0&scope=bot%20applications.commands";
+const FALLBACK_AVATAR = "https://cdn.discordapp.com/embed/avatars/0.png";
+const $ = id => document.getElementById(id);
+const api = path => API_BASE_URL.replace(/\/+$/,"")+path;
+
+$("brandAvatar").src = BOT_AVATAR;
+$("settingsInviteBtn").href = INVITE_URL;
+$("brandAvatar").addEventListener("error",e=>e.target.src=FALLBACK_AVATAR);
+
+const pages = [
+ ["home","Home","H"],["dashboard","Dashboard","D"],
+ ["status","System Status","S"],["search","Global Search","G"],
+ ["notifications","Notification Center","N"],["logs","Activity Logs","A"],
+ ["servers","Server Management","M"],["commands","Command Explorer","C"],
+ ["help","Help Center","?"],["changelog","Changelog","V"],
+ ["language","Language Settings","L"],["settings","Settings","S"],
+ ["terms","Terms of Service","T"],["privacy","Privacy Policy","P"]
+];
+
+const languageOptions = [
+ ["en","English"],["aa","Afar"],["ab","Abkhaz"],["af","Afrikaans"],
+ ["ak","Akan"],["sq","Albanian"],["am","Amharic"],["ar","العربية (Arabic)"],
+ ["hy","Armenian"],["az","Azerbaijani"],["eu","Basque"],["bn","বাংলা (Bengali)"],
+ ["bs","Bosnian"],["bg","Bulgarian"],["my","Burmese"],["ca","Catalan"],
+ ["ceb","Cebuano"],["zh-CN","简体中文 (Chinese, Simplified)"],
+ ["zh-TW","繁體中文 (Chinese, Traditional)"],["co","Corsican"],
+ ["hr","Croatian"],["cs","Czech"],["da","Danish"],["nl","Dutch"],
+ ["en-GB","English (United Kingdom)"],["en-US","English (United States)"],
+ ["eo","Esperanto"],["et","Estonian"],["tl","Filipino"],["fi","Finnish"],
+ ["fr","Français (French)"],["fr-CA","French (Canada)"],["gl","Galician"],
+ ["ka","Georgian"],["de","Deutsch (German)"],["el","Greek"],["gu","Gujarati"],
+ ["ht","Haitian Creole"],["ha","Hausa"],["he","Hebrew"],["hi","हिन्दी (Hindi)"],
+ ["hu","Hungarian"],["is","Icelandic"],["ig","Igbo"],["id","Indonesian"],
+ ["ga","Irish"],["it","Italian"],["ja","日本語 (Japanese)"],["jv","Javanese"],
+ ["kn","Kannada"],["kk","Kazakh"],["km","Khmer"],["ko","한국어 (Korean)"],
+ ["ku","Kurdish"],["ky","Kyrgyz"],["lo","Lao"],["la","Latin"],
+ ["lv","Latvian"],["lt","Lithuanian"],["mk","Macedonian"],["ms","Malay"],
+ ["ml","Malayalam"],["mt","Maltese"],["mi","Māori"],["mr","Marathi"],
+ ["mn","Mongolian"],["ne","Nepali"],["no","Norwegian"],["or","Odia"],
+ ["om","Oromo"],["ps","Pashto"],["fa","Persian"],["pl","Polski (Polish)"],
+ ["pt","Português (Portuguese)"],["pt-BR","Portuguese (Brazil)"],
+ ["pa","Punjabi"],["ro","Romanian"],["ru","Русский (Russian)"],
+ ["sm","Samoan"],["gd","Scottish Gaelic"],["sr","Serbian"],["st","Sesotho"],
+ ["sd","Sindhi"],["si","Sinhala"],["sk","Slovak"],["sl","Slovenian"],
+ ["so","Soomaali (Somali)"],["es","Español (Spanish)"],["su","Sundanese"],
+ ["sw","Kiswahili (Swahili)"],["sv","Swedish"],["ta","Tamil"],["te","Telugu"],
+ ["th","ไทย (Thai)"],["tr","Türkçe (Turkish)"],["uk","Ukrainian"],
+ ["ur","اردو (Urdu)"],["uz","Uzbek"],["vi","Vietnamese"],["cy","Welsh"],
+ ["wo","Wolof"],["xh","Xhosa"],["yi","Yiddish"],["yo","Yoruba"],["zu","Zulu"]
+];
+
+function populateLanguages(){
+ const html=languageOptions.map(([v,n])=>`<option value="${v}">${n}</option>`).join("");
+ $("languageSelect").innerHTML=html;
+ $("settingsLanguage").innerHTML=html;
+}
+populateLanguages();
+
+function navMarkup(){
+ const groups=[
+  ["Workspace",pages.slice(0,4)],
+  ["Bot tools",pages.slice(4,8)],
+  ["Support and preferences",pages.slice(8)]
+ ];
+ return groups.map(([title,items])=>'<div class="nav-label">'+title+'</div>'+
+  items.map(([id,label,symbol])=>`<button class="navbtn" data-go="${id}"><span class="ns" aria-hidden="true">${symbol}</span><span>${label}</span></button>`).join("")
+ ).join("");
+}
+$("sidebar").innerHTML=navMarkup();
+$("drawer").innerHTML='<div class="brand" style="margin:0 0 18px"><img class="avatar" src="'+BOT_AVATAR+'" alt="Rhymo bot avatar"><span>Rhymo</span></div>'+navMarkup();
+$("drawer").querySelector("img").addEventListener("error",e=>e.target.src=FALLBACK_AVATAR);
+
+function showPage(id,updateHash=true){
+ if(!pages.some(p=>p[0]===id))id="home";
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+id));
+ document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("active",b.dataset.go===id));
+ $("drawer").classList.remove("open");
+ $("scrim").classList.remove("open");
+ $("menuToggle").setAttribute("aria-expanded","false");
+ if(updateHash)history.replaceState(null,"","#"+id);
+ window.scrollTo({top:0,behavior:"smooth"});
+ if(id==="search")renderSearch($("searchPageInput").value);
+}
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-go]");
+ if(b){e.preventDefault();showPage(b.dataset.go);}
+});
+function toggleDrawer(force){
+ const open=typeof force==="boolean"?force:!$("drawer").classList.contains("open");
+ $("drawer").classList.toggle("open",open);
+ $("scrim").classList.toggle("open",open);
+ $("menuToggle").setAttribute("aria-expanded",String(open));
+}
+$("menuToggle").addEventListener("click",()=>toggleDrawer());
+$("scrim").addEventListener("click",()=>toggleDrawer(false));
+
+let toastTimer;
+function toast(message){
+ $("toast").textContent=message;
+ $("toast").classList.remove("hidden");
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>$("toast").classList.add("hidden"),3200);
+}
+function login(){
+ if(!API_BASE_URL){
+  toast("Discord login is not connected yet. Deploy the secure backend first.");
+  return;
+ }
+ window.location.assign(api("/auth/discord"));
+}
+["loginBtn","homeLoginBtn","dashboardLoginBtn","settingsLoginBtn"].forEach(id=>$(id).addEventListener("click",login));
+
+async function request(path,options={}){
+ const headers=new Headers(options.headers||{});
+ if(options.method==="POST")headers.set("Content-Type","application/json");
+ const response=await fetch(api(path),{...options,headers,credentials:"include",cache:"no-store"});
+ if(!response.ok)throw new Error("Request failed ("+response.status+")");
+ return response;
+}
+
+let currentUser=null;
+function setUser(user){
+ currentUser=user;
+ const loggedIn=!!user;
+ $("loginBtn").classList.toggle("hidden",loggedIn);
+ $("accountBtn").classList.toggle("hidden",!loggedIn);
+ $("dashboardLoginBtn").classList.toggle("hidden",loggedIn);
+ $("logoutBtn").classList.toggle("hidden",!loggedIn);
+ $("settingsLoginBtn").classList.toggle("hidden",loggedIn);
+ $("settingsLogoutBtn").classList.toggle("hidden",!loggedIn);
+ $("settingsProfile").hidden=!loggedIn;
+ if(!user){
+  ["profileAvatar","settingsAvatar","headerAvatar"].forEach(id=>$(id).src=FALLBACK_AVATAR);
+  $("profileName").textContent="Not signed in";
+  $("profileId").textContent="";
+  $("authBadge").textContent=API_BASE_URL?"Signed out":"Backend not configured";
+  $("accountMessage").textContent=API_BASE_URL?"Log in with Discord to view your account.":"Discord login will be available after the backend is deployed.";
+  $("settingsAccountText").textContent="You are not signed in.";
+  $("homeAccountMessage").textContent="Sign in with Discord to display your account profile.";
+  $("homeLoginBtn").classList.remove("hidden");
+  return;
+ }
+ const avatar=user.avatar||FALLBACK_AVATAR;
+ $("headerAvatar").src=avatar;
+ $("profileAvatar").src=avatar;
+ $("settingsAvatar").src=avatar;
+ $("settingsName").textContent=user.globalName||user.username||"Discord user";
+ $("settingsId").textContent="Discord ID: "+(user.id||"");
+ $("profileName").textContent=user.globalName||user.username||"Discord user";
+ $("profileId").textContent="Discord ID: "+(user.id||"");
+ $("authBadge").textContent="Signed in";
+ $("accountMessage").textContent="Your Discord session is active.";
+ $("settingsAccountText").textContent="Signed in as "+(user.globalName||user.username)+".";
+ $("homeAccountMessage").textContent="Signed in as "+(user.globalName||user.username)+".";
+ $("homeLoginBtn").classList.add("hidden");
+}
+async function refreshAccount(){
+ if(!API_BASE_URL){
+  setUser(null);
+  $("authBadge").textContent="Backend not configured";
+  return;
+ }
+ try{
+  const r=await request("/api/me");
+  const d=await r.json();
+  setUser(d.user||null);
+ }catch{
+  setUser(null);
+  $("authBadge").textContent="Backend unavailable";
+  $("accountMessage").textContent="Could not verify your login session. Check the backend connection.";
+ }
+}
+async function logout(){
+ try{
+  if(!API_BASE_URL)throw new Error("Backend not configured");
+  await request("/auth/logout",{method:"POST",body:"{}"});
+  setUser(null);showPage("home");toast("You have been logged out.");
+ }catch{toast("Logout could not be completed. Check the backend connection.");}
+}
+$("logoutBtn").addEventListener("click",logout);
+$("settingsLogoutBtn").addEventListener("click",logout);
+$("accountBtn").addEventListener("click",()=>showPage("dashboard"));
+
+const searchIndex=[
+ ...pages.map(([id,label])=>({title:label,description:"Rhymo website page",page:id})),
+ {title:"Discord login",description:"Sign in, account profile, session, and logout",page:"dashboard"},
+ {title:"Add Rhymo to Discord",description:"Install the bot from Settings",page:"settings"},
+ {title:"Privacy and data",description:"Privacy Policy and account sessions",page:"privacy"},
+ {title:"Terms and usage",description:"Terms of Service",page:"terms"},
+ {title:"OAuth2 help",description:"Login troubleshooting and redirect configuration",page:"help"},
+ {title:"Moderation activity",description:"Activity log interface and backend integration",page:"logs"},
+ {title:"Server permissions",description:"Server selection and permission checks",page:"servers"},
+ {title:"Bot uptime",description:"System health monitoring",page:"status"},
+ {title:"Announcements",description:"Maintenance and release notifications",page:"notifications"}
+];
+function renderSearch(query){
+ const q=query.trim().toLowerCase(),target=$("searchResults");
+ if(!q){target.innerHTML='<div class="empty">Enter a search term to find pages and help topics.</div>';return;}
+ const matches=searchIndex.filter(x=>(x.title+" "+x.description).toLowerCase().includes(q));
+ target.innerHTML="";
+ if(!matches.length){target.innerHTML='<div class="empty">No matching pages or help topics found.</div>';return;}
+ matches.forEach(item=>{
+  const b=document.createElement("button");b.className="result";
+  const title=document.createElement("strong");title.textContent=item.title;
+  const desc=document.createElement("small");desc.textContent=item.description;
+  b.append(title,desc);b.addEventListener("click",()=>showPage(item.page));target.appendChild(b);
+ });
+}
+$("globalSearch").addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  $("searchPageInput").value=e.target.value;showPage("search");renderSearch(e.target.value);
+ }
+});
+$("globalSearch").addEventListener("input",e=>{
+ if(e.target.value.trim().length>=2){
+  $("searchPageInput").value=e.target.value;showPage("search");renderSearch(e.target.value);
+ }
+});
+$("searchPageInput").addEventListener("input",e=>renderSearch(e.target.value));
+
+$("loadServersBtn").addEventListener("click",()=>{
+ $("serverMessage").textContent="Server listing is not connected. A backend endpoint, Discord authorization, and permission checks are required.";
+});
+$("configBtn").addEventListener("click",()=>toast("Server configuration requires backend integration."));
+$("moderationBtn").addEventListener("click",()=>toast("Moderation settings require backend integration."));
+$("logFilter").addEventListener("change",()=>toast("Activity log filters will work when a log source is connected."));
+$("commandSearch").addEventListener("input",()=>{
+ $("commandResults").textContent="No live command catalog is connected. Connect a backend endpoint to retrieve verified command data.";
+});
+
+const translations={
+ en:{Home:"Home",Dashboard:"Dashboard","System Status":"System Status","Global Search":"Global Search","Notification Center":"Notification Center","Activity Logs":"Activity Logs","Server Management":"Server Management","Command Explorer":"Command Explorer","Help Center":"Help Center",Changelog:"Changelog","Language Settings":"Language Settings",Settings:"Settings","Terms of Service":"Terms of Service","Privacy Policy":"Privacy Policy"},
+ so:{Home:"Bogga Hore",Dashboard:"Xarunta Maamulka","System Status":"Xaaladda Nidaamka","Global Search":"Raadin Guud","Notification Center":"Ogeysiisyada","Activity Logs":"Diiwaanka Hawlaha","Server Management":"Maamulka Server-ka","Command Explorer":"Baadh Amarada","Help Center":"Xarunta Caawinta",Changelog:"Isbeddellada","Language Settings":"Dejinta Luqadda",Settings:"Dejinta","Terms of Service":"Shuruudaha Adeegga","Privacy Policy":"Siyaasadda Asturnaanta"},
+ es:{Home:"Inicio",Dashboard:"Panel","System Status":"Estado del sistema","Global Search":"Búsqueda global","Notification Center":"Notificaciones","Activity Logs":"Registro de actividad","Server Management":"Gestión de servidores","Command Explorer":"Explorador de comandos","Help Center":"Centro de ayuda",Changelog:"Novedades","Language Settings":"Idioma",Settings:"Configuración","Terms of Service":"Términos del servicio","Privacy Policy":"Política de privacidad"},
+ fr:{Home:"Accueil",Dashboard:"Tableau de bord","System Status":"État du système","Global Search":"Recherche globale","Notification Center":"Notifications","Activity Logs":"Journal d’activité","Server Management":"Gestion des serveurs","Command Explorer":"Explorateur de commandes","Help Center":"Centre d’aide",Changelog:"Modifications","Language Settings":"Langue",Settings:"Paramètres","Terms of Service":"Conditions d’utilisation","Privacy Policy":"Confidentialité"},
+ de:{Home:"Startseite",Dashboard:"Dashboard","System Status":"Systemstatus","Global Search":"Globale Suche","Notification Center":"Benachrichtigungen","Activity Logs":"Aktivitätsprotokoll","Server Management":"Serververwaltung","Command Explorer":"Befehlsübersicht","Help Center":"Hilfezentrum",Changelog:"Änderungen","Language Settings":"Sprache",Settings:"Einstellungen","Terms of Service":"Nutzungsbedingungen","Privacy Policy":"Datenschutz"},
+ pt:{Home:"Início",Dashboard:"Painel","System Status":"Estado do sistema","Global Search":"Pesquisa global","Notification Center":"Notificações","Activity Logs":"Registo de atividade","Server Management":"Gestão de servidores","Command Explorer":"Explorador de comandos","Help Center":"Centro de ajuda",Changelog:"Novidades","Language Settings":"Idioma",Settings:"Definições","Terms of Service":"Termos de serviço","Privacy Policy":"Privacidade"},
+ ar:{Home:"الرئيسية",Dashboard:"لوحة التحكم","System Status":"حالة النظام","Global Search":"بحث شامل","Notification Center":"مركز الإشعارات","Activity Logs":"سجل النشاط","Server Management":"إدارة الخوادم","Command Explorer":"مستكشف الأوامر","Help Center":"مركز المساعدة",Changelog:"سجل التغييرات","Language Settings":"إعدادات اللغة",Settings:"الإعدادات","Terms of Service":"شروط الخدمة","Privacy Policy":"سياسة الخصوصية"},
+ hi:{Home:"होम",Dashboard:"डैशबोर्ड","System Status":"सिस्टम स्थिति","Global Search":"वैश्विक खोज","Notification Center":"सूचना केंद्र","Activity Logs":"गतिविधि लॉग","Server Management":"सर्वर प्रबंधन","Command Explorer":"कमांड एक्सप्लोरर","Help Center":"सहायता केंद्र",Changelog:"बदलाव सूची","Language Settings":"भाषा सेटिंग",Settings:"सेटिंग","Terms of Service":"सेवा की शर्तें","Privacy Policy":"गोपनीयता नीति"},
+ "zh-CN":{Home:"首页",Dashboard:"控制面板","System Status":"系统状态","Global Search":"全局搜索","Notification Center":"通知中心","Activity Logs":"活动日志","Server Management":"服务器管理","Command Explorer":"命令浏览器","Help Center":"帮助中心",Changelog:"更新日志","Language Settings":"语言设置",Settings:"设置","Terms of Service":"服务条款","Privacy Policy":"隐私政策"},
+ ja:{Home:"ホーム",Dashboard:"ダッシュボード","System Status":"システム状況","Global Search":"全体検索","Notification Center":"通知センター","Activity Logs":"アクティビティログ","Server Management":"サーバー管理","Command Explorer":"コマンド一覧","Help Center":"ヘルプセンター",Changelog:"変更履歴","Language Settings":"言語設定",Settings:"設定","Terms of Service":"利用規約","Privacy Policy":"プライバシーポリシー"},
+ ko:{Home:"홈",Dashboard:"대시보드","System Status":"시스템 상태","Global Search":"전체 검색","Notification Center":"알림 센터","Activity Logs":"활동 로그","Server Management":"서버 관리","Command Explorer":"명령어 탐색기","Help Center":"도움말 센터",Changelog:"변경 기록","Language Settings":"언어 설정",Settings:"설정","Terms of Service":"서비스 약관","Privacy Policy":"개인정보 처리방침"},
+ ru:{Home:"Главная",Dashboard:"Панель управления","System Status":"Состояние системы","Global Search":"Глобальный поиск","Notification Center":"Центр уведомлений","Activity Logs":"Журнал действий","Server Management":"Управление серверами","Command Explorer":"Список команд","Help Center":"Центр помощи",Changelog:"История изменений","Language Settings":"Язык",Settings:"Настройки","Terms of Service":"Условия использования","Privacy Policy":"Политика конфиденциальности"},
+ tr:{Home:"Ana sayfa",Dashboard:"Kontrol paneli","System Status":"Sistem durumu","Global Search":"Genel arama","Notification Center":"Bildirim merkezi","Activity Logs":"Etkinlik kayıtları","Server Management":"Sunucu yönetimi","Command Explorer":"Komut gezgini","Help Center":"Yardım merkezi",Changelog:"Değişiklik günlüğü","Language Settings":"Dil ayarları",Settings:"Ayarlar","Terms of Service":"Hizmet şartları","Privacy Policy":"Gizlilik politikası"},
+ sw:{Home:"Nyumbani",Dashboard:"Dashibodi","System Status":"Hali ya mfumo","Global Search":"Tafuta kote","Notification Center":"Kituo cha arifa","Activity Logs":"Kumbukumbu za shughuli","Server Management":"Usimamizi wa seva","Command Explorer":"Kivinjari cha amri","Help Center":"Kituo cha msaada",Changelog:"Mabadiliko","Language Settings":"Mipangilio ya lugha",Settings:"Mipangilio","Terms of Service":"Masharti ya huduma","Privacy Policy":"Sera ya faragha"}
+};
+const rtlLanguages=new Set(["ar","fa","he","ps","sd","ur","yi"]);
+function setLanguage(lang){
+ const dict=translations[lang]||translations.en;
+ document.querySelectorAll(".navbtn[data-go]").forEach(b=>{
+  const entry=pages.find(p=>p[0]===b.dataset.go);
+  if(entry)b.querySelector("span:last-child").textContent=dict[entry[1]]||entry[1];
+ });
+ document.documentElement.lang=lang;
+ document.documentElement.dir=rtlLanguages.has(lang)?"rtl":"ltr";
+ $("languageSelect").value=lang;
+ $("settingsLanguage").value=lang;
+ const selected=languageOptions.find(x=>x[0]===lang)?.[1]||lang;
+ $("languageMessage").textContent=translations[lang]
+  ?selected+" selected. Some page content remains in English."
+  :selected+" selected. A full translation is not available yet, so some interface text remains in English.";
+ try{localStorage.setItem("rhymo-language",lang)}catch{}
+}
+$("languageSelect").addEventListener("change",e=>setLanguage(e.target.value));
+$("settingsLanguage").addEventListener("change",e=>setLanguage(e.target.value));
+
+$("accentSelect").addEventListener("change",e=>{
+ document.documentElement.style.setProperty("--accent",e.target.value);
+ try{localStorage.setItem("rhymo-accent",e.target.value)}catch{}
+});
+$("resetPreferencesBtn").addEventListener("click",()=>{
+ try{
+  localStorage.removeItem("rhymo-accent");
+  localStorage.removeItem("rhymo-language");
+ }catch{}
+ document.documentElement.style.setProperty("--accent","#609bff");
+ $("accentSelect").value="#609bff";
+ setLanguage("en");
+ toast("Your preferences have been reset.");
+});
+
+window.addEventListener("keydown",e=>{
+ const typing=["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName);
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
+  e.preventDefault();showPage("search");$("searchPageInput").focus();return;
+ }
+ if(e.key==="/"&&!typing){
+  e.preventDefault();$("globalSearch").focus();return;
+ }
+ if(e.key==="Escape")toggleDrawer(false);
+});
+window.addEventListener("scroll",()=>{
+ const max=document.documentElement.scrollHeight-window.innerHeight;
+ $("scrollProgress").style.width=(max>0?(window.scrollY/max)*100:0)+"%";
+ $("backTop").classList.toggle("visible",window.scrollY>350);
+},{passive:true});
+$("backTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+try{
+ const savedAccent=localStorage.getItem("rhymo-accent");
+ if(savedAccent&&["#609bff","#a78bfa","#55d6a3"].includes(savedAccent)){
+  document.documentElement.style.setProperty("--accent",savedAccent);
+  $("accentSelect").value=savedAccent;
+ }
+ setLanguage(localStorage.getItem("rhymo-language")||"en");
+}catch{setLanguage("en")}
+
+const params=new URLSearchParams(location.search);
+if(params.get("login")==="success")toast("Discord login completed.");
+if(params.get("login")==="cancelled")toast("Discord login was cancelled.");
+if(params.has("login")){
+ params.delete("login");
+ history.replaceState(null,"",location.pathname+location.hash);
+}
+const initialPage=location.hash.slice(1);
+showPage(pages.some(p=>p[0]===initialPage)?initialPage:"home",false);
+renderSearch("");
+refreshAccount();
+</script>
+</body>
+</html>
