@@ -331,18 +331,40 @@ $("sidebar").innerHTML = navMarkup();
 $("drawer").innerHTML =
  '<div class="brand" style="margin:0 0 18px"><img class="avatar" src="'+BOT_AVATAR+'" alt="Rhymo bot avatar"><span>Rhymo</span></div>'+navMarkup();
 
+
 function showPage(id,updateHash=true){
  if(!pages.some(p=>p[0]===id))id="home";
- document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+id));
- document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("active",b.dataset.go===id));
+
+ document.querySelectorAll(".page").forEach(p=>
+  p.classList.toggle("active",p.id==="page-"+id)
+ );
+
+ document.querySelectorAll("[data-go]").forEach(b=>
+  b.classList.toggle("active",b.dataset.go===id)
+ );
+
  $("drawer").classList.remove("open");
  $("scrim").classList.remove("open");
  $("menuToggle").setAttribute("aria-expanded","false");
+
  if(updateHash)history.replaceState(null,"","#"+id);
+
  window.scrollTo({top:0,behavior:"smooth"});
- if(id==="search")renderSearch($("searchPageInput").value);
- if(id==="servers" && currentUser && !managedServers.length) {
-   serverMessage("Choose Load servers to retrieve your manageable Discord servers.");
+
+ if(id==="search"){
+  renderSearch($("searchPageInput").value);
+ }
+
+ if(id==="servers"){
+  if(!currentUser){
+   serverMessage("Please log in with Discord before loading servers.");
+  }else if(!managedServers.length){
+   loadServers();
+  }else{
+   serverMessage(
+    `Loaded ${managedServers.length} server(s). Choose a server to continue.`
+   );
+  }
  }
 }
 
