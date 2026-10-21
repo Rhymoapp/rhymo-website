@@ -128,14 +128,39 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
 </section>
 
 <section class="page" id="page-status">
-  <div class="eyebrow">Monitoring</div><h1>System Status</h1><p class="sub">Live figures appear only after a real monitoring endpoint is connected.</p>
-  <div class="grid">
-    <article class="panel third"><h3>Bot uptime</h3><div class="stat">--</div><span class="pill">Not connected</span><p>Requires bot uptime data from a backend endpoint.</p></article>
-    <article class="panel third"><h3>API latency</h3><div class="stat">--</div><span class="pill">Not connected</span><p>Requires actual measured latency.</p></article>
-    <article class="panel third"><h3>Service health</h3><div class="stat">Unknown</div><span class="pill">Not connected</span><p>No health check has been configured.</p></article>
-    <article class="panel full"><h2>Incident history</h2><div class="empty">No incident source is connected. This does not mean that no incidents exist.</div></article>
-  </div>
+  
+<div class="eyebrow">Monitoring</div>
+<h1>System Status</h1>
+<p class="sub">Live Rhymo bot monitoring.</p>
+
+<div class="grid">
+  <article class="panel third">
+    <h3>Bot Status</h3>
+    <div class="stat" id="botOnline">Checking...</div>
+    <span class="pill" id="botHeartbeat">Connecting...</span>
+  </article>
+
+  <article class="panel third">
+    <h3>Bot Uptime</h3>
+    <div class="stat" id="botUptime">--</div>
+    <p>Time since the bot started.</p>
+  </article>
+
+  <article class="panel third">
+    <h3>Discord Latency</h3>
+    <div class="stat" id="botLatency">--</div>
+    <p>Discord gateway latency.</p>
+  </article>
+
+  <article class="panel full">
+    <h2>Connected Servers</h2>
+    <div class="stat" id="botServers">--</div>
+    <p>Discord servers Rhymo is connected to.</p>
+    <p class="muted" id="botLastHeartbeat">Waiting for heartbeat...</p>
+  </article>
+</div>
 </section>
+
 
 <section class="page" id="page-search">
   <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages and help topics.</p>
