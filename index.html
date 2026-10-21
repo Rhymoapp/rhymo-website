@@ -528,6 +528,27 @@ try{
  setLanguage(localStorage.getItem("rhymo-language")||"en");
 }catch{setLanguage("en");}
 
+async function refreshBotMetrics(){
+  try{
+    const r=await fetch(api("/api/bot/metrics"),{cache:"no-store"});
+    if(!r.ok)throw Error("Request failed");
+    const m=await r.json();
+    $("botOnline").textContent=m.online?"Online":"Offline";
+    $("botHeartbeat").textContent=m.online?"Heartbeat active":"Heartbeat stale";
+    $("botUptime").textContent=Number(m.uptimeSeconds)+" seconds";
+    $("botLatency").textContent=Number(m.latencyMs).toFixed(2)+" ms";
+    $("botServers").textContent=m.serverCount;
+    $("botLastHeartbeat").textContent=m.lastHeartbeat
+      ?"Last heartbeat: "+new Date(m.lastHeartbeat).toLocaleString()
+      :"No heartbeat received.";
+  }catch(e){
+    $("botOnline").textContent="Unavailable";
+    $("botHeartbeat").textContent="Connection failed";
+    $("botLastHeartbeat").textContent="Could not load bot metrics.";
+  }
+}
+refreshBotMetrics();
+setInterval(refreshBotMetrics,15000);
 const params=new URLSearchParams(location.search);
 if(params.get("login")==="success")toast("Discord authorized. Checking your dashboard session...");
 if(params.get("login")==="cancelled")toast("Discord login was cancelled.");
