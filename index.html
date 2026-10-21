@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,46 +86,30 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
 </head>
 <body>
 <header class="topbar">
-  <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false">
-    <span class="hamb"><i></i><i></i><i></i></span>
-  </button>
-  <a href="#home" class="brand" data-go="home">
-    <img class="avatar" id="brandAvatar" alt="Rhymo bot avatar">
-    <span>Rhymo</span>
-  </a>
-  <label class="top-search">
-    <span aria-hidden="true">⌕</span>
-    <input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo">
-  </label>
+  <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false"><span class="hamb"><i></i><i></i><i></i></span></button>
+  <a href="#home" class="brand" data-go="home"><img class="avatar" id="brandAvatar" alt="Rhymo bot avatar"><span>Rhymo</span></a>
+  <label class="top-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo"></label>
   <div class="top-actions">
     <button class="primary" id="loginBtn">Login with Discord</button>
-    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account">
-      <img id="headerAvatar" class="avatar" alt="Your Discord avatar">
-    </button>
+    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
   </div>
 </header>
 
-<div id="scrim"></div>
-<div id="drawer" aria-label="Mobile navigation"></div>
-
+<div id="scrim"></div><div id="drawer" aria-label="Mobile navigation"></div>
 <div class="layout">
 <aside class="sidebar" id="sidebar"></aside>
 <main><div class="content">
 
 <section class="page active" id="page-home">
   <div class="hero">
-    <div class="eyebrow">Discord bot dashboard</div>
-    <h1>Welcome to Rhymo.</h1>
+    <div class="eyebrow">Discord bot dashboard</div><h1>Welcome to Rhymo.</h1>
     <p>Your central place to explore Rhymo, review service information, manage your account, and access available tools.</p>
-    <div class="actions">
-      <button class="primary" data-go="dashboard">Open dashboard</button>
-      <button data-go="status">View system status</button>
-    </div>
+    <div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div>
   </div>
   <div class="grid">
     <article class="panel third"><h2>System Status</h2><p>Review service health when a real monitoring source is connected.</p><button data-go="status">View status</button></article>
     <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
-    <article class="panel third"><h2>Server Management</h2><p>Access the planned server configuration interface.</p><button data-go="servers">Open servers</button></article>
+    <article class="panel third"><h2>Server Management</h2><p>Access the server configuration interface.</p><button data-go="servers">Open servers</button></article>
     <article class="panel full"><h2>Welcome to your workspace</h2><p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p><button class="primary" id="homeLoginBtn">Login with Discord</button></article>
   </div>
 </section>
@@ -133,12 +118,8 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
   <div class="eyebrow">Workspace</div><h1>Your dashboard</h1><p class="sub">Your account information is retrieved from the configured backend.</p>
   <div class="grid">
     <article class="panel full">
-      <div class="row">
-        <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
-        <div><div class="profile-name" id="profileName">Not signed in</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div>
-      </div>
-      <hr>
-      <p id="accountMessage" class="muted">Checking your login session...</p>
+      <div class="row"><img class="profile-pic" id="profileAvatar" alt="Your Discord avatar"><div><div class="profile-name" id="profileName">Checking session...</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div></div>
+      <hr><p id="accountMessage" class="muted">Checking your login session...</p>
       <div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
     </article>
     <article class="panel"><h2>Account</h2><p>Your profile is loaded from the authenticated session, not browser storage.</p><button data-go="settings">Account settings</button></article>
@@ -153,47 +134,35 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <article class="panel third"><h3>API latency</h3><div class="stat">--</div><span class="pill">Not connected</span><p>Requires actual measured latency.</p></article>
     <article class="panel third"><h3>Service health</h3><div class="stat">Unknown</div><span class="pill">Not connected</span><p>No health check has been configured.</p></article>
     <article class="panel full"><h2>Incident history</h2><div class="empty">No incident source is connected. This does not mean that no incidents exist.</div></article>
-    <article class="panel full"><h2>Monitoring integration</h2><p>Connect a server-side health endpoint to display uptime, latency, service availability, and incidents here.</p></article>
   </div>
 </section>
 
 <section class="page" id="page-search">
-  <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages, help articles, settings, and available command information.</p>
+  <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages and help topics.</p>
   <div class="panel full"><label class="field"><span>Search Rhymo</span><input id="searchPageInput" type="search" placeholder="Try settings, login, privacy..."></label><div id="searchResults" aria-live="polite"></div></div>
 </section>
 
 <section class="page" id="page-notifications">
-  <div class="eyebrow">Updates</div><h1>Notification Center</h1><p class="sub">Announcements, maintenance notices, and release updates will appear here when configured.</p>
+  <div class="eyebrow">Updates</div><h1>Notification Center</h1><p class="sub">Announcements, maintenance notices, and release updates will appear here when published.</p>
   <div class="grid">
-    <article class="panel full"><div class="panel-head"><h2>Announcements</h2><span class="pill">Feed not connected</span></div><div class="empty">No announcement feed has been configured yet.</div></article>
-    <article class="panel full"><div class="panel-head"><h2>Maintenance</h2><span class="pill">Feed not connected</span></div><div class="empty">Maintenance notices will appear here when published by a real source.</div></article>
-    <article class="panel full"><div class="panel-head"><h2>Release updates</h2><span class="pill">Feed not connected</span></div><div class="empty">Release notifications have not been configured.</div></article>
+    <article class="panel full"><h2>Announcements</h2><div class="empty">No announcements have been published.</div></article>
+    <article class="panel full"><h2>Maintenance</h2><div class="empty">No maintenance notices have been published.</div></article>
+    <article class="panel full"><h2>Release updates</h2><div class="empty">No release updates have been published.</div></article>
   </div>
 </section>
 
 <section class="page" id="page-logs">
-  <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Interface prepared for real moderation events and recent actions from your backend.</p>
-  <div class="panel full">
-    <div class="panel-head"><h2>Recent activity</h2><span class="pill">Backend required</span></div>
-    <label class="field"><span>Filter event type</span><select id="logFilter"><option value="all">All events</option><option value="moderation">Moderation</option><option value="security">Security</option><option value="system">System</option></select></label>
-    <div class="empty">No activity source is connected. No moderation records are being retrieved or displayed.</div>
-    <p>Connect an authenticated, permission-checked API endpoint before displaying server logs.</p>
-  </div>
+  <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Moderation events require a real, permission-checked backend source.</p>
+  <div class="panel full"><h2>Recent activity</h2><div class="empty">No activity-log source is connected.</div></div>
 </section>
 
 <section class="page" id="page-servers">
-  <div class="eyebrow">Administration</div><h1>Server Management</h1><p class="sub">A starting interface for server selection, configuration, moderation settings, and permissions.</p>
+  <div class="eyebrow">Administration</div><h1>Server Management</h1><p class="sub">Manage servers after the backend supports secure server authorization.</p>
   <div class="grid">
-    <article class="panel full">
-      <h2>Select a server</h2>
-      <p>Real Discord servers can only be listed after the backend implements authorization and the required Discord OAuth scope.</p>
-      <label class="field"><span>Server</span><select id="serverSelect"><option value="">No server data connected</option></select></label>
-      <button class="primary" id="loadServersBtn">Check server connection</button>
-      <div id="serverMessage" class="notice" style="margin-top:15px">Server listing is not connected.</div>
-    </article>
-    <article class="panel"><h2>Configuration</h2><p>Configure server-specific Rhymo behavior when a secure backend is available.</p><button id="configBtn">Check integration</button></article>
-    <article class="panel"><h2>Moderation settings</h2><p>Moderation settings must be loaded and saved through permission-checked backend routes.</p><button id="moderationBtn">Check integration</button></article>
-    <article class="panel full"><h2>Permissions</h2><p>Login with Discord does not automatically grant server administration permissions. Server-specific actions must verify the user's actual permissions on the server.</p></article>
+    <article class="panel full"><h2>Select a server</h2><p>Server listing requires additional Discord authorization and backend routes.</p><label class="field"><span>Server</span><select id="serverSelect"><option value="">No server data connected</option></select></label><button class="primary" id="loadServersBtn">Check server connection</button><div id="serverMessage" class="notice" style="margin-top:15px">Server listing is not connected.</div></article>
+    <article class="panel"><h2>Configuration</h2><p>Server configuration requires backend integration.</p><button id="configBtn">Check integration</button></article>
+    <article class="panel"><h2>Moderation settings</h2><p>Moderation settings require permission checks.</p><button id="moderationBtn">Check integration</button></article>
+    <article class="panel full"><h2>Permissions</h2><p>Signing in does not automatically grant server administration permissions. Server actions must verify actual permissions.</p></article>
   </div>
 </section>
 
@@ -201,75 +170,67 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
   <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p>
   <div class="grid">
     <article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord and approve the identity permission. The backend validates the callback and creates a session.</p></article>
-    <article class="panel full"><h2>Why can't I log in?</h2><p>Confirm that the backend is deployed, the redirect URL exactly matches the Discord Developer Portal setting, and the frontend points to the correct backend origin.</p></article>
-    <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions on Discord before approving installation.</p></article>
-    <article class="panel full"><h2>Where can I find commands?</h2><p>Use Global Search to find available command information. A live command catalog requires a configured data source.</p></article>
+    <article class="panel full"><h2>Why can't I log in?</h2><p>Check that the backend is deployed and the Discord redirect URL exactly matches the configured callback. Safari privacy protections can block cross-site cookies.</p></article>
+    <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions before authorizing installation.</p></article>
+    <article class="panel full"><h2>Where can I find commands?</h2><p>Use Command Explorer. A live command catalog must be connected before it can display verified commands.</p></article>
   </div>
 </section>
 
 <section class="page" id="page-changelog">
   <div class="eyebrow">Version history</div><h1>Changelog</h1><p class="sub">Published releases and fixes will be listed here.</p>
-  <div class="panel full"><div class="empty">No release entries have been published. Add verified version notes here when a release is ready.</div></div>
+  <div class="panel full"><div class="empty">No release entries have been published.</div></div>
 </section>
 
 <section class="page" id="page-commands">
-  <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Search a connected command catalog. No live bot command source is configured yet.</p>
-  <div class="panel full"><label class="field"><span>Find a command</span><input id="commandSearch" placeholder="Search commands..."></label><div id="commandResults" class="empty">No command catalog is connected. Connect a backend endpoint to show verified commands, descriptions, and permissions.</div></div>
+  <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Search a connected command catalog.</p>
+  <div class="panel full"><label class="field"><span>Find a command</span><input id="commandSearch" placeholder="Search commands..."></label><div id="commandResults" class="empty">No live command catalog is connected.</div></div>
 </section>
 
 <section class="page" id="page-language">
-  <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose your interface language. Additional translations can be added to the translation dictionary.</p>
-  <div class="panel full">
-    <label class="field"><span>Interface language</span><select id="languageSelect"><option value="en">English</option><option value="so">Somali</option></select></label>
-    <div class="notice" id="languageMessage">English is selected.</div>
-    <p class="muted">This starter includes translated navigation labels for English and Somali. Other interface text remains in English until translated.</p>
-  </div>
+  <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose your interface language.</p>
+  <div class="panel full"><label class="field"><span>Interface language</span><select id="languageSelect"><option value="en">English</option><option value="so">Somali</option></select></label><div class="notice" id="languageMessage">English is selected.</div><p class="muted">Some content remains in English until translations are added.</p></div>
 </section>
 
 <section class="page" id="page-settings">
-  <div class="eyebrow">Preferences</div><h1>Settings</h1><p class="sub">Manage your account, website preferences, and bot installation.</p>
+  <div class="eyebrow">Preferences</div><h1>Settings</h1><p class="sub">Manage your account, appearance, and bot installation.</p>
   <div class="grid">
-    <article class="panel full">
-      <h2>Discord Account</h2>
-      <p id="settingsAccountText" class="muted">Sign in to view your Discord profile.</p>
-      <div class="row" id="settingsProfile" hidden><img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar"><div><div id="settingsName" class="profile-name"></div><div id="settingsId" class="muted"></div></div></div>
-      <div class="actions"><button class="primary" id="settingsLoginBtn">Login with Discord</button><button id="settingsLogoutBtn" class="hidden">Log out</button></div>
-    </article>
-    <article class="panel full">
-      <h2>Add Rhymo to Discord</h2>
-      <p>Install Rhymo on a server where you have permission. Review Discord's requested permissions before authorizing.</p>
-      <a class="btn primary" id="settingsInviteBtn" target="_blank" rel="noopener noreferrer">Add to Discord</a>
-    </article>
-    <article class="panel full">
-      <h2>Appearance</h2>
-      <label class="field"><span>Accent color</span><select id="accentSelect"><option value="#609bff">Blue</option><option value="#a78bfa">Purple</option><option value="#55d6a3">Green</option></select></label>
-      <label class="field"><span>Interface language</span><select id="settingsLanguage"><option value="en">English</option><option value="so">Somali</option></select></label>
-    </article>
-    <article class="panel full">
-      <h2>Privacy and security</h2>
-      <p>Rhymo uses a server-side login session. The Discord client secret must never be included in this HTML file.</p>
-      <div class="actions"><button data-go="privacy">Privacy Policy</button><button data-go="terms">Terms of Service</button></div>
-    </article>
+    <article class="panel full"><h2>Discord Account</h2><p id="settingsAccountText" class="muted">Checking your account...</p><div class="row" id="settingsProfile" hidden><img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar"><div><div id="settingsName" class="profile-name"></div><div id="settingsId" class="muted"></div></div></div><div class="actions"><button class="primary" id="settingsLoginBtn">Login with Discord</button><button id="settingsLogoutBtn" class="hidden">Log out</button></div></article>
+    <article class="panel full"><h2>Add Rhymo to Discord</h2><p>Install Rhymo on a server where you have permission. Review Discord's requested permissions before authorizing.</p><a class="btn primary" id="settingsInviteBtn" target="_blank" rel="noopener noreferrer">Add to Discord</a></article>
+    <article class="panel full"><h2>Appearance</h2><label class="field"><span>Accent color</span><select id="accentSelect"><option value="#609bff">Blue</option><option value="#a78bfa">Purple</option><option value="#55d6a3">Green</option></select></label><label class="field"><span>Interface language</span><select id="settingsLanguage"><option value="en">English</option><option value="so">Somali</option></select></label></article>
+    <article class="panel full"><h2>Privacy and security</h2><p>Rhymo uses a server-side login session. The Discord client secret must never be included in this HTML file.</p><div class="actions"><button data-go="privacy">Privacy Policy</button><button data-go="terms">Terms of Service</button></div></article>
   </div>
 </section>
 
 <section class="page" id="page-terms">
   <div class="eyebrow">Legal</div><h1>Terms of Service</h1>
   <div class="panel full">
-    <p>Use Rhymo responsibly and in accordance with Discord's applicable terms and community guidelines. Do not attempt to disrupt the service, access another person's account, or misuse bot features.</p>
-    <p>This is a starter draft, not legal advice. Replace it with terms that accurately describe the released service before publication.</p>
+    <p>By using Rhymo's website and authentication features, you agree to use them lawfully and follow Discord's applicable terms and policies. Do not attempt to disrupt the service, bypass security, access another person's account, or misuse its features.</p>
+    <p>Rhymo is provided on an as-available basis. Features may change, become unavailable, or be discontinued. Signing in with Discord does not grant server permissions. Bot actions must be authorized separately and may require appropriate Discord permissions.</p>
+    <p>You are responsible for keeping access to your Discord account secure and for reviewing permissions before authorizing an application. You may stop using the website and log out at any time.</p>
+    <p>These terms should be reviewed for the actual service and applicable law before being treated as final legal advice. For questions, use the support contact published by the Rhymo operator.</p>
   </div>
 </section>
 
 <section class="page" id="page-privacy">
   <div class="eyebrow">Legal</div><h1>Privacy Policy</h1>
   <div class="panel full">
-    <p>When Discord login is enabled, Rhymo receives the profile information permitted by the configured OAuth2 scope. The backend stores a server-side session to recognize your login.</p>
-    <p>Before launch, document actual data retention, session expiration, hosting providers, contact information, and any additional data the service collects. Review this draft before publishing it as your privacy policy.</p>
+    <h2>Information processed</h2>
+    <p>When you sign in with Discord, Rhymo requests the Discord identity scope and receives profile fields made available by that scope, such as your Discord user ID, username, display name, and avatar information.</p>
+    <h2>Why it is used</h2>
+    <p>This information is used to authenticate your session and display your account in the dashboard. The backend uses a session cookie and server-side session storage to recognize your login.</p>
+    <h2>Storage and providers</h2>
+    <p>The website is hosted on GitHub Pages. The authentication backend and PostgreSQL session storage are hosted through Render. Discord processes the authorization request. These providers may process technical information as part of operating their services.</p>
+    <h2>Cookies and sessions</h2>
+    <p>Rhymo uses an HTTP-only, secure session cookie for authentication. The current website and backend use different domains, so browser privacy settings may affect whether the cookie is accepted.</p>
+    <h2>Retention and choices</h2>
+    <p>Server-side sessions are configured to expire after seven days. Logging out requests deletion of the active session. This does not necessarily remove technical logs or records retained by hosting providers. You can revoke Rhymo's access from your Discord authorized applications settings.</p>
+    <h2>Contact</h2>
+    <p>For privacy questions or data requests, contact the Rhymo operator through an official support channel published by Rhymo. A verified contact address should be added here before public launch.</p>
+    <p>This policy describes the current login implementation, not every possible future bot feature. Update it whenever the service's data practices change.</p>
   </div>
 </section>
 
-<footer>Rhymo · Website interface and authentication integration</footer>
+<footer>Rhymo · Dashboard and authentication</footer>
 </div></main>
 </div>
 <div id="toast" class="hidden" role="status" aria-live="polite"></div>
@@ -278,9 +239,8 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
 "use strict";
 
 const API_BASE_URL = "https://rhymo-auth-backend.onrender.com";
-const APPLICATION_ID = "1534695566846726204";
 const BOT_AVATAR = "https://cdn.discordapp.com/attachments/1541449772865691728/1562289873921122404/IMG_1541.png?ex=6ad97353&is=6ad821d3&hm=06512c733f9273e37198b82cc474187b1f5f972c4802763a17f4c388a4bfa520";
-const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&response_type=code&redirect_uri=https%3A%2F%2Frhymo-auth-backend.onrender.com%2Fauth%2Fdiscord%2Fcallback&integration_type=0&scope=guilds+guilds.join+guilds.members.read+gdm.join+bot+applications.commands";
+const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands";
 
 const api = path => API_BASE_URL.replace(/\/+$/,"") + path;
 const fallbackAvatar = "https://cdn.discordapp.com/embed/avatars/0.png";
@@ -348,10 +308,6 @@ function toast(message){
  toastTimer=setTimeout(()=>$("toast").classList.add("hidden"),3500);
 }
 function login(){
- if(!API_BASE_URL){
-  toast("Discord login is not connected yet. Deploy the backend first.");
-  return;
- }
  window.location.assign(api("/auth/discord"));
 }
 ["loginBtn","homeLoginBtn","dashboardLoginBtn","settingsLoginBtn"].forEach(id=>{
@@ -359,14 +315,15 @@ function login(){
 });
 
 async function request(path,options={}){
- const url=api(path);
  const headers=new Headers(options.headers||{});
  if(options.method==="POST")headers.set("Content-Type","application/json");
- const response=await fetch(url,{
-  ...options,headers,credentials:"include",cache:"no-store"
+ return fetch(api(path),{
+  ...options,
+  headers,
+  credentials:"include",
+  cache:"no-store",
+  mode:"cors"
  });
- if(!response.ok)throw new Error("Request failed ("+response.status+")");
- return response;
 }
 
 let currentUser=null;
@@ -382,12 +339,12 @@ function setUser(user){
  $("settingsProfile").hidden=!loggedIn;
 
  if(!user){
+  $("headerAvatar").src=fallbackAvatar;
   $("profileAvatar").src=fallbackAvatar;
   $("profileName").textContent="Not signed in";
   $("profileId").textContent="";
-  $("authBadge").textContent=API_BASE_URL?"Signed out":"Backend not configured";
-  $("accountMessage").textContent=API_BASE_URL?
-   "Log in with Discord to view your account.":"Discord login will be available after the backend is deployed.";
+  $("authBadge").textContent="Signed out";
+  $("accountMessage").textContent="Log in with Discord to view your account.";
   $("settingsAccountText").textContent="You are not signed in.";
   $("homeAccountMessage").textContent="Sign in with Discord to display your account profile.";
   $("homeLoginBtn").classList.remove("hidden");
@@ -413,30 +370,45 @@ function setUser(user){
 }
 
 async function refreshAccount(){
- if(!API_BASE_URL){
-  setUser(null);
-  $("authBadge").textContent="Backend not configured";
-  return;
- }
+ $("authBadge").textContent="Checking session";
+ $("accountMessage").textContent="Checking your login session...";
+
  try{
   const response=await request("/api/me");
+
+  if(response.status===401){
+   setUser(null);
+   return;
+  }
+
+  if(!response.ok){
+   throw new Error("Session check failed ("+response.status+")");
+  }
+
   const data=await response.json();
-  setUser(data.user||null);
- }catch{
-  setUser(null);
-  $("authBadge").textContent="Backend unavailable";
-  $("accountMessage").textContent="Could not verify the login session. Check the backend connection.";
+
+  if(data.authenticated===true && data.user){
+   setUser(data.user);
+  }else{
+   setUser(null);
+  }
+ }catch(error){
+  console.error("Rhymo session check failed:",error);
+  $("authBadge").textContent="Session unavailable";
+  $("accountMessage").textContent="Your browser could not verify the login session. The backend may recognize you, but Safari can block cross-site cookies between GitHub Pages and Render.";
+  $("settingsAccountText").textContent="Your session could not be verified by this browser.";
  }
 }
 
 async function logout(){
  try{
-  if(!API_BASE_URL)throw new Error("Backend not configured");
-  await request("/auth/logout",{method:"POST",body:"{}"});
+  const response=await request("/auth/logout",{method:"POST",body:"{}"});
+  if(!response.ok)throw new Error("Logout failed ("+response.status+")");
   setUser(null);
   showPage("home");
   toast("You have been logged out.");
- }catch{
+ }catch(error){
+  console.error("Rhymo logout failed:",error);
   toast("Logout could not be completed. Check the backend connection.");
  }
 }
@@ -450,12 +422,13 @@ const searchIndex=[
  {title:"Add Rhymo to Discord",description:"Install the bot from Settings",page:"settings"},
  {title:"Privacy and data",description:"Privacy Policy and account sessions",page:"privacy"},
  {title:"Terms and usage",description:"Terms of Service",page:"terms"},
- {title:"OAuth2 help",description:"Login troubleshooting and redirect configuration",page:"help"},
- {title:"Moderation activity",description:"Activity log interface and backend integration",page:"logs"},
- {title:"Server permissions",description:"Server selection and permission checks",page:"servers"},
+ {title:"OAuth2 help",description:"Login troubleshooting",page:"help"},
+ {title:"Moderation activity",description:"Activity log interface",page:"logs"},
+ {title:"Server permissions",description:"Server selection and permissions",page:"servers"},
  {title:"Bot uptime",description:"System health monitoring",page:"status"},
  {title:"Announcements",description:"Maintenance and release notifications",page:"notifications"}
 ];
+
 function renderSearch(query){
  const q=query.trim().toLowerCase();
  const target=$("searchResults");
@@ -467,7 +440,6 @@ function renderSearch(query){
  matches.forEach(item=>{
   const b=document.createElement("button");
   b.className="result";
-  b.innerHTML="";
   const title=document.createElement("strong");title.textContent=item.title;
   const desc=document.createElement("small");desc.textContent=item.description;
   b.append(title,desc);
@@ -492,13 +464,12 @@ $("globalSearch").addEventListener("input",e=>{
 $("searchPageInput").addEventListener("input",e=>renderSearch(e.target.value));
 
 $("loadServersBtn").addEventListener("click",()=>{
- $("serverMessage").textContent="Server listing is not connected. A backend endpoint, Discord authorization, and permission checks are required.";
+ $("serverMessage").textContent="Server listing requires a backend endpoint, Discord authorization, and permission checks.";
 });
 $("configBtn").addEventListener("click",()=>toast("Server configuration requires backend integration."));
 $("moderationBtn").addEventListener("click",()=>toast("Moderation settings require backend integration."));
-$("logFilter").addEventListener("change",()=>toast("Activity log filters will work when a log source is connected."));
 $("commandSearch").addEventListener("input",()=>{
- $("commandResults").textContent="No live command catalog is connected. Connect a backend endpoint to retrieve verified command data.";
+ $("commandResults").textContent="No live command catalog is connected.";
 });
 
 const translations={
@@ -508,8 +479,7 @@ const translations={
 function setLanguage(lang){
  const dict=translations[lang]||translations.en;
  document.querySelectorAll(".navbtn[data-go]").forEach(b=>{
-  const key=b.dataset.go;
-  const entry=pages.find(p=>p[0]===key);
+  const entry=pages.find(p=>p[0]===b.dataset.go);
   if(entry)b.querySelector("span:last-child").textContent=dict[entry[1]]||entry[1];
  });
  $("languageMessage").textContent=lang==="so"?"Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi.":"English is selected.";
@@ -534,7 +504,7 @@ try{
 }catch{setLanguage("en");}
 
 const params=new URLSearchParams(location.search);
-if(params.get("login")==="success")toast("Discord login completed.");
+if(params.get("login")==="success")toast("Discord authorized. Checking your dashboard session...");
 if(params.get("login")==="cancelled")toast("Discord login was cancelled.");
 if(params.has("login")){
  params.delete("login");
