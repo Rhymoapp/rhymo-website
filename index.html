@@ -65,7 +65,7 @@ select option{background:#07172f;color:var(--text)}
 textarea{min-height:90px;resize:vertical}
 .list-item{padding:14px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
 .list-item:last-child{border-bottom:0}
-.list-item p{margin:5px 0 0;font-size:13px;overflow-wrap:anywhere}
+.list-item p{margin:5px 0 0;font-size:13px;overflow-wrap:anywhere;white-space:pre-wrap}
 .row{display:flex;align-items:center;gap:13px}
 .profile-pic{width:64px;height:64px;border-radius:18px;object-fit:cover;background:#10284d;border:1px solid var(--border)}
 .profile-name{font-size:18px;font-weight:700}
@@ -86,7 +86,6 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
-
 <header class="topbar">
   <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false"><span class="hamb"><i></i><i></i><i></i></span></button>
   <a href="#home" class="brand" data-go="home"><img class="avatar" id="brandAvatar" alt="Rhymo bot avatar"><span>Rhymo</span></a>
@@ -96,21 +95,12 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
   </div>
 </header>
-
-<div id="scrim"></div>
-<div id="drawer" aria-label="Mobile navigation"></div>
-
+<div id="scrim"></div><div id="drawer" aria-label="Mobile navigation"></div>
 <div class="layout">
 <aside class="sidebar" id="sidebar"></aside>
 <main><div class="content">
-
 <section class="page active" id="page-home">
-  <div class="hero">
-    <div class="eyebrow">Discord bot dashboard</div>
-    <h1>Welcome to Rhymo.</h1>
-    <p>Your central place to explore Rhymo, review service information, manage your account, and access available tools.</p>
-    <div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div>
-  </div>
+  <div class="hero"><div class="eyebrow">Discord bot dashboard</div><h1>Welcome to Rhymo.</h1><p>Your central place to explore Rhymo, review service information, manage your account, and access available tools.</p><div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div></div>
   <div class="grid">
     <article class="panel third"><h2>System Status</h2><p>Review live bot monitoring and service health.</p><button data-go="status">View status</button></article>
     <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
@@ -118,20 +108,15 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <article class="panel full"><h2>Welcome to your workspace</h2><p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p><button class="primary" id="homeLoginBtn">Login with Discord</button></article>
   </div>
 </section>
-
 <section class="page" id="page-dashboard">
   <div class="eyebrow">Workspace</div><h1>Your dashboard</h1><p class="sub">Your account information is retrieved from the configured backend.</p>
   <div class="grid">
-    <article class="panel full">
-      <div class="row"><img class="profile-pic" id="profileAvatar" alt="Your Discord avatar"><div><div class="profile-name" id="profileName">Checking session...</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div></div>
-      <hr><p id="accountMessage" class="muted">Checking your login session...</p>
-      <div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
-    </article>
+    <article class="panel full"><div class="row"><img class="profile-pic" id="profileAvatar" alt="Your Discord avatar"><div><div class="profile-name" id="profileName">Checking session...</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div></div><hr><p id="accountMessage" class="muted">Checking your login session...</p><div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div></article>
+
     <article class="panel"><h2>Account</h2><p>Your profile is loaded from the authenticated session, not browser storage.</p><button data-go="settings">Account settings</button></article>
     <article class="panel"><h2>Help and support</h2><p>Find information about Rhymo's website and login.</p><button data-go="help">Open Help Center</button></article>
   </div>
 </section>
-
 <section class="page" id="page-status">
   <div class="eyebrow">Monitoring</div><h1>System Status</h1><p class="sub">Live Rhymo bot monitoring.</p>
   <div class="grid">
@@ -141,111 +126,24 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <article class="panel full"><h2>Connected Servers</h2><div class="stat" id="botServers">--</div><p>Discord servers Rhymo is connected to.</p><p class="muted" id="botLastHeartbeat">Waiting for heartbeat...</p></article>
   </div>
 </section>
-
-<section class="page" id="page-search">
-  <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages and help topics.</p>
-  <div class="panel full"><label class="field"><span>Search Rhymo</span><input id="searchPageInput" type="search" placeholder="Try settings, login, privacy..."></label><div id="searchResults" aria-live="polite"></div></div>
-</section>
-
-<section class="page" id="page-notifications">
-  <div class="eyebrow">Updates</div><h1>Notification Center</h1><p class="sub">Announcements, maintenance notices, and release updates.</p>
-  <div class="grid">
-    <article class="panel full"><h2>Announcements</h2><div id="notificationList"><div class="empty">Loading announcements...</div></div></article>
-  </div>
-</section>
-
-<section class="page" id="page-logs">
-  <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Choose a manageable server to view its recorded activity.</p>
-  <div class="panel full"><h2>Recent activity</h2><p class="muted">Open Server Management to select a server and view its logs.</p><button class="primary" data-go="servers">Select a server</button></div>
-</section>
-
+<section class="page" id="page-search"><div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages and help topics.</p><div class="panel full"><label class="field"><span>Search Rhymo</span><input id="searchPageInput" type="search" placeholder="Try settings, login, privacy..."></label><div id="searchResults" aria-live="polite"></div></div></section>
+<section class="page" id="page-notifications"><div class="eyebrow">Updates</div><h1>Notification Center</h1><p class="sub">Announcements, maintenance notices, and release updates.</p><div class="grid"><article class="panel full"><h2>Announcements</h2><div id="notificationList"><div class="empty">Loading announcements...</div></div></article></div></section>
+<section class="page" id="page-logs"><div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Choose a manageable server to view its recorded activity.</p><div class="panel full"><h2>Recent activity</h2><p class="muted">Open Server Management to select a server and view its logs.</p><button class="primary" data-go="servers">Select a server</button></div></section>
 <section class="page" id="page-servers">
-  <div class="eyebrow">Administration</div>
-  <h1>Server Management</h1>
-  <p class="sub">Select a Discord server you manage to view its status and activity.</p>
-
+  <div class="eyebrow">Administration</div><h1>Server Management</h1><p class="sub">Select a Discord server you manage to view its status and activity.</p>
   <div class="grid">
-    <article class="panel full">
-      <div class="panel-head">
-        <h2>Select a server</h2>
-        <button class="primary" id="loadServersBtn">Load servers</button>
-      </div>
-      <label class="field">
-        <span>Your Discord servers</span>
-        <select id="serverSelect">
-          <option value="">Load your servers first</option>
-        </select>
-      </label>
-      <div id="serverMessage" class="notice" role="status">Sign in with Discord, then load your servers.</div>
-    </article>
-
-    <article class="panel full">
-      <h2 id="selectedServerName">Server details</h2>
-      <p id="selectedServerDescription" class="muted">Select a server to view its details.</p>
-      <div class="grid">
-        <article class="panel">
-          <h3>Rhymo installation</h3>
-          <div class="stat" id="selectedBotStatus">--</div>
-        </article>
-        <article class="panel">
-          <h3>Recorded activity</h3>
-          <div class="stat" id="selectedLogCount">--</div>
-        </article>
-      </div>
-      <div class="actions">
-        <button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button>
-        <button id="loadServerLogsBtn" disabled>View activity logs</button>
-        <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo to Discord</a>
-      </div>
-    </article>
-
-    <article class="panel full">
-      <h2>Activity logs</h2>
-      <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view its recorded activity.</div></div>
-    </article>
-
-    <article class="panel">
-      <h2>Configuration</h2>
-      <p>Server details and recorded activity are available through the connected backend.</p>
-      <button id="configBtn">View server details</button>
-    </article>
-    <article class="panel">
-      <h2>Moderation settings</h2>
-      <p>Moderation changes require separately implemented and authorized backend actions.</p>
-      <button id="moderationBtn">View activity logs</button>
-    </article>
-    <article class="panel full">
-      <h2>Permissions and security</h2>
-      <p>Only servers returned by Discord where your account has management permissions are available. Signing in does not automatically authorize moderation actions.</p>
-    </article>
+    <article class="panel full"><div class="panel-head"><h2>Select a server</h2><button class="primary" id="loadServersBtn">Load servers</button></div><label class="field"><span>Your Discord servers</span><select id="serverSelect"><option value="">Load your servers first</option></select></label><div id="serverMessage" class="notice" role="status">Sign in with Discord, then load your servers.</div></article>
+    <article class="panel full"><h2 id="selectedServerName">Server details</h2><p id="selectedServerDescription" class="muted">Select a server to view its details.</p><div class="grid"><article class="panel"><h3>Rhymo installation</h3><div class="stat" id="selectedBotStatus">--</div></article><article class="panel"><h3>Recorded activity</h3><div class="stat" id="selectedLogCount">--</div></article></div><div class="actions"><button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button><button id="loadServerLogsBtn" disabled>View activity logs</button><a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo to Discord</a></div></article>
+    <article class="panel full"><h2>Activity logs</h2><div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view its recorded activity.</div></div></article>
+    <article class="panel"><h2>Configuration</h2><p>Server details and recorded activity are available through the connected backend.</p><button id="configBtn">View server details</button></article>
+    <article class="panel"><h2>Moderation settings</h2><p>Moderation changes require separately implemented and authorized backend actions.</p><button id="moderationBtn">View activity logs</button></article>
+    <article class="panel full"><h2>Permissions and security</h2><p>Only servers returned by Discord where your account has management permissions are available. Signing in does not automatically authorize moderation actions.</p></article>
   </div>
 </section>
-
-<section class="page" id="page-help">
-  <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p>
-  <div class="grid">
-    <article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord and approve the requested permissions. The backend validates the callback and creates a session.</p></article>
-    <article class="panel full"><h2>Why can't I log in?</h2><p>Check that the backend is deployed and the Discord redirect URL exactly matches the configured callback. Safari privacy protections can block cross-site cookies.</p></article>
-    <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions before authorizing installation.</p></article>
-    <article class="panel full"><h2>How do I select a server?</h2><p>Sign in with Discord, open Server Management, and select Load servers. You must have the required management permissions on a server.</p></article>
-  </div>
-</section>
-
-<section class="page" id="page-changelog">
-  <div class="eyebrow">Version history</div><h1>Changelog</h1><p class="sub">Published releases and fixes will be listed here.</p>
-  <div class="panel full"><div class="empty">No release entries have been published.</div></div>
-</section>
-
-<section class="page" id="page-commands">
-  <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Search the connected command catalog when one is published.</p>
-  <div class="panel full"><label class="field"><span>Find a command</span><input id="commandSearch" placeholder="Search commands..."></label><div id="commandResults" class="empty">No live command catalog is connected.</div></div>
-</section>
-
-<section class="page" id="page-language">
-  <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose your interface language.</p>
-  <div class="panel full"><label class="field"><span>Interface language</span><select id="languageSelect"><option value="en">English</option><option value="so">Somali</option></select></label><div class="notice" id="languageMessage">English is selected.</div><p class="muted">Some content remains in English until translations are added.</p></div>
-</section>
-
+<section class="page" id="page-help"><div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p><div class="grid"><article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord and approve the requested permissions. The backend validates the callback and creates a session.</p></article><article class="panel full"><h2>Why can't I log in?</h2><p>Check that the backend is deployed and the Discord redirect URL exactly matches the configured callback. Safari privacy protections can block cross-site cookies.</p></article><article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions before authorizing installation.</p></article><article class="panel full"><h2>How do I select a server?</h2><p>Sign in with Discord, open Server Management, and select Load servers. You must have the required management permissions on a server.</p></article></div></section>
+<section class="page" id="page-changelog"><div class="eyebrow">Version history</div><h1>Changelog</h1><p class="sub">Published releases and fixes will be listed here.</p><div id="publicChangelogList" class="panel full"><div class="empty">Loading changelog...</div></div></section>
+<section class="page" id="page-commands"><div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Search the connected command catalog when one is published.</p><div class="panel full"><label class="field"><span>Find a command</span><input id="commandSearch" placeholder="Search commands..."></label><div id="commandResults" class="empty">No live command catalog is connected.</div></div></section>
+<section class="page" id="page-language"><div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose your interface language.</p><div class="panel full"><label class="field"><span>Interface language</span><select id="languageSelect"><option value="en">English</option><option value="so">Somali</option></select></label><div class="notice" id="languageMessage">English is selected.</div><p class="muted">Some content remains in English until translations are added.</p></div></section>
 <section class="page" id="page-settings">
   <div class="eyebrow">Preferences</div><h1>Settings</h1><p class="sub">Manage your account, appearance, and bot installation.</p>
   <div class="grid">
@@ -255,672 +153,419 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <article class="panel full"><h2>Privacy and security</h2><p>Rhymo uses a server-side login session. The Discord client secret must never be included in this HTML file.</p><div class="actions"><button data-go="privacy">Privacy Policy</button><button data-go="terms">Terms of Service</button></div></article>
   </div>
 </section>
-
-<section class="page" id="page-terms">
-  <div class="eyebrow">Legal</div><h1>Terms of Service</h1>
-  <div class="panel full">
-    <p>By using Rhymo's website and authentication features, you agree to use them lawfully and follow Discord's applicable terms and policies. Do not attempt to disrupt the service, bypass security, access another person's account, or misuse its features.</p>
-    <p>Rhymo is provided on an as-available basis. Features may change, become unavailable, or be discontinued. Signing in with Discord does not grant server permissions. Bot actions must be authorized separately and may require appropriate Discord permissions.</p>
-    <p>You are responsible for keeping access to your Discord account secure and for reviewing permissions before authorizing an application. You may stop using the website and log out at any time.</p>
-    <p>These terms should be reviewed for the actual service and applicable law before being treated as final legal advice. For questions, use the support contact published by the Rhymo operator.</p>
+<section class="page" id="page-admin">
+  <div class="eyebrow">Owner tools</div><h1>Site Management</h1><p class="sub">Create, publish, edit, and delete announcements and changelog entries.</p>
+  <div class="grid">
+    <article class="panel full">
+      <h2 id="postFormHeading">Create a post</h2>
+      <form id="postForm">
+        <label class="field"><span>Post type</span><select id="postType" required><option value="announcement">Announcement</option><option value="changelog">Changelog entry</option></select></label>
+        <label class="field"><span>Title</span><input id="postTitle" maxlength="200" required placeholder="Enter a title"></label>
+        <label class="field"><span>Content</span><textarea id="postContent" maxlength="10000" required placeholder="Write your announcement or release notes"></textarea></label>
+        <label class="field"><span><input id="postPublished" type="checkbox" style="width:auto;margin-right:8px">Publish immediately</span></label>
+        <div class="actions"><button class="primary" id="savePostBtn" type="submit">Save post</button><button id="cancelPostEditBtn" type="button" class="hidden">Cancel editing</button></div>
+      </form>
+      <p id="adminMessage" class="notice" role="status">Sign in with the Rhymo owner Discord account to manage posts.</p>
+    </article>
+    <article class="panel full"><div class="panel-head"><h2>Manage existing posts</h2><button id="reloadPostsBtn">Refresh posts</button></div><div id="adminPostList"><div class="empty">Sign in as the owner to load posts.</div></div></article>
   </div>
 </section>
 
-<section class="page" id="page-privacy">
-  <div class="eyebrow">Legal</div><h1>Privacy Policy</h1>
-  <div class="panel full">
-    <h2>Information processed</h2>
-    <p>When you sign in with Discord, Rhymo requests the Discord identity and server-listing scopes and receives profile and server information made available by those permissions.</p>
-    <h2>Why it is used</h2>
-    <p>This information is used to authenticate your session, display your account, and list servers where your account has management permissions.</p>
-    <h2>Storage and providers</h2>
-    <p>The website is hosted on GitHub Pages. The authentication backend and PostgreSQL session storage are hosted through Render. Discord processes the authorization request.</p>
-    <h2>Cookies and sessions</h2>
-    <p>Rhymo uses an HTTP-only, secure session cookie for authentication. The website and backend use different domains, so browser privacy settings may affect whether the cookie is accepted.</p>
-    <h2>Retention and choices</h2>
-    <p>Server-side sessions are configured to expire after seven days. Logging out requests deletion of the active session. You can revoke Rhymo's access from your Discord authorized applications settings.</p>
-    <h2>Contact</h2>
-    <p>For privacy questions or data requests, contact the Rhymo operator through an official support channel published by Rhymo.</p>
-  </div>
-</section>
-
+<section class="page" id="page-terms"><div class="eyebrow">Legal</div><h1>Terms of Service</h1><div class="panel full"><p>By using Rhymo's website and authentication features, you agree to use them lawfully and follow Discord's applicable terms and policies. Do not attempt to disrupt the service, bypass security, access another person's account, or misuse its features.</p><p>Rhymo is provided on an as-available basis. Features may change, become unavailable, or be discontinued. Signing in with Discord does not grant server permissions. Bot actions must be authorized separately and may require appropriate Discord permissions.</p><p>You are responsible for keeping access to your Discord account secure and for reviewing permissions before authorizing an application. You may stop using the website and log out at any time.</p><p>These terms should be reviewed for the actual service and applicable law before being treated as final legal advice. For questions, use the support contact published by the Rhymo operator.</p></div></section>
+<section class="page" id="page-privacy"><div class="eyebrow">Legal</div><h1>Privacy Policy</h1><div class="panel full"><h2>Information processed</h2><p>When you sign in with Discord, Rhymo requests the Discord identity and server-listing scopes and receives profile and server information made available by those permissions.</p><h2>Why it is used</h2><p>This information is used to authenticate your session, display your account, and list servers where your account has management permissions.</p><h2>Storage and providers</h2><p>The website is hosted on GitHub Pages. The authentication backend and PostgreSQL session storage are hosted through Render. Discord processes the authorization request.</p><h2>Cookies and sessions</h2><p>Rhymo uses an HTTP-only, secure session cookie for authentication. The website and backend use different domains, so browser privacy settings may affect whether the cookie is accepted.</p><h2>Retention and choices</h2><p>Server-side sessions are configured to expire after seven days. Logging out requests deletion of the active session. You can revoke Rhymo's access from your Discord authorized applications settings.</p><h2>Contact</h2><p>For privacy questions or data requests, contact the Rhymo operator through an official support channel published by Rhymo.</p></div></section>
 <footer>Rhymo · Dashboard and authentication</footer>
-</div></main>
-</div>
+</div></main></div>
 <div id="toast" class="hidden" role="status" aria-live="polite"></div>
-
 <script>
 "use strict";
+const API_BASE_URL="https://rhymo-auth-backend.onrender.com";
+const BOT_AVATAR="https://cdn.discordapp.com/attachments/1541449772865691728/1562289873921122404/IMG_1541.png?ex=6ad97353&is=6ad821d3&hm=06512c733f9273e37198b82cc474187b1f5f972c4802763a17f4c388a4bfa520";
+const INVITE_URL="https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands";
+const RHYMO_OWNER_ID="1481780053682688001";
+const api=path=>API_BASE_URL.replace(/\/+$/,"")+path;
+const fallbackAvatar="https://cdn.discordapp.com/embed/avatars/0.png";
+const $=id=>document.getElementById(id);
+$("brandAvatar").src=BOT_AVATAR;
+$("settingsInviteBtn").href=INVITE_URL;
 
-const API_BASE_URL = "https://rhymo-auth-backend.onrender.com";
-const BOT_AVATAR = "https://cdn.discordapp.com/attachments/1541449772865691728/1562289873921122404/IMG_1541.png?ex=6ad97353&is=6ad821d3&hm=06512c733f9273e37198b82cc474187b1f5f972c4802763a17f4c388a4bfa520";
-const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands";
-
-const api = path => API_BASE_URL.replace(/\/+$/,"") + path;
-const fallbackAvatar = "https://cdn.discordapp.com/embed/avatars/0.png";
-const $ = id => document.getElementById(id);
-
-$("brandAvatar").src = BOT_AVATAR;
-$("settingsInviteBtn").href = INVITE_URL;
-
-const pages = [
- ["home","Home","H"],["dashboard","Dashboard","D"],
- ["status","System Status","S"],["search","Global Search","G"],
- ["notifications","Notification Center","N"],["logs","Activity Logs","A"],
- ["servers","Server Management","M"],["commands","Command Explorer","C"],
- ["help","Help Center","?"],["changelog","Changelog","V"],
- ["language","Language Settings","L"],["settings","Settings","S"],
- ["terms","Terms of Service","T"],["privacy","Privacy Policy","P"]
+const pages=[
+ ["home","Home","H"],["dashboard","Dashboard","D"],["status","System Status","S"],["search","Global Search","G"],
+ ["notifications","Notification Center","N"],["logs","Activity Logs","A"],["servers","Server Management","M"],["commands","Command Explorer","C"],
+ ["help","Help Center","?"],["changelog","Changelog","V"],["language","Language Settings","L"],["settings","Settings","S"],
+ ["admin","Site Management","A"],["terms","Terms of Service","T"],["privacy","Privacy Policy","P"]
 ];
 
 function navMarkup(){
- const groups = [
-  ["Workspace",pages.slice(0,4)],
-  ["Bot tools",pages.slice(4,8)],
-  ["Support and preferences",pages.slice(8)]
- ];
- return groups.map(([title,items]) =>
-  '<div class="nav-label">'+title+'</div>' +
-  items.map(([id,label,symbol]) =>
-   `<button class="navbtn" data-go="${id}"><span class="ns" aria-hidden="true">${symbol}</span><span>${label}</span></button>`
-  ).join("")
- ).join("");
+ const groups=[["Workspace",pages.slice(0,4)],["Bot tools",pages.slice(4,8)],["Support and preferences",pages.slice(8)]];
+ return groups.map(([title,items])=>'<div class="nav-label">'+title+'</div>'+items.map(([id,label,symbol])=>`<button class="navbtn ${id==="admin"?"owner-nav hidden":""}" data-go="${id}"><span class="ns" aria-hidden="true">${symbol}</span><span>${label}</span></button>`).join("")).join("");
 }
+$("sidebar").innerHTML=navMarkup();
+$("drawer").innerHTML='<div class="brand" style="margin:0 0 18px"><img class="avatar" src="'+BOT_AVATAR+'" alt="Rhymo bot avatar"><span>Rhymo</span></div>'+navMarkup();
 
-$("sidebar").innerHTML = navMarkup();
-$("drawer").innerHTML =
- '<div class="brand" style="margin:0 0 18px"><img class="avatar" src="'+BOT_AVATAR+'" alt="Rhymo bot avatar"><span>Rhymo</span></div>'+navMarkup();
+let currentUser=null;
+let managedServers=[];
+let selectedGuildId="";
+let toastTimer;
+let editingPostId=null;
+let adminPosts=[];
 
-
+function toast(message){
+ $("toast").textContent=message;$("toast").classList.remove("hidden");
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.add("hidden"),3500);
+}
+function serverMessage(message){$("serverMessage").textContent=message}
 function showPage(id,updateHash=true){
  if(!pages.some(p=>p[0]===id))id="home";
-
- document.querySelectorAll(".page").forEach(p=>
-  p.classList.toggle("active",p.id==="page-"+id)
- );
-
- document.querySelectorAll("[data-go]").forEach(b=>
-  b.classList.toggle("active",b.dataset.go===id)
- );
-
- $("drawer").classList.remove("open");
- $("scrim").classList.remove("open");
- $("menuToggle").setAttribute("aria-expanded","false");
-
+ if(id==="admin"&&!isRhymoOwner()){id="home";toast("Site Management is restricted to the Rhymo owner.");}
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+id));
+ document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("active",b.dataset.go===id));
+ $("drawer").classList.remove("open");$("scrim").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false");
  if(updateHash)history.replaceState(null,"","#"+id);
-
  window.scrollTo({top:0,behavior:"smooth"});
-
- if(id==="search"){
-  renderSearch($("searchPageInput").value);
- }
-
+ if(id==="search")renderSearch($("searchPageInput").value);
  if(id==="servers"){
-  if(!currentUser){
-   serverMessage("Please log in with Discord before loading servers.");
-  }else if(!managedServers.length){
-   loadServers();
-  }else{
-   serverMessage(
-    `Loaded ${managedServers.length} server(s). Choose a server to continue.`
-   );
-  }
+  if(!currentUser)serverMessage("Please log in with Discord before loading servers.");
+  else if(!managedServers.length)loadServers();
+  else serverMessage(`Loaded ${managedServers.length} server(s). Choose a server to continue.`);
  }
+ if(id==="admin")loadAdminPosts();
 }
-
-document.addEventListener("click",e=>{
- const b=e.target.closest("[data-go]");
- if(b){e.preventDefault();showPage(b.dataset.go);}
-});
-
-function toggleDrawer(){
- const open=!$("drawer").classList.contains("open");
- $("drawer").classList.toggle("open",open);
- $("scrim").classList.toggle("open",open);
- $("menuToggle").setAttribute("aria-expanded",String(open));
-}
-$("menuToggle").addEventListener("click",toggleDrawer);
-$("scrim").addEventListener("click",toggleDrawer);
-
-let toastTimer;
-function toast(message){
- $("toast").textContent=message;
- $("toast").classList.remove("hidden");
- clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>$("toast").classList.add("hidden"),3500);
-}
-
-function login(){
- window.location.assign(api("/auth/discord"));
-}
-["loginBtn","homeLoginBtn","dashboardLoginBtn","settingsLoginBtn"].forEach(id=>{
- $(id).addEventListener("click",login);
-});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){e.preventDefault();showPage(b.dataset.go)}});
+function toggleDrawer(){const open=!$("drawer").classList.contains("open");$("drawer").classList.toggle("open",open);$("scrim").classList.toggle("open",open);$("menuToggle").setAttribute("aria-expanded",String(open))}
+$("menuToggle").addEventListener("click",toggleDrawer);$("scrim").addEventListener("click",toggleDrawer);
 
 async function request(path,options={}){
  const headers=new Headers(options.headers||{});
- if(options.method==="POST")headers.set("Content-Type","application/json");
- return fetch(api(path),{
-  ...options,
-  headers,
-  credentials:"include",
-  cache:"no-store",
-  mode:"cors"
- });
+ if(["POST","PATCH","PUT"].includes(String(options.method||"GET").toUpperCase()))headers.set("Content-Type","application/json");
+ return fetch(api(path),{...options,headers,credentials:"include",cache:"no-store",mode:"cors"});
 }
+function login(){window.location.assign(api("/auth/discord"))}
+["loginBtn","homeLoginBtn","dashboardLoginBtn","settingsLoginBtn"].forEach(id=>$(id).addEventListener("click",login));
 
-let currentUser=null;
+function isRhymoOwner(){return !!currentUser&&String(currentUser.id)===RHYMO_OWNER_ID}
+function updateAdminNavigation(){
+ document.querySelectorAll(".owner-nav").forEach(b=>b.classList.toggle("hidden",!isRhymoOwner()));
+}
 function setUser(user){
  currentUser=user;
  const loggedIn=!!user;
- $("loginBtn").classList.toggle("hidden",loggedIn);
- $("accountBtn").classList.toggle("hidden",!loggedIn);
- $("dashboardLoginBtn").classList.toggle("hidden",loggedIn);
- $("logoutBtn").classList.toggle("hidden",!loggedIn);
- $("settingsLoginBtn").classList.toggle("hidden",loggedIn);
- $("settingsLogoutBtn").classList.toggle("hidden",!loggedIn);
+ $("loginBtn").classList.toggle("hidden",loggedIn);$("accountBtn").classList.toggle("hidden",!loggedIn);
+ $("dashboardLoginBtn").classList.toggle("hidden",loggedIn);$("logoutBtn").classList.toggle("hidden",!loggedIn);
+ $("settingsLoginBtn").classList.toggle("hidden",loggedIn);$("settingsLogoutBtn").classList.toggle("hidden",!loggedIn);
  $("settingsProfile").hidden=!loggedIn;
-
  if(!user){
-  $("headerAvatar").src=fallbackAvatar;
-  $("profileAvatar").src=fallbackAvatar;
-  $("profileName").textContent="Not signed in";
-  $("profileId").textContent="";
-  $("authBadge").textContent="Signed out";
-  $("accountMessage").textContent="Log in with Discord to view your account.";
-  $("settingsAccountText").textContent="You are not signed in.";
-  $("homeAccountMessage").textContent="Sign in with Discord to display your account profile.";
-  $("homeLoginBtn").classList.remove("hidden");
-  managedServers=[];
-  selectedGuildId="";
-  $("serverSelect").replaceChildren(new Option("Log in to load servers",""));
-  resetServerDetails();
+  $("headerAvatar").src=fallbackAvatar;$("profileAvatar").src=fallbackAvatar;
+  $("profileName").textContent="Not signed in";$("profileId").textContent="";$("authBadge").textContent="Signed out";
+  $("accountMessage").textContent="Log in with Discord to view your account.";$("settingsAccountText").textContent="You are not signed in.";
+  $("homeAccountMessage").textContent="Sign in with Discord to display your account profile.";$("homeLoginBtn").classList.remove("hidden");
+  managedServers=[];selectedGuildId="";$("serverSelect").replaceChildren(new Option("Log in to load servers",""));resetServerDetails();
   serverMessage("Please log in with Discord before loading servers.");
-  return;
+ }else{
+  const avatar=user.avatarUrl||(user.avatar&&user.id?`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`:fallbackAvatar);
+  const displayName=user.global_name||user.globalName||user.username||"Discord user";
+  $("headerAvatar").src=avatar;$("profileAvatar").src=avatar;$("settingsAvatar").src=avatar;
+  $("settingsName").textContent=displayName;$("settingsId").textContent="Discord ID: "+(user.id||"");
+  $("profileName").textContent=displayName;$("profileId").textContent="Discord ID: "+(user.id||"");
+  $("authBadge").textContent="Signed in";$("accountMessage").textContent="Your Discord session is active.";
+  $("settingsAccountText").textContent="Signed in as "+displayName+".";$("homeAccountMessage").textContent="Signed in as "+displayName+".";
+  $("homeLoginBtn").classList.add("hidden");
  }
-
- const avatar=user.avatarUrl || (user.avatar && user.id
-  ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-  : fallbackAvatar);
- const displayName=user.global_name||user.globalName||user.username||"Discord user";
- $("headerAvatar").src=avatar;
- $("profileAvatar").src=avatar;
- $("settingsAvatar").src=avatar;
- $("settingsName").textContent=displayName;
- $("settingsId").textContent="Discord ID: "+(user.id||"");
- $("profileName").textContent=displayName;
- $("profileId").textContent="Discord ID: "+(user.id||"");
- $("authBadge").textContent="Signed in";
- $("accountMessage").textContent="Your Discord session is active.";
- $("settingsAccountText").textContent="Signed in as "+displayName+".";
- $("homeAccountMessage").textContent="Signed in as "+displayName+".";
- $("homeLoginBtn").classList.add("hidden");
+ updateAdminNavigation();
+ if(isRhymoOwner())loadAdminPosts();
+ else if($("page-admin").classList.contains("active"))showPage("home");
 }
-
 async function refreshAccount(){
- $("authBadge").textContent="Checking session";
- $("accountMessage").textContent="Checking your login session...";
-
+ $("authBadge").textContent="Checking session";$("accountMessage").textContent="Checking your login session...";
  try{
   const response=await request("/api/me");
-  if(response.status===401){setUser(null);return;}
+  if(response.status===401){setUser(null);return}
   if(!response.ok)throw new Error("Session check failed ("+response.status+")");
-  const data=await response.json();
-  if(data.authenticated===true && data.user){
-   setUser(data.user);
-  }else{
-   setUser(null);
-  }
+  const data=await response.json();setUser(data.authenticated===true&&data.user?data.user:null);
  }catch(error){
-  console.error("Rhymo session check failed:",error);
-  $("authBadge").textContent="Session unavailable";
+  console.error("Rhymo session check failed:",error);$("authBadge").textContent="Session unavailable";
   $("accountMessage").textContent="Your browser could not verify the login session. Safari may block cross-site cookies between GitHub Pages and Render.";
   $("settingsAccountText").textContent="Your session could not be verified by this browser.";
  }
 }
-
 async function logout(){
  try{
   const response=await request("/auth/logout",{method:"POST",body:"{}"});
   if(!response.ok)throw new Error("Logout failed ("+response.status+")");
-  setUser(null);
-  showPage("home");
-  toast("You have been logged out.");
- }catch(error){
-  console.error("Rhymo logout failed:",error);
-  toast("Logout could not be completed. Check the backend connection.");
- }
+  setUser(null);showPage("home");toast("You have been logged out.");
+ }catch(error){console.error("Rhymo logout failed:",error);toast("Logout could not be completed. Check the backend connection.")}
 }
-$("logoutBtn").addEventListener("click",logout);
-$("settingsLogoutBtn").addEventListener("click",logout);
-$("accountBtn").addEventListener("click",()=>showPage("dashboard"));
+$("logoutBtn").addEventListener("click",logout);$("settingsLogoutBtn").addEventListener("click",logout);$("accountBtn").addEventListener("click",()=>showPage("dashboard"));
 
 const searchIndex=[
- ...pages.map(([id,label])=>({title:label,description:"Rhymo website page",page:id})),
+ ...pages.filter(p=>p[0]!=="admin").map(([id,label])=>({title:label,description:"Rhymo website page",page:id})),
  {title:"Discord login",description:"Sign in, account profile, session, and logout",page:"dashboard"},
  {title:"Add Rhymo to Discord",description:"Install the bot from Settings",page:"settings"},
  {title:"Privacy and data",description:"Privacy Policy and account sessions",page:"privacy"},
  {title:"Terms and usage",description:"Terms of Service",page:"terms"},
  {title:"OAuth2 help",description:"Login troubleshooting",page:"help"},
- {title:"Moderation activity",description:"Activity log interface",page:"logs"},
- {title:"Server permissions",description:"Server selection and permissions",page:"servers"},
- {title:"Bot uptime",description:"System health monitoring",page:"status"},
- {title:"Announcements",description:"Maintenance and release notifications",page:"notifications"}
+ {title:"Moderation activity",description:"View server activity logs",page:"logs"},
+ {title:"Server settings",description:"Choose a server you manage",page:"servers"}
 ];
-
 function renderSearch(query){
- const q=query.trim().toLowerCase();
- const target=$("searchResults");
- if(!target)return;
- if(!q){target.innerHTML='<div class="empty">Enter a search term to find pages and help topics.</div>';return;}
- const matches=searchIndex.filter(x=>(x.title+" "+x.description).toLowerCase().includes(q));
- target.innerHTML="";
- if(!matches.length){target.innerHTML='<div class="empty">No matching pages or help topics found.</div>';return;}
- matches.forEach(item=>{
-  const b=document.createElement("button");
-  b.className="result";
-  const title=document.createElement("strong");title.textContent=item.title;
-  const desc=document.createElement("small");desc.textContent=item.description;
-  b.append(title,desc);
-  b.addEventListener("click",()=>showPage(item.page));
-  target.appendChild(b);
- });
+ const target=$("searchResults");const q=String(query||"").trim().toLowerCase();
+ const matches=searchIndex.filter(item=>(item.title+" "+item.description).toLowerCase().includes(q));
+ target.innerHTML=matches.length?matches.map(item=>`<button class="result" data-go="${item.page}"><strong>${escapeHTML(item.title)}</strong><span>${escapeHTML(item.description)}</span></button>`).join(""):'<div class="empty">No matching pages or features were found.</div>';
 }
-
-$("globalSearch").addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-  $("searchPageInput").value=e.target.value;
-  showPage("search");
-  renderSearch(e.target.value);
- }
-});
-$("globalSearch").addEventListener("input",e=>{
- if(e.target.value.trim().length>=2){
-  $("searchPageInput").value=e.target.value;
-  showPage("search");
-  renderSearch(e.target.value);
- }
-});
+$("globalSearchInput").addEventListener("input",e=>renderSearch(e.target.value));
 $("searchPageInput").addEventListener("input",e=>renderSearch(e.target.value));
-
-/* SERVER MANAGEMENT */
-let managedServers=[];
-let selectedGuildId="";
-
-function serverMessage(message){
- $("serverMessage").textContent=message;
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 
 function resetServerDetails(){
- $("selectedServerName").textContent="Server details";
- $("selectedServerDescription").textContent="Select a server to view its details.";
- $("selectedBotStatus").textContent="--";
- $("selectedLogCount").textContent="--";
- $("loadServerDetailsBtn").disabled=true;
- $("loadServerLogsBtn").disabled=true;
- $("serverInviteBtn").classList.add("hidden");
+ $("serverDetails").classList.add("hidden");
+ $("serverDetails").innerHTML="";
  $("serverLogs").replaceChildren();
- const empty=document.createElement("div");
- empty.className="empty";
- empty.textContent="Select a server to view its recorded activity.";
- $("serverLogs").appendChild(empty);
+ $("serverLogsMessage").textContent="Choose a server to load its activity logs.";
 }
-
 async function loadServers(){
- if(!currentUser){
-  serverMessage("Please log in with Discord before loading servers.");
-  return;
- }
-
- const button=$("loadServersBtn");
- button.disabled=true;
- button.textContent="Loading...";
- serverMessage("Loading your manageable Discord servers...");
-
+ if(!currentUser){serverMessage("Please log in with Discord before loading servers.");return}
+ serverMessage("Loading servers...");
  try{
-  const response=await request("/api/servers");
-  const data=await response.json().catch(()=>({}));
-
-  if(response.status===401){
-   setUser(null);
-   serverMessage("Your Discord session expired. Please log in again.");
-   return;
-  }
-  if(!response.ok){
-   throw new Error(data.error||`Request failed (${response.status})`);
-  }
-
+  const response=await request("/api/servers"),data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Could not load servers.");
   managedServers=Array.isArray(data.servers)?data.servers:[];
-  const select=$("serverSelect");
-  select.replaceChildren();
-
+  const select=$("serverSelect");select.replaceChildren(new Option("Choose a server",""));
+  managedServers.forEach(server=>select.add(new Option(server.name+" "+(server.botInstalled?"(Rhymo installed)":"(Rhymo not installed)"),String(server.id))));
   if(!managedServers.length){
-   select.add(new Option("No manageable servers found",""));
-   selectedGuildId="";
-   resetServerDetails();
-   serverMessage("No servers with the required management permissions were found.");
-   return;
+   serverMessage("No manageable servers were returned for this Discord account.");
+   resetServerDetails();return;
   }
-
-  select.add(new Option("Choose a server...",""));
-  managedServers.forEach(server=>{
-   const status=server.botInstalled===true
-    ?" — Rhymo installed"
-    :server.botInstalled===false
-     ?" — Rhymo not installed"
-     :"";
-   select.add(new Option(server.name+status,server.id));
-  });
-
-  serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue.`);
-
-  if(selectedGuildId&&managedServers.some(s=>s.id===selectedGuildId)){
-   select.value=selectedGuildId;
-   await loadServerDetails();
-  }else{
-   selectedGuildId="";
-   resetServerDetails();
-  }
+  serverMessage(`Loaded ${managedServers.length} server(s). Choose a server to continue.`);
+  if(selectedGuildId&&managedServers.some(s=>String(s.id)===selectedGuildId)){
+   select.value=selectedGuildId;await loadServerDetails(selectedGuildId);
+  }else{selectedGuildId="";resetServerDetails()}
  }catch(error){
-  console.error("Loading servers failed:",error);
+  console.error("Server list failed:",error);
   serverMessage(error.message||"Could not load servers. Please try again.");
- }finally{
-  button.disabled=false;
-  button.textContent="Load servers";
  }
 }
-
-async function loadServerDetails(){
- const guildId=$("serverSelect").value;
- if(!guildId){
-  selectedGuildId="";
-  resetServerDetails();
-  serverMessage("Choose a server first.");
-  return;
- }
-
- selectedGuildId=guildId;
- const selected=managedServers.find(item=>item.id===guildId);
- $("selectedServerName").textContent=selected?.name||"Selected server";
- $("selectedServerDescription").textContent="Loading server details...";
- $("selectedBotStatus").textContent="Checking...";
- $("selectedLogCount").textContent="--";
- $("loadServerDetailsBtn").disabled=true;
- $("loadServerLogsBtn").disabled=true;
- $("serverInviteBtn").classList.add("hidden");
-
- try{
-  const response=await request("/api/servers/"+encodeURIComponent(guildId));
-  const data=await response.json().catch(()=>({}));
-
-  if(response.status===401){
-   setUser(null);
-   throw new Error("Your Discord session expired. Please log in again.");
-  }
-  if(!response.ok){
-   throw new Error(data.error||`Request failed (${response.status})`);
-  }
-  if(selectedGuildId!==guildId)return;
-
-  const details=data.server;
-  if(!details)throw new Error("The backend returned no server details.");
-
-  $("selectedServerName").textContent=details.name||"Selected server";
-  $("selectedServerDescription").textContent=
-   "Server ID: "+details.id+(details.owner?" · You own this server":"");
-
-  if(details.botInstalled===true){
-   $("selectedBotStatus").textContent="Installed";
-  }else if(details.botInstalled===false){
-   $("selectedBotStatus").textContent="Not installed";
-  }else{
-   $("selectedBotStatus").textContent="Status unavailable";
-  }
-
-  $("selectedLogCount").textContent=String(data.activityLogCount??0);
-  $("loadServerDetailsBtn").disabled=false;
-  $("loadServerLogsBtn").disabled=false;
-
-  if(details.botInstalled===false){
-   $("serverInviteBtn").href=INVITE_URL;
-   $("serverInviteBtn").classList.remove("hidden");
-  }
-
-  serverMessage("Server details loaded successfully.");
- }catch(error){
-  console.error("Loading server details failed:",error);
-  $("selectedServerDescription").textContent=error.message||"Could not load server details.";
-  serverMessage(error.message||"Could not load server details.");
- }
-}
-
-async function loadServerLogs(){
- const guildId=selectedGuildId;
- if(!guildId){
-  serverMessage("Choose a server first.");
-  return;
- }
-
- const target=$("serverLogs");
- target.replaceChildren();
- const loading=document.createElement("div");
- loading.className="empty";
- loading.textContent="Loading activity logs...";
- target.appendChild(loading);
- $("loadServerLogsBtn").disabled=true;
-
+$("reloadServersBtn").addEventListener("click",loadServers);
+$("serverSelect").addEventListener("change",e=>{
+ selectedGuildId=e.target.value;
+ if(selectedGuildId)loadServerDetails(selectedGuildId);
+ else resetServerDetails();
+});
+async function loadServerDetails(guildId){
+ const server=managedServers.find(s=>String(s.id)===String(guildId));
+ if(!server)return;
+ $("serverDetails").classList.remove("hidden");
+ $("serverDetails").innerHTML="";
+ const title=document.createElement("h2");title.textContent=server.name;
+ const info=document.createElement("p");info.className="muted";
+ info.textContent="Server ID: "+server.id;
+ const status=document.createElement("p");
+ status.textContent=server.botInstalled?"Rhymo is installed in this server.":"Rhymo is not installed in this server.";
+ const invite=document.createElement("a");invite.href=INVITE_URL+"&guild_id="+encodeURIComponent(server.id)+"&disable_guild_select=true";
+ invite.target="_blank";invite.rel="noopener noreferrer";invite.className="button-link";invite.textContent="Add Rhymo to Discord";
+ $("serverDetails").append(title,info,status);
+ if(!server.botInstalled)$("serverDetails").appendChild(invite);
+ $("serverLogsMessage").textContent="Loading activity logs...";
+ $("serverLogs").replaceChildren();
  try{
   const response=await request("/api/servers/"+encodeURIComponent(guildId)+"/logs");
   const data=await response.json().catch(()=>({}));
-
-  if(response.status===401){
-   setUser(null);
-   throw new Error("Your Discord session expired. Please log in again.");
-  }
-  if(!response.ok){
-   throw new Error(data.error||`Request failed (${response.status})`);
-  }
-  if(selectedGuildId!==guildId)return;
-
+  if(!response.ok)throw new Error(data.error||"Could not load activity logs.");
   const logs=Array.isArray(data.logs)?data.logs:[];
-  target.replaceChildren();
-
-  if(!logs.length){
-   const empty=document.createElement("div");
-   empty.className="empty";
-   empty.textContent="No activity has been recorded for this server.";
-   target.appendChild(empty);
-   return;
-  }
-
+  $("serverLogsMessage").textContent=logs.length?`Showing ${logs.length} recent log entries.`:"No activity logs have been recorded for this server yet.";
   logs.forEach(log=>{
-   const item=document.createElement("div");
-   item.className="list-item";
-
-   const title=document.createElement("strong");
-   title.textContent=log.event_type||"Activity";
-
-   const date=document.createElement("p");
-   date.textContent=log.created_at
-    ?new Date(log.created_at).toLocaleString()
-    :"Date unavailable";
-
-   const details=document.createElement("p");
-   const safeDetails=log.details&&typeof log.details==="object"
-    ?JSON.stringify(log.details)
-    :"{}";
-   details.textContent=safeDetails.length>500
-    ?safeDetails.slice(0,500)+"..."
-    :safeDetails;
-
-   item.append(title,date,details);
-   target.appendChild(item);
+   const item=document.createElement("article");item.className="result";
+   const heading=document.createElement("strong");heading.textContent=log.action||log.event||"Activity";
+   const detail=document.createElement("span");detail.textContent=log.message||log.details||"No additional details.";
+   const time=document.createElement("span");time.textContent=log.created_at||log.createdAt?new Date(log.created_at||log.createdAt).toLocaleString():"Time unavailable";
+   item.append(heading,detail,time);$("serverLogs").appendChild(item);
   });
  }catch(error){
-  console.error("Loading activity logs failed:",error);
-  target.replaceChildren();
-  const message=document.createElement("div");
-  message.className="empty";
-  message.textContent=error.message||"Could not load activity logs.";
-  target.appendChild(message);
- }finally{
-  $("loadServerLogsBtn").disabled=!selectedGuildId;
+  console.error("Server logs failed:",error);
+  $("serverLogsMessage").textContent=error.message||"Could not load activity logs.";
  }
 }
 
-$("loadServersBtn").addEventListener("click",loadServers);
-$("serverSelect").addEventListener("change",loadServerDetails);
-$("loadServerDetailsBtn").addEventListener("click",loadServerDetails);
-$("loadServerLogsBtn").addEventListener("click",loadServerLogs);
-
-$("configBtn").addEventListener("click",()=>{
- if(!selectedGuildId){
-  toast("Select a server first.");
-  return;
- }
- loadServerDetails();
-});
-
-$("moderationBtn").addEventListener("click",()=>{
- if(!selectedGuildId){
-  toast("Select a server first.");
-  return;
- }
- loadServerLogs();
-});
-
-/* NOTIFICATIONS */
-async function refreshNotifications(){
- const target=$("notificationList");
+/* SYSTEM STATUS */
+async function refreshSystemStatus(){
  try{
-  const response=await request("/api/notifications");
-  if(!response.ok)throw new Error("Could not load notifications.");
-  const data=await response.json();
-  const notifications=Array.isArray(data.notifications)?data.notifications:[];
-  target.replaceChildren();
+  const response=await request("/api/health");
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Backend health check failed.");
+  $("backendStatus").textContent="Connected";
+  $("backendStatusDetail").textContent="The Rhymo authentication backend responded successfully.";
+  $("databaseStatus").textContent=data.database||data.db||"Health endpoint responded";
+ }catch(error){
+  $("backendStatus").textContent="Unavailable";
+  $("backendStatusDetail").textContent="The backend could not be reached or returned an error.";
+  $("databaseStatus").textContent="Status unavailable";
+ }
+}
+$("refreshStatusBtn").addEventListener("click",refreshSystemStatus);
 
-  if(!notifications.length){
-   const empty=document.createElement("div");
-   empty.className="empty";
-   empty.textContent="No announcements have been published.";
-   target.appendChild(empty);
+/* ACTIVITY LOGS */
+async function loadRecentLogs(){
+ const target=$("recentLogs");target.replaceChildren();
+ $("recentLogsMessage").textContent="Loading activity logs...";
+ try{
+  const response=await request("/api/servers");
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Could not load your servers.");
+  const servers=Array.isArray(data.servers)?data.servers:[];
+  if(!servers.length){
+   $("recentLogsMessage").textContent="No manageable servers were found.";
    return;
   }
+  const gathered=[];
+  for(const server of servers.slice(0,10)){
+   try{
+    const r=await request("/api/servers/"+encodeURIComponent(server.id)+"/logs");
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&Array.isArray(d.logs)){
+     d.logs.forEach(log=>gathered.push({...log,serverName:server.name}));
+    }
+   }catch(error){console.warn("Could not load logs for a server:",error)}
+  }
+  gathered.sort((a,b)=>new Date(b.created_at||b.createdAt||0)-new Date(a.created_at||a.createdAt||0));
+  const recent=gathered.slice(0,30);
+  $("recentLogsMessage").textContent=recent.length?`Showing ${recent.length} recent entries across your servers.`:"No activity logs have been recorded yet.";
+  recent.forEach(log=>{
+   const item=document.createElement("article");item.className="result";
+   const heading=document.createElement("strong");heading.textContent=(log.action||log.event||"Activity")+" — "+(log.serverName||"Server");
+   const detail=document.createElement("span");detail.textContent=log.message||log.details||"No additional details.";
+   const time=document.createElement("span");time.textContent=log.created_at||log.createdAt?new Date(log.created_at||log.createdAt).toLocaleString():"Time unavailable";
+   item.append(heading,detail,time);target.appendChild(item);
+  });
+ }catch(error){
+  console.error("Recent logs failed:",error);
+  $("recentLogsMessage").textContent=error.message||"Could not load activity logs.";
+ }
+}
+$("reloadLogsBtn").addEventListener("click",loadRecentLogs);
 
+/* NOTIFICATION CENTER */
+async function loadNotifications(){
+ const target=$("notificationList");target.replaceChildren();
+ try{
+  const response=await request("/api/notifications");
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Could not load notifications.");
+  const notifications=Array.isArray(data.notifications)?data.notifications:[];
+  if(!notifications.length){
+   const empty=document.createElement("div");empty.className="empty";empty.textContent="There are no notifications yet.";
+   target.appendChild(empty);return;
+  }
   notifications.forEach(notification=>{
-   const item=document.createElement("div");
-   item.className="list-item";
-   const title=document.createElement("strong");
-   title.textContent=notification.title||"Announcement";
-   const severity=document.createElement("span");
-   severity.className="pill";
-   severity.textContent=notification.severity||"info";
-   const message=document.createElement("p");
-   message.textContent=notification.message||"";
-   const date=document.createElement("p");
-   date.textContent=notification.created_at
-    ?new Date(notification.created_at).toLocaleString()
-    :"";
-   item.append(title,document.createTextNode(" "),severity,message,date);
+   const item=document.createElement("article");item.className="result";
+   const heading=document.createElement("strong");heading.textContent=notification.title||"Notification";
+   const detail=document.createElement("span");detail.textContent=notification.message||notification.content||"";
+   const time=document.createElement("span");time.textContent=notification.created_at||notification.createdAt?new Date(notification.created_at||notification.createdAt).toLocaleString():"";
+   item.append(heading,detail,time);
+   if(notification.id){
+    const button=document.createElement("button");button.textContent="Mark as read";
+    button.addEventListener("click",async()=>{
+     try{
+      const r=await request("/api/notifications/"+encodeURIComponent(notification.id)+"/read",{method:"POST",body:"{}"});
+      if(!r.ok)throw new Error("Could not mark notification as read.");
+      button.disabled=true;button.textContent="Read";
+     }catch(error){toast(error.message||"Could not update notification.")}
+    });
+    item.appendChild(button);
+   }
    target.appendChild(item);
   });
  }catch(error){
-  console.error("Notification loading failed:",error);
-  target.replaceChildren();
-  const empty=document.createElement("div");
-  empty.className="empty";
-  empty.textContent="Notifications are temporarily unavailable.";
+  console.error("Notifications failed:",error);
+  const empty=document.createElement("div");empty.className="empty";empty.textContent="Notifications are temporarily unavailable.";
   target.appendChild(empty);
  }
 }
+$("reloadNotificationsBtn").addEventListener("click",loadNotifications);
+
+/* COMMAND EXPLORER */
+const commandInfo=[
+ {name:"/help",description:"View the bot's help and command information."},
+ {name:"/server-info",description:"View information about the current Discord server."}
+];
+function renderCommands(query=""){
+ const target=$("commandList");target.replaceChildren();
+ const q=query.trim().toLowerCase();
+ const matches=commandInfo.filter(c=>(c.name+" "+c.description).toLowerCase().includes(q));
+ if(!matches.length){
+  const empty=document.createElement("div");empty.className="empty";empty.textContent="No matching command information was found.";
+  target.appendChild(empty);return;
+ }
+ matches.forEach(command=>{
+  const item=document.createElement("article");item.className="result";
+  const heading=document.createElement("strong");heading.textContent=command.name;
+  const detail=document.createElement("span");detail.textContent=command.description;
+  item.append(heading,detail);target.appendChild(item);
+ });
+}
+$("commandSearch").addEventListener("input",e=>renderCommands(e.target.value));
+renderCommands();
+
+/* HELP CENTER */
+$("helpSearch").addEventListener("input",e=>{
+ const query=e.target.value.trim().toLowerCase();
+ document.querySelectorAll("[data-help]").forEach(item=>{
+  item.classList.toggle("hidden",!item.textContent.toLowerCase().includes(query));
+ });
+});
+
+/* SETTINGS */
+$("settingsInviteBtn").target="_blank";
+$("settingsInviteBtn").rel="noopener noreferrer";
+$("refreshStatusBtn").addEventListener("click",refreshSystemStatus);
+
+/* NOTIFICATIONS / CHANGELOG */
+async function refreshNotifications(){await loadPublicPosts()}
 
 /* LANGUAGE SETTINGS */
 const translations={
- en:{Home:"Home",Dashboard:"Dashboard","System Status":"System Status","Global Search":"Global Search","Notification Center":"Notification Center","Activity Logs":"Activity Logs","Server Management":"Server Management","Command Explorer":"Command Explorer","Help Center":"Help Center",Changelog:"Changelog","Language Settings":"Language Settings",Settings:"Settings","Terms of Service":"Terms of Service","Privacy Policy":"Privacy Policy"},
- so:{Home:"Bogga Hore",Dashboard:"Xarunta Maamulka","System Status":"Xaaladda Nidaamka","Global Search":"Raadin Guud","Notification Center":"Ogeysiisyada","Activity Logs":"Diiwaanka Hawlaha","Server Management":"Maamulka Server-ka","Command Explorer":"Baadh Amarada","Help Center":"Xarunta Caawinta",Changelog:"Isbeddellada","Language Settings":"Dejinta Luqadda",Settings:"Dejinta","Terms of Service":"Shuruudaha Adeegga","Privacy Policy":"Siyaasadda Asturnaanta"}
+ en:{Home:"Home",Dashboard:"Dashboard","System Status":"System Status","Global Search":"Global Search","Notification Center":"Notification Center","Activity Logs":"Activity Logs","Server Management":"Server Management","Command Explorer":"Command Explorer","Help Center":"Help Center",Changelog:"Changelog","Language Settings":"Language Settings",Settings:"Settings","Site Management":"Site Management","Terms of Service":"Terms of Service","Privacy Policy":"Privacy Policy"},
+ so:{Home:"Bogga Hore",Dashboard:"Xarunta Maamulka","System Status":"Xaaladda Nidaamka","Global Search":"Raadin Guud","Notification Center":"Ogeysiisyada","Activity Logs":"Diiwaanka Hawlaha","Server Management":"Maamulka Server-ka","Command Explorer":"Baadh Amarada","Help Center":"Xarunta Caawinta",Changelog:"Isbeddellada","Language Settings":"Dejinta Luqadda",Settings:"Dejinta","Site Management":"Maamulka Bogga","Terms of Service":"Shuruudaha Adeegga","Privacy Policy":"Siyaasadda Asturnaanta"}
 };
-
 function setLanguage(lang){
  const dict=translations[lang]||translations.en;
- document.querySelectorAll(".navbtn[data-go]").forEach(b=>{
-  const entry=pages.find(p=>p[0]===b.dataset.go);
-  if(entry)b.querySelector("span:last-child").textContent=dict[entry[1]]||entry[1];
- });
- $("languageMessage").textContent=lang==="so"
-  ?"Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi."
-  :"English is selected.";
- $("languageSelect").value=lang;
- $("settingsLanguage").value=lang;
- try{localStorage.setItem("rhymo-language",lang);}catch{}
+ document.querySelectorAll(".navbtn[data-go]").forEach(b=>{const entry=pages.find(p=>p[0]===b.dataset.go);if(entry)b.querySelector("span:last-child").textContent=dict[entry[1]]||entry[1]});
+ $("languageMessage").textContent=lang==="so"?"Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi.":"English is selected.";
+ $("languageSelect").value=lang;$("settingsLanguage").value=lang;
+ try{localStorage.setItem("rhymo-language",lang)}catch{}
 }
-
 $("languageSelect").addEventListener("change",e=>setLanguage(e.target.value));
 $("settingsLanguage").addEventListener("change",e=>setLanguage(e.target.value));
-
-$("accentSelect").addEventListener("change",e=>{
- document.documentElement.style.setProperty("--accent",e.target.value);
- try{localStorage.setItem("rhymo-accent",e.target.value);}catch{}
-});
-
+$("accentSelect").addEventListener("change",e=>{document.documentElement.style.setProperty("--accent",e.target.value);try{localStorage.setItem("rhymo-accent",e.target.value)}catch{}});
 try{
  const savedAccent=localStorage.getItem("rhymo-accent");
- if(savedAccent&&["#609bff","#a78bfa","#55d6a3"].includes(savedAccent)){
-  document.documentElement.style.setProperty("--accent",savedAccent);
-  $("accentSelect").value=savedAccent;
- }
+ if(savedAccent&&["#609bff","#a78bfa","#55d6a3"].includes(savedAccent)){document.documentElement.style.setProperty("--accent",savedAccent);$("accentSelect").value=savedAccent}
  setLanguage(localStorage.getItem("rhymo-language")||"en");
-}catch{
- setLanguage("en");
-}
+}catch{setLanguage("en")}
 
 /* BOT HEARTBEAT METRICS */
 async function refreshBotMetrics(){
  try{
-  const response=await fetch(api("/api/bot/metrics"),{cache:"no-store"});
-  if(!response.ok)throw new Error("Request failed ("+response.status+")");
+  const response=await fetch(api("/api/bot/metrics"),{cache:"no-store"});if(!response.ok)throw new Error("Request failed ("+response.status+")");
   const metrics=await response.json();
-
-  $("botOnline").textContent=metrics.online?"Online":"Offline";
-  $("botHeartbeat").textContent=metrics.online?"Heartbeat active":"Heartbeat stale";
-  $("botUptime").textContent=Number.isFinite(Number(metrics.uptimeSeconds))
-   ?Math.floor(Number(metrics.uptimeSeconds))+" seconds"
-   :"--";
-  $("botLatency").textContent=Number.isFinite(Number(metrics.latencyMs))
-   ?Number(metrics.latencyMs).toFixed(2)+" ms"
-   :"--";
-  $("botServers").textContent=Number.isFinite(Number(metrics.serverCount))
-   ?String(metrics.serverCount)
-   :"--";
-  $("botLastHeartbeat").textContent=metrics.lastHeartbeat
-   ?"Last heartbeat: "+new Date(metrics.lastHeartbeat).toLocaleString()
-   :"No heartbeat received.";
+  $("botOnline").textContent=metrics.online?"Online":"Offline";$("botHeartbeat").textContent=metrics.online?"Heartbeat active":"Heartbeat stale";
+  $("botUptime").textContent=Number.isFinite(Number(metrics.uptimeSeconds))?Math.floor(Number(metrics.uptimeSeconds))+" seconds":"--";
+  $("botLatency").textContent=Number.isFinite(Number(metrics.latencyMs))?Number(metrics.latencyMs).toFixed(2)+" ms":"--";
+  $("botServers").textContent=Number.isFinite(Number(metrics.serverCount))?String(metrics.serverCount):"--";
+  $("botLastHeartbeat").textContent=metrics.lastHeartbeat?"Last heartbeat: "+new Date(metrics.lastHeartbeat).toLocaleString():"No heartbeat received.";
  }catch(error){
-  console.error("Bot metrics failed:",error);
-  $("botOnline").textContent="Unavailable";
-  $("botHeartbeat").textContent="Connection failed";
-  $("botUptime").textContent="--";
-  $("botLatency").textContent="--";
-  $("botServers").textContent="--";
-  $("botLastHeartbeat").textContent="Could not load bot metrics.";
+  console.error("Bot metrics failed:",error);$("botOnline").textContent="Unavailable";$("botHeartbeat").textContent="Connection failed";
+  $("botUptime").textContent="--";$("botLatency").textContent="--";$("botServers").textContent="--";$("botLastHeartbeat").textContent="Could not load bot metrics.";
  }
 }
-
-refreshBotMetrics();
-setInterval(refreshBotMetrics,15000);
-refreshNotifications();
+refreshBotMetrics();setInterval(refreshBotMetrics,15000);refreshNotifications();
 
 const params=new URLSearchParams(location.search);
 if(params.get("login")==="success")toast("Discord authorized. Checking your dashboard session...");
 if(params.get("login")==="cancelled")toast("Discord login was cancelled.");
-if(params.has("login")){
- params.delete("login");
- history.replaceState(null,"",location.pathname+(location.hash||""));
-}
-
+if(params.has("login")){params.delete("login");history.replaceState(null,"",location.pathname+(location.hash||""))}
 const initialPage=location.hash.slice(1);
 showPage(pages.some(p=>p[0]===initialPage)?initialPage:"home",false);
-renderSearch("");
-refreshAccount();
+renderSearch("");refreshAccount();
 </script>
 </body>
 </html>
