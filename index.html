@@ -874,7 +874,7 @@ try{
 /* BOT HEARTBEAT METRICS */
 async function refreshBotMetrics(){
  try{
-  const response=await fetch(api("/api/bot/metrics"),{cache:"no-store"});
+  const response=await fetch(`${API_BASE_URL}/api/bot/metrics`,{cache:"no-store"});
   if(!response.ok)throw new Error("Request failed ("+response.status+")");
   const metrics=await response.json();
 
