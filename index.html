@@ -466,9 +466,30 @@ function setUser(user){
   ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
   : fallbackAvatar);
  const displayName=user.global_name||user.globalName||user.username||"Discord user";
- $("headerAvatar").src=avatar;
- $("profileAvatar").src=avatar;
- $("settingsAvatar").src=avatar;
+    const isPremium = user.is_premium === true;
+   
+   $("headerAvatar").src=avatar;
+   $("profileAvatar").src=avatar;
+   $("settingsAvatar").src=avatar;
+
+   if (isPremium) {
+     ["headerAvatar", "profileAvatar", "settingsAvatar"].forEach(id => {
+       const el = $(id);
+       if (el && !el.parentElement.classList.contains("premium-container")) {
+         const wrapper = document.createElement("div");
+         wrapper.className = "premium-container";
+         const shard = document.createElement("div");
+         shard.className = "premium-shard";
+         el.parentNode.insertBefore(wrapper, el);
+         wrapper.appendChild(el);
+         wrapper.appendChild(shard);
+       }
+     });
+     $("authBadge").textContent = "Premium Member";
+     $("authBadge").style.background = "linear-gradient(135deg, #00f0ff, #7000ff)";
+     $("authBadge").style.color = "white";
+   }
+
  $("settingsName").textContent=displayName;
  $("settingsId").textContent="Discord ID: "+(user.id||"");
  $("profileName").textContent=displayName;
