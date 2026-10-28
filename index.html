@@ -4,8 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071b3d">
-<title>Rhymo | Dashboard</title>
+<title>Rhymo Discord</title>
+<script>
+function applyPremiumTheme(themeName) {
+  document.body.classList.remove("theme-midnight-gold", "theme-cyberpunk-crimson", "theme-obsidian-dark");
+  if (themeName !== "default") {
+    document.body.classList.add(`theme-${themeName}`);
+    localStorage.setItem("rhymo_premium_theme", themeName);
+  } else {
+    localStorage.removeItem("rhymo_premium_theme");
+  }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem("rhymo_premium_theme");
+  if (savedTheme) document.body.classList.add(`theme-${savedTheme}`);
+});
+</script>
+
 <style>
+/* Premium Theme Configurations */
+body.theme-midnight-gold {
+  --bg: #0d0c08;
+  --panel: rgba(28, 26, 18, 0.95);
+  --accent-color: #ffd700;
+  --button-gradient: linear-gradient(135deg, #ffd700, #b8860b);
+}
+body.theme-cyberpunk-crimson {
+  --bg: #0f0508;
+  --panel: rgba(37, 12, 20, 0.95);
+  --accent-color: #ff0055;
+  --button-gradient: linear-gradient(135deg, #ff0055, #990033);
+}
+body.theme-obsidian-dark {
+  --bg: #050505;
+  --panel: rgba(18, 18, 18, 0.95);
+  --accent-color: #ffffff;
+  --button-gradient: linear-gradient(135deg, #333333, #000000);
+}
+.premium-theme-picker {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+.theme-swatch {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+}
+.theme-swatch:hover {
+  transform: scale(1.1);
+}
+
 :root{--bg:#030b20;--panel:rgba(12,32,68,.88);--panel2:#142f59;--border:rgba(143,183,255,.17);--text:#edf4ff;--muted:#a5b7d4;--accent:#609bff;--accent2:#3779ee;--radius:17px}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(ellipse at 12% 0%,#173d79,transparent 38%),radial-gradient(ellipse at 90% 40%,#211854,transparent 35%),linear-gradient(135deg,#030b20,#071b3d 60%,#101338);background-attachment:fixed}
@@ -136,6 +188,18 @@ footer{padding:30px 0 10px;color:var(--muted);font-size:12px}
     <div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div>
   </div>
   <div class="grid">
+              <!-- Premium Customization Card Panel Matrix -->
+          <article id="premium-settings-card" class="panel full" style="display: none; padding: 20px; margin-bottom: 20px;">
+            <h2 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">💎 Premium Customization Engine</h2>
+            <p style="font-size: 14px; opacity: 0.85; margin-bottom: 15px;">Select your personalized premium dashboard accent theme layout:</p>
+            <div class="premium-theme-picker">
+              <div class="theme-swatch" style="background: #ffd700;" onclick="applyPremiumTheme('midnight-gold')" title="Midnight Gold"></div>
+              <div class="theme-swatch" style="background: #ff0055;" onclick="applyPremiumTheme('cyberpunk-crimson')" title="Cyberpunk Crimson"></div>
+              <div class="theme-swatch" style="background: #ffffff; border: 1px solid #333;" onclick="applyPremiumTheme('obsidian-dark')" title="Obsidian Dark"></div>
+              <div class="theme-swatch" style="background: #3498db;" onclick="applyPremiumTheme('default')" title="Standard Rhymo Blue"></div>
+            </div>
+          </article>
+
     <article class="panel third"><h2>System Status</h2><p>Review live bot monitoring and service health.</p><button data-go="status">View status</button></article>
     <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
     <article class="panel third"><h2>Server Management</h2><p>Choose a Discord server you manage.</p><button data-go="servers">Open servers</button></article>
