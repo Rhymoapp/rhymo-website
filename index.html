@@ -2023,6 +2023,7 @@ showPage(pages.some(p => p[0] === initialPage) ? initialPage : "home", false);
 renderSearch("");
 
 refreshAccount().then(() => checkOwner());
+window.request = async function(path, options = {}) { const savedUser = JSON.parse(localStorage.getItem("rhymo_user") || "null"); const headers = new Headers(options.headers || {}); if (options.method === "POST") headers.set("Content-Type", "application/json"); if (savedUser?.id) headers.set("X-User-ID", savedUser.id); return fetch(api(path), { ...options, headers, credentials: "include", cache: "no-store", mode: "cors" }); };
 </script>
 </body>
 </html>
