@@ -1523,6 +1523,7 @@ function setUser(user) {
 }
 
 async function refreshAccount() {
+  const params = new URLSearchParams(window.location.search); if (params.has("auth_data")) { const data = JSON.parse(decodeURIComponent(params.get("auth_data"))); localStorage.setItem("rhymo_user", JSON.stringify(data)); setUser(data); history.replaceState(null, "", window.location.pathname + window.location.hash); return; } const saved = localStorage.getItem("rhymo_user"); if (saved) { setUser(JSON.parse(saved)); return; }
   $("authBadge").textContent = "Checking session";
   $("accountMessage").textContent = "Checking your login session...";
 
