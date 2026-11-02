@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09090b">
+<title>Rhymo Discord</title>
+<script>
+function applyPremiumTheme(themeName) {
+  document.body.classList.remove("theme-midnight-gold", "theme-cyberpunk-crimson", "theme-obsidian-dark");
+  if (themeName !== "default") {
+    document.body.classList.add(`theme-${themeName}`);
+    localStorage.setItem("rhymo_premium_theme", themeName);
+  } else {
+    localStorage.removeItem("rhymo_premium_theme");
+  }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem("rhymo_premium_theme");
+  if (savedTheme) document.body.classList.add(`theme-${savedTheme}`);
+});
+</script>
+
+<style>
+/* ========== PREMIUM THEMES ========== */
+body.theme-midnight-gold {
+  --bg: #0c0a09;
+  --surface: rgba(28, 25, 23, 0.75);
+  --surface-2: #1c1917;
+  --border: rgba(251, 191, 36, 0.2);
+  --text: #fafaf9;
+  --muted: #a8a29e;
+  --accent: #fbbf24;
+  --accent-2: #d97706;
+  --glow: rgba(251, 191, 36, 0.2);
+}
+body.theme-cyberpunk-crimson {
+  --bg: #0a0406;
+  --surface: rgba(30, 8, 16, 0.8);
+  --surface-2: #2a0a14;
+  --border: rgba(244, 63, 94, 0.22);
+  --text: #fff1f2;
+  --muted: #fda4af;
+  --accent: #f43f5e;
+  --accent-2: #e11d48;
+  --glow: rgba(244, 63, 94, 0.22);
+}
+body.theme-obsidian-dark {
+  --bg: #09090b;
+  --surface: rgba(24, 24, 27, 0.8);
+  --surface-2: #18181b;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #e4e4e7;
+  --accent-2: #a1a1aa;
+  --glow: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== DESIGN SYSTEM ========== */
+:root {
+  --bg: #09090b;
+  --surface: rgba(24, 24, 27, 0.72);
+  --surface-2: #18181b;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #818cf8;
+  --accent-2: #6366f1;
+  --glow: rgba(129, 140, 248, 0.18);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Atmospheric background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 15% -5%, rgba(99, 102, 241, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(168, 85, 247, 0.16), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 110%, rgba(59, 130, 246, 0.1), transparent 45%);
+  pointer-events: none;
+  z-index: -2;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.12), transparent 70%);
+  top: -180px;
+  right: -120px;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -1;
+  animation: drift 25s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-80px, 60px) scale(1.15); }
+}
+
+/* ========== BASE ELEMENTS ========== */
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ========== BUTTONS ========== */
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+button:hover, .btn:hover {
+  background: #27272a;
+  border-color: rgba(255,255,255,0.16);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+button:active, .btn:active { transform: translateY(0); }
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.primary {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border: none;
+  color: white;
+  box-shadow: 0 4px 20px var(--glow);
+}
+.primary:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 8px 28px var(--glow);
+  transform: translateY(-2px);
+}
+
+/* ========== TOP BAR ========== */
+.topbar {
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  background: rgba(9, 9, 11, 0.8);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.4px;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.iconbtn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.hamb {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5px;
+}
+.hamb i {
+  width: 17px;
+  height: 1.5px;
+  background: currentColor;
+  display: block;
+  border-radius: 1px;
+}
+
+.top-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  width: min(280px, 28vw);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.top-search:focus-within {
+  border-color: rgba(129, 140, 248, 0.45);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+.top-search input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+.top-search input::placeholder { color: var(--muted); }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  padding: 20px 12px;
+  border-right: 1px solid var(--border);
+  background: rgba(9, 9, 11, 0.4);
+}
+
+.nav-label {
+  padding: 14px 12px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.navbtn {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  margin: 2px 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 650;
+  padding: 11px 12px;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.navbtn .ns {
+  width: 18px;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+  transition: transform 0.2s ease;
+}
+.navbtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  transform: translateX(3px);
+}
+.navbtn:hover .ns {
+  transform: scale(1.15);
+}
+.navbtn.active {
+  background: rgba(129, 140, 248, 0.14);
+  color: var(--text);
+  border-color: transparent;
+  font-weight: 700;
+}
+
+/* ========== LAYOUT ========== */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+main {
+  flex: 1;
+  min-width: 0;
+  padding: clamp(20px, 4vw, 40px);
+}
+
+.content {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.page { display: none; }
+.page.active {
+  display: block;
+  animation: pageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ========== TYPOGRAPHY ========== */
+.eyebrow {
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+h1 {
+  font-size: clamp(28px, 4.2vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.9px;
+  margin: 0 0 10px;
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: 17px;
+  font-weight: 750;
+  margin: 0 0 8px;
+  letter-spacing: -0.25px;
+}
+
+h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+p { margin: 0 0 12px; line-height: 1.6; }
+.sub, .muted { color: var(--muted); }
+.sub { max-width: 640px; margin-bottom: 22px; font-size: 15px; }
+
+/* ========== HERO ========== */
+.hero {
+  padding: clamp(28px, 5vw, 44px);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(145deg, rgba(99, 102, 241, 0.18), rgba(24, 24, 27, 0.6)),
+    radial-gradient(ellipse at 90% 10%, rgba(168, 85, 247, 0.12), transparent 55%);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: heroIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 50%, rgba(129, 140, 248, 0.04));
+  pointer-events: none;
+}
+.hero p {
+  max-width: 560px;
+  color: #d4d4d8;
+  position: relative;
+  font-size: 15.5px;
+  font-weight: 450;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  position: relative;
+}
+
+/* ========== GRID + PANELS ========== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.panel {
+  grid-column: span 6;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  min-width: 0;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: panelIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.panel:nth-child(1) { animation-delay: 0.04s; }
+.panel:nth-child(2) { animation-delay: 0.08s; }
+.panel:nth-child(3) { animation-delay: 0.12s; }
+.panel:nth-child(4) { animation-delay: 0.16s; }
+.panel:nth-child(5) { animation-delay: 0.2s; }
+.panel:nth-child(6) { animation-delay: 0.24s; }
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+.panel.full { grid-column: span 12; }
+.panel.third { grid-column: span 4; }
+.panel p { color: var(--muted); font-size: 14px; }
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.panel-head h2 { margin: 0; }
+
+.stat {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+
+.pill {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ========== FORMS ========== */
+.field { display: block; margin: 12px 0; }
+.field span {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
+input, select, textarea {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(129, 140, 248, 0.5);
+  box-shadow: 0 0 0 3px var(--glow);
+  outline: none;
+}
+select option {
+  background: #18181b;
+  color: var(--text);
+}
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ========== LISTS & MISC ========== */
+.list-item {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.list-item:last-child { border-bottom: 0; }
+.list-item p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-pic {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.profile-name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.notice {
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.empty {
+  padding: 22px;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.result {
+  width: 100%;
+  display: block;
+  text-align: left;
+  margin: 6px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+}
+.result:hover { background: rgba(255, 255, 255, 0.04); }
+.result small {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 3px;
+  font-size: 12.5px;
+}
+
+.hidden { display: none !important; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+footer {
+  padding: 28px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ========== DRAWER / OVERLAY ========== */
+#drawer {
+  display: block;
+  position: fixed;
+  inset: 64px auto 0 0;
+  width: min(280px, 85vw);
+  z-index: 50;
+  background: rgba(9, 9, 11, 0.97);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow: auto;
+  backdrop-filter: blur(20px);
+  transform: translateX(-105%);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  visibility: hidden;
+}
+#drawer.open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+#scrim {
+  display: block;
+  position: fixed;
+  inset: 64px 0 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+#scrim.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 12px 18px;
+  border-radius: 12px;
+  z-index: 100;
+  max-width: 90vw;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  backdrop-filter: blur(12px);
+}
+
+/* ========== PREMIUM ========== */
+.premium-theme-picker {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.theme-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.18s, box-shadow 0.18s;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+}
+.theme-swatch:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
+}
+
+.premium-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.btn-premium {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: linear-gradient(135deg, #22d3ee, #a855f7);
+  color: white;
+  padding: 14px 0;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 22px rgba(168, 85, 247, 0.3);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-premium:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.5);
+  filter: brightness(1.07);
+}
+.btn-premium-secondary {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 0;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: background 0.18s, border-color 0.18s;
+}
+.btn-premium-secondary:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Premium avatar shard */
+.premium-container {
+  position: relative;
+  display: inline-block;
+}
+.premium-shard {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  background: linear-gradient(135deg, #22d3ee, #a855f7);
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px #22d3ee, 0 0 18px #a855f7;
+  animation: floatShard 2.2s ease-in-out infinite;
+  z-index: 5;
+}
+@keyframes floatShard {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%      { transform: rotate(45deg) translateY(-4px); }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .panel.third { grid-column: span 6; }
+}
+
+@media (max-width: 600px) {
+  .topbar { padding: 0 12px; gap: 8px; height: 58px; }
+  .brand { font-size: 15px; }
+  .brand .avatar { width: 30px; height: 30px; }
+  .top-search { width: auto; flex: 1; margin-left: 4px; }
+  .top-actions button { font-size: 12px; padding: 8px 10px; }
+  .panel, .panel.third { grid-column: span 12; }
+  main { padding: 16px 12px; }
+  .hero { padding: 22px 18px; }
+  .profile-pic { width: 48px; height: 48px; }
+  #drawer.open { inset: 58px auto 0 0; }
+  #scrim.open { inset: 58px 0 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false"><span class="hamb"><i></i><i></i><i></i></span></button>
+  <a href="#home" class="brand" data-go="home"><img class="avatar" id="brandAvatar" alt="Rhymo bot avatar"><span>Rhymo</span></a>
+  <label class="top-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo"></label>
+  <div class="top-actions">
+    <button class="primary" id="loginBtn">Login with Discord</button>
+    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
+  </div>
+</header>
+
+<div id="scrim"></div>
+<div id="drawer" aria-label="Mobile navigation"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main><div class="content">
+
+<section class="page active" id="page-home">
+  <div class="hero">
+    <div class="eyebrow">Discord bot dashboard</div>
+    <h1>Welcome to Rhymo.</h1>
+    <p>Your central place to explore Rhymo, review service information, manage your account, and access available tools.</p>
+    <div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div>
+  </div>
+  <div class="grid">
+            <article class="panel full premium-card">
+              <h3 style="margin: 0 0 6px 0;">Premium Membership</h3>
+              <p class="muted" style="margin: 0 0 14px 0; font-size: 14px;">Unlock exclusive themes and future premium features.</p>
+              <a href="https://buy.stripe.com/test_fZu9AUc1O9Psfai7Kqf7i00" class="btn-premium">Activate Premium ($3/mo)</a>
+              <a href="https://stripe.com" class="btn-premium-secondary">Manage / Cancel Subscription</a>
+            </article>
+
+            <article id="premium-settings-card" class="panel full" style="display: none; margin-bottom: 20px;">
+              <h2 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">Premium Customization</h2>
+              <p class="muted" style="font-size: 14px; margin-bottom: 14px;">Choose your personalized dashboard accent theme:</p>
+              <div class="premium-theme-picker">
+                <div class="theme-swatch" style="background: #fbbf24;" onclick="applyPremiumTheme('midnight-gold')" title="Midnight Gold"></div>
+                <div class="theme-swatch" style="background: #f43f5e;" onclick="applyPremiumTheme('cyberpunk-crimson')" title="Cyberpunk Crimson"></div>
+                <div class="theme-swatch" style="background: #fafafa; border: 1px solid #52525b;" onclick="applyPremiumTheme('obsidian-dark')" title="Obsidian Dark"></div>
+                <div class="theme-swatch" style="background: #818cf8;" onclick="applyPremiumTheme('default')" title="Standard Rhymo Blue"></div>
+              </div>
+            </article>
+
+    <article class="panel third"><h2>System Status</h2><p>Review live bot monitoring and service health.</p><button data-go="status">View status</button></article>
+    <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
+    <article class="panel third"><h2>Server Management</h2><p>Choose a Discord server you manage.</p><button data-go="servers">Open servers</button></article>
+    <article class="panel full"><h2>Welcome to your workspace</h2><p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p><button class="primary" id="homeLoginBtn">Login with Discord</button></article>
+  </div>
+</section>
+
+<section class="page" id="page-dashboard">
+  <div class="eyebrow">Workspace</div><h1>Your dashboard</h1><p class="sub">Your account information is retrieved from the configured backend.</p>
+  <div class="grid">
+    <article class="panel full">
+      <div class="row"><img class="profile-pic" id="profileAvatar" alt="Your Discord avatar"><div><div class="profile-name" id="profileName">Checking session...</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div></div>
+      <hr><p id="accountMessage" class="muted">Checking your login session...</p>
+      <div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
+    </article>
+    <article class="panel"><h2>Account</h2><p>Your profile is loaded from the authenticated session, not browser storage.</p><button data-go="settings">Account settings</button></article>
+    <article class="panel"><h2>Help and support</h2><p>Find information about Rhymo's website and login.</p><button data-go="help">Open Help Center</button></article>
+  </div>
+</section>
+
+<section class="page" id="page-status">
+  <div class="eyebrow">Monitoring</div><h1>System Status</h1><p class="sub">Live Rhymo bot monitoring.</p>
+  <div class="grid">
+    <article class="panel third"><h3>Bot Status</h3><div class="stat" id="botOnline">Checking...</div><span class="pill" id="botHeartbeat">Connecting...</span></article>
+    <article class="panel third"><h3>Bot Uptime</h3><div class="stat" id="botUptime">--</div><p>Time since the bot started.</p></article>
+    <article class="panel third"><h3>Discord Latency</h3><div class="stat" id="botLatency">--</div><p>Discord gateway latency.</p></article>
+    <article class="panel full"><h2>Connected Servers</h2><div class="stat" id="botServers">--</div><p>Discord servers Rhymo is connected to.</p><p class="muted" id="botLastHeartbeat">Waiting for heartbeat...</p></article>
+  </div>
+</section>
+
+<section class="page" id="page-search">
+  <div class="eyebrow">Navigation</div><h1>Global Search</h1><p class="sub">Search website pages and help topics.</p>
+  <div class="panel full"><label class="field"><span>Search Rhymo</span><input id="searchPageInput" type="search" placeholder="Try settings, login, privacy..."></label><div id="searchResults" aria-live="polite"></div></div>
+</section>
+
+<section class="page" id="page-notifications">
+  <div class="eyebrow">Updates</div>
+  <h1>Notification Center</h1>
+  <p class="sub">Announcements, maintenance notices, and release updates.</p>
+  <div class="grid">
+    <article class="panel full" id="announceAdminPanel" style="display:none;">
+      <h2>Post Announcement (Owner)</h2>
+      <p class="muted" style="margin-bottom:12px;">Only you can see this. Create a new public announcement.</p>
+      <label class="field"><span>Title</span><input id="announceTitle" type="text" maxlength="200" placeholder="Announcement title"></label>
+      <label class="field"><span>Content</span><textarea id="announceContent" placeholder="Write the announcement..."></textarea></label>
+      <div class="actions">
+        <button class="primary" id="publishAnnounceBtn">Publish Announcement</button>
+        <button id="draftAnnounceBtn">Save as Draft</button>
+      </div>
+      <p id="announceAdminMsg" class="muted" style="margin-top:10px;"></p>
+    </article>
+    <article class="panel full">
+      <h2>Announcements</h2>
+      <div id="notificationList"><div class="empty">Loading announcements...</div></div>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-logs">
+  <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Choose a manageable server to view its recorded activity.</p>
+  <div class="panel full"><h2>Recent activity</h2><p class="muted">Open Server Management to select a server and view its logs.</p><button class="primary" data-go="servers">Select a server</button></div>
+</section>
+
+<section class="page" id="page-servers">
+  <div class="eyebrow">Administration</div>
+  <h1>Server Management</h1>
+  <p class="sub">Select a Discord server you manage to view its status and activity.</p>
+
+  <div class="grid">
+    <article class="panel full">
+      <div class="panel-head">
+        <h2>Select a server</h2>
+        <button class="primary" id="loadServersBtn">Load servers</button>
+      </div>
+      <label class="field">
+        <span>Your Discord servers</span>
+        <select id="serverSelect">
+          <option value="">Load your servers first</option>
+        </select>
+      </label>
+      <div id="serverMessage" class="notice" role="status">Sign in with Discord, then load your servers.</div>
+    </article>
+
+    <article class="panel full">
+      <h2 id="selectedServerName">Server details</h2>
+      <p id="selectedServerDescription" class="muted">Select a server to view its details.</p>
+      <div class="grid">
+        <article class="panel">
+          <h3>Rhymo installation</h3>
+          <div class="stat" id="selectedBotStatus">--</div>
+        </article>
+        <article class="panel">
+          <h3>Recorded activity</h3>
+          <div class="stat" id="selectedLogCount">--</div>
+        </article>
+      </div>
+      <div class="actions">
+        <button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button>
+        <button id="loadServerLogsBtn" disabled>View activity logs</button>
+        <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo to Discord</a>
+      </div>
+    </article>
+
+    <article class="panel full">
+      <h2>Activity logs</h2>
+      <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view its recorded activity.</div></div>
+    </article>
+
+    <article class="panel">
+      <h2>Configuration</h2>
+      <p>Server details and recorded activity are available through the connected backend.</p>
+      <button id="configBtn">View server details</button>
+    </article>
+    <article class="panel">
+      <h2>Moderation settings</h2>
+      <p>Moderation changes require separately implemented and authorized backend actions.</p>
+      <button id="moderationBtn">View activity logs</button>
+    </article>
+    <article class="panel full">
+      <h2>Permissions and security</h2>
+      <p>Only servers returned by Discord where your account has management permissions are available. Signing in does not automatically authorize moderation actions.</p>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-help">
+  <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p>
+  <div class="grid">
+    <article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord and approve the requested permissions. The backend validates the callback and creates a session.</p></article>
+    <article class="panel full"><h2>Why can't I log in?</h2><p>Check that the backend is deployed and the Discord redirect URL exactly matches the configured callback. Safari privacy protections can block cross-site cookies.</p></article>
+    <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions before authorizing installation.</p></article>
+    <article class="panel full"><h2>How do I select a server?</h2><p>Open Server Management, sign in, load your servers, then choose one from the list.</p></article>
+  </div>
+</section>
+
+<section class="page" id="page-changelog">
+  <div class="eyebrow">Updates</div>
+  <h1>Changelog</h1>
+  <p class="sub">Recent changes and improvements to Rhymo.</p>
+  <div class="grid">
+    <article class="panel full" id="changelogAdminPanel" style="display:none;">
+      <h2>Post Changelog Entry (Owner)</h2>
+      <p class="muted" style="margin-bottom:12px;">Only you can see this. Create a new changelog entry.</p>
+      <label class="field"><span>Title</span><input id="changelogTitle" type="text" maxlength="200" placeholder="e.g. Dashboard redesign"></label>
+      <label class="field"><span>Content</span><textarea id="changelogContent" placeholder="Describe what changed..."></textarea></label>
+      <div class="actions">
+        <button class="primary" id="publishChangelogBtn">Publish Entry</button>
+        <button id="draftChangelogBtn">Save as Draft</button>
+      </div>
+      <p id="changelogAdminMsg" class="muted" style="margin-top:10px;"></p>
+    </article>
+    <article class="panel full">
+      <h2>Published Entries</h2>
+      <div id="changelogList"><div class="empty">Loading changelog...</div></div>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-commands">
+  <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Browse available Rhymo commands.</p>
+  <div class="panel full"><div class="empty">Command list is loaded from the backend when available.</div></div>
+</section>
+
+<section class="page" id="page-language">
+  <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Choose your preferred interface language.</p>
+  <div class="panel full">
+    <label class="field"><span>Language</span>
+      <select id="languageSelect">
+        <option value="en">English</option>
+        <option value="so">Somali</option>
+      </select>
+    </label>
+    <p id="languageMessage" class="muted">English is selected.</p>
+  </div>
+</section>
+
+<section class="page" id="page-settings">
+  <div class="eyebrow">Account</div><h1>Settings</h1><p class="sub">Manage your account preferences and Discord connection.</p>
+  <div class="grid">
+    <article class="panel full" id="settingsProfile" hidden>
+      <div class="row">
+        <img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar">
+        <div>
+          <div class="profile-name" id="settingsName">—</div>
+          <div class="muted" id="settingsId"></div>
+        </div>
+      </div>
+      <hr>
+      <p id="settingsAccountText" class="muted">Signed in.</p>
+      <div class="actions">
+        <button id="settingsLogoutBtn">Log out</button>
+      </div>
+    </article>
+    <article class="panel">
+      <h2>Accent color</h2>
+      <label class="field"><span>Choose accent</span>
+        <select id="accentSelect">
+          <option value="#818cf8">Indigo</option>
+          <option value="#a78bfa">Violet</option>
+          <option value="#34d399">Emerald</option>
+        </select>
+      </label>
+    </article>
+    <article class="panel">
+      <h2>Language</h2>
+      <label class="field"><span>Interface language</span>
+        <select id="settingsLanguage">
+          <option value="en">English</option>
+          <option value="so">Somali</option>
+        </select>
+      </label>
+    </article>
+    <article class="panel full">
+      <h2>Add Rhymo to Discord</h2>
+      <p class="muted">Install Rhymo on a server you manage.</p>
+      <a class="btn primary" id="inviteBtn" href="#" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+    </article>
+    <article class="panel full">
+      <p id="settingsLoginPrompt" class="muted">You are not signed in.</p>
+      <button class="primary" id="settingsLoginBtn">Login with Discord</button>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-terms">
+  <div class="eyebrow">Legal</div>
+  <h1>Terms of Service</h1>
+  <p class="sub">Last updated: November 2, 2026</p>
+
+  <div class="grid">
+    <article class="panel full">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing, browsing, or using Rhymo — including the website, web dashboard, Discord bot, APIs, and any related services (collectively, the “Service”) — you agree to be bound by these Terms of Service (“Terms”). If you do not agree to these Terms, you must not access or use the Service.</p>
+      <p>These Terms constitute a legally binding agreement between you and the operators of Rhymo. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>2. Description of the Service</h2>
+      <p>Rhymo is a Discord bot and companion web dashboard designed to help server administrators monitor bot status, view system metrics, manage servers they control, review activity logs, access help resources, and use related tools.</p>
+      <p>We may add, modify, suspend, or discontinue any part of the Service at any time, with or without notice. We do not guarantee that any specific feature will remain available indefinitely.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>3. Eligibility</h2>
+      <p>You must be at least 13 years old (or the minimum age required in your country to use Discord) to use Rhymo. By using the Service you represent that you meet this requirement and that you have the legal capacity to enter into these Terms.</p>
+      <p>If you are under the age of majority in your jurisdiction, you may only use the Service with the consent and supervision of a parent or legal guardian who agrees to these Terms on your behalf.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>4. Accounts and Discord Authentication</h2>
+      <p>Most features of Rhymo require you to authenticate with Discord via OAuth2. When you sign in, we receive limited information from Discord (such as your user ID, username, avatar, and the list of servers you can manage) as permitted by the scopes we request.</p>
+      <p>You are responsible for:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Maintaining the security of your Discord account</li>
+        <li>All activity that occurs under your Rhymo session</li>
+        <li>Ensuring that the Discord account you use belongs to you or that you have permission to use it</li>
+      </ul>
+      <p>We are not responsible for any loss or damage arising from unauthorized access to your account or session. You must notify us promptly if you become aware of any unauthorized use.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>5. Server Management and Permissions</h2>
+      <p>Rhymo only shows servers for which Discord reports that you have management permissions (or ownership). Signing in does not automatically grant Rhymo or its operators any moderation powers inside your Discord servers beyond what the bot itself is authorized to do when invited.</p>
+      <p>You are solely responsible for the permissions you grant when adding the Rhymo bot to a server and for any actions taken by the bot in accordance with those permissions.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>6. Acceptable Use</h2>
+      <p>You agree that you will not:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Use the Service for any unlawful purpose or in violation of Discord’s Terms of Service, Community Guidelines, or any applicable law</li>
+        <li>Attempt to gain unauthorized access to the Service, other users’ data, accounts, systems, or networks</li>
+        <li>Interfere with, disrupt, overload, or attempt to disrupt the Service, its infrastructure, or other users’ enjoyment of it</li>
+        <li>Use the Service to harass, threaten, spam, phish, or otherwise harm individuals or communities</li>
+        <li>Scrape, crawl, reverse engineer, decompile, or attempt to extract source code or data from the Service except as expressly permitted</li>
+        <li>Circumvent any rate limits, access controls, or security measures</li>
+        <li>Misrepresent your identity or affiliation when using the Service</li>
+        <li>Use the Service to distribute malware, run unauthorized bots, or engage in any form of abuse</li>
+      </ul>
+      <p>We reserve the right to investigate violations and to suspend or terminate access, remove content, or take other appropriate action at our sole discretion.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>7. Premium Subscriptions</h2>
+      <p>Certain features may be offered under a paid Premium subscription. Pricing, included benefits, and availability are described on the website or at the time of purchase and may change.</p>
+      <p>Payments are processed by third-party payment providers (such as Stripe). By purchasing Premium you also agree to the terms of the applicable payment provider. Refunds, if any, are handled according to the payment provider’s policies and any refund terms we explicitly state at checkout.</p>
+      <p>We may modify, suspend, or discontinue Premium features. If we discontinue Premium entirely, we will make reasonable efforts to handle existing subscriptions fairly.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>8. Intellectual Property</h2>
+      <p>The Service, including but not limited to the Rhymo name, logos, branding, website design, user interface, original text, graphics, and software, is owned by the Rhymo operators or their licensors and is protected by copyright, trademark, and other intellectual property laws.</p>
+      <p>You are granted a limited, non-exclusive, non-transferable, revocable license to access and use the Service for its intended purpose. You may not copy, modify, distribute, sell, lease, reverse engineer, or create derivative works from any part of the Service without prior written permission, except as allowed by applicable law.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>9. User Content and Feedback</h2>
+      <p>If you submit feedback, suggestions, or ideas about Rhymo, you grant us a perpetual, worldwide, royalty-free license to use, modify, and incorporate that feedback into the Service without any obligation to compensate you.</p>
+      <p>You retain ownership of any content you submit through the Service, but you are responsible for ensuring you have the rights to submit it and that it does not violate any law or third-party rights.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>10. Third-Party Services</h2>
+      <p>Rhymo relies on third-party services, including Discord, payment processors, hosting providers, and databases. Your use of those services is subject to their respective terms and privacy policies. We are not responsible for the availability, accuracy, or practices of third-party services.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>11. Disclaimer of Warranties</h2>
+      <p>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.</p>
+      <p>We do not warrant that the Service will be uninterrupted, secure, error-free, or free of harmful components, or that any data will be accurate or preserved.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>12. Limitation of Liability</h2>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL RHYMO, ITS OPERATORS, AFFILIATES, OR SERVICE PROVIDERS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, GOODWILL, OR BUSINESS OPPORTUNITIES, ARISING OUT OF OR RELATED TO YOUR USE OF (OR INABILITY TO USE) THE SERVICE, REGARDLESS OF THE THEORY OF LIABILITY AND EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+      <p>OUR TOTAL AGGREGATE LIABILITY FOR ANY CLAIMS ARISING OUT OF OR RELATED TO THE SERVICE SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID US FOR PREMIUM FEATURES IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED U.S. DOLLARS (US $100).</p>
+    </article>
+
+    <article class="panel full">
+      <h2>13. Indemnification</h2>
+      <p>You agree to indemnify, defend, and hold harmless Rhymo and its operators, officers, agents, and service providers from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys’ fees) arising out of or related to your use of the Service, your violation of these Terms, or your violation of any third-party rights.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>14. Termination</h2>
+      <p>We may suspend or terminate your access to the Service at any time, with or without cause or notice, including if we reasonably believe you have violated these Terms.</p>
+      <p>You may stop using the Service at any time. Provisions of these Terms that by their nature should survive termination (including ownership, disclaimers, limitations of liability, and indemnification) will survive.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>15. Changes to These Terms</h2>
+      <p>We may revise these Terms from time to time. When we do, we will update the “Last updated” date at the top of this page. Material changes may also be communicated through the website, dashboard, or other reasonable means.</p>
+      <p>Your continued use of the Service after the revised Terms become effective constitutes your acceptance of the changes. If you do not agree to the new Terms, you must stop using the Service.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>16. Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the Rhymo operators primarily operate, without regard to conflict-of-law principles. Any disputes arising under these Terms shall be resolved in the courts of that jurisdiction, unless applicable law provides otherwise.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>17. General Provisions</h2>
+      <p>If any provision of these Terms is found to be unenforceable, the remaining provisions will remain in full effect. Our failure to enforce any right or provision shall not constitute a waiver of that right or provision. These Terms constitute the entire agreement between you and us regarding the Service and supersede any prior agreements on the subject.</p>
+      <p>You may not assign or transfer these Terms without our prior written consent. We may assign these Terms without restriction.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>18. Contact</h2>
+      <p>If you have questions about these Terms of Service, please contact us through the support channels listed in the Help Center or via the official Rhymo Discord presence.</p>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-privacy">
+  <div class="eyebrow">Legal</div>
+  <h1>Privacy Policy</h1>
+  <p class="sub">Last updated: November 2, 2026</p>
+
+  <div class="grid">
+    <article class="panel full">
+      <h2>1. Introduction</h2>
+      <p>This Privacy Policy explains how Rhymo (“we”, “us”, or “our”) collects, uses, stores, and shares information when you use our website, web dashboard, Discord bot, and related services (the “Service”).</p>
+      <p>By using Rhymo you acknowledge that you have read and understood this Privacy Policy. If you do not agree, please do not use the Service.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>2. Information We Collect</h2>
+      <p>We collect information in the following ways:</p>
+      <p><strong>Information from Discord</strong><br>
+      When you sign in with Discord, we receive data authorized by the OAuth2 scopes we request. This typically includes:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Your Discord user ID</li>
+        <li>Username and display name (global name)</li>
+        <li>Avatar image URL</li>
+        <li>List of servers (guilds) you can manage, including server IDs, names, icons, and ownership/permission flags</li>
+      </ul>
+      <p>We do not receive your Discord password. We currently do not request your email address.</p>
+      <p><strong>Information you provide</strong><br>
+      If you contact us for support or submit feedback, we collect the information you choose to send.</p>
+      <p><strong>Automatically collected information</strong><br>
+      When you use the website we may collect standard technical data such as IP address, browser type, device information, pages viewed, and approximate location derived from IP. We may also use cookies or similar technologies for session management and preferences (for example language or accent color).</p>
+      <p><strong>Bot and activity data</strong><br>
+      When the Rhymo bot is present in a server, we may process and store limited operational data such as server IDs the bot is connected to, heartbeat/status metrics, and activity log entries generated by bot events. These logs are intended for server administrators who have permission to view them.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>3. How We Use Information</h2>
+      <p>We use the information we collect to:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Authenticate you and maintain your session</li>
+        <li>Display your profile information in the dashboard</li>
+        <li>Show the Discord servers you can manage and related status/details</li>
+        <li>Provide bot monitoring, metrics, notifications, and activity logs</li>
+        <li>Operate, maintain, secure, and improve the Service</li>
+        <li>Respond to support requests and communicate important service notices</li>
+        <li>Enforce our Terms of Service and prevent abuse</li>
+        <li>Comply with legal obligations</li>
+      </ul>
+      <p>We do not sell your personal information.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>4. Legal Bases for Processing (where applicable)</h2>
+      <p>If you are in a region that requires a legal basis for processing (such as the EEA/UK), we rely on:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li><strong>Contract</strong> — to provide the Service you request</li>
+        <li><strong>Legitimate interests</strong> — to operate, secure, and improve Rhymo, and to prevent abuse</li>
+        <li><strong>Consent</strong> — where we ask for it (for example certain cookies or optional features)</li>
+        <li><strong>Legal obligation</strong> — when we must process data to comply with the law</li>
+      </ul>
+    </article>
+
+    <article class="panel full">
+      <h2>5. How We Share Information</h2>
+      <p>We may share information in these limited situations:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li><strong>Service providers</strong> — hosting, database, payment processing (e.g. Stripe), and infrastructure providers that help us run Rhymo. They are only permitted to process data on our behalf.</li>
+        <li><strong>Discord</strong> — the Service interacts with Discord’s API; your use of Discord is governed by Discord’s own Privacy Policy and Terms.</li>
+        <li><strong>Legal requirements</strong> — if required by law, regulation, legal process, or governmental request.</li>
+        <li><strong>Protection of rights</strong> — to protect the safety, rights, or property of Rhymo, our users, or the public.</li>
+        <li><strong>Business transfers</strong> — in connection with a merger, acquisition, or sale of assets, subject to appropriate confidentiality protections.</li>
+      </ul>
+      <p>We do not share your information with third parties for their own marketing purposes.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>6. Data Retention</h2>
+      <p>We retain information only as long as necessary for the purposes described in this policy, including to provide the Service, comply with legal obligations, resolve disputes, and enforce our agreements.</p>
+      <p>Session data is kept while your session is active and for a limited period afterward. Activity logs and operational metrics may be retained for a reasonable period to allow server administrators to review them and for us to maintain service reliability. You may request deletion of certain data as described below.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>7. Cookies and Local Storage</h2>
+      <p>We use cookies and browser local storage for essential functions such as:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Keeping you signed in (session cookies)</li>
+        <li>Remembering preferences (language, accent color, premium theme)</li>
+      </ul>
+      <p>You can control cookies through your browser settings. Disabling certain cookies may affect the functionality of the dashboard (for example, staying logged in).</p>
+    </article>
+
+    <article class="panel full">
+      <h2>8. Data Security</h2>
+      <p>We implement reasonable technical and organizational measures designed to protect the information we process. This includes encrypted connections (HTTPS), secure session handling, and restricted access to backend systems.</p>
+      <p>No method of transmission or storage is completely secure. We cannot guarantee absolute security, and you use the Service at your own risk.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>9. Your Rights and Choices</h2>
+      <p>Depending on your location, you may have rights regarding your personal information, including the right to:</p>
+      <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
+        <li>Access the personal data we hold about you</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of certain data</li>
+        <li>Object to or restrict certain processing</li>
+        <li>Withdraw consent where processing is based on consent</li>
+        <li>Lodge a complaint with a supervisory authority</li>
+      </ul>
+      <p>To exercise these rights, contact us through the channels listed in the Help Center or via the official Rhymo Discord presence. We may need to verify your identity before fulfilling certain requests.</p>
+      <p>You can also disconnect Rhymo by logging out and, if desired, revoking the application’s access from your Discord account settings (User Settings → Authorized Apps).</p>
+    </article>
+
+    <article class="panel full">
+      <h2>10. Children’s Privacy</h2>
+      <p>Rhymo is not directed at children under 13 (or the minimum age required to use Discord in your country). We do not knowingly collect personal information from children under that age. If you believe we have collected such information, please contact us so we can delete it.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>11. International Data Transfers</h2>
+      <p>Rhymo may be hosted and operated in countries other than your own. When we transfer information internationally, we take steps designed to ensure appropriate protections are in place as required by applicable law.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>12. Third-Party Links and Services</h2>
+      <p>The Service may link to or integrate with third-party sites and services (including Discord and payment providers). This Privacy Policy does not apply to those third parties. We encourage you to review their privacy policies.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>13. Changes to This Privacy Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do, we will revise the “Last updated” date at the top of this page. For significant changes we may also provide additional notice through the website or dashboard.</p>
+      <p>Your continued use of the Service after an update constitutes acceptance of the revised policy.</p>
+    </article>
+
+    <article class="panel full">
+      <h2>14. Contact Us</h2>
+      <p>If you have questions or requests regarding this Privacy Policy or our data practices, please contact us through the support channels listed in the Help Center or via the official Rhymo Discord presence.</p>
+    </article>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Rhymo. All rights reserved.</p>
+  <p style="margin-top: 6px; opacity: 0.75;">Discord bot dashboard · Not affiliated with Discord Inc.</p>
+</footer>
+
+</div></main>
+</div>
+
+<script>
+/* ===== CORE CONFIG ===== */
+const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:3000"
+  : "https://rhymo-auth-backend.vercel.app";
+const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands";
+
+const $ = id => document.getElementById(id);
+const api = path => API_BASE_URL + path;
+
+const pages = [
+  ["home", "Home"],
+  ["dashboard", "Dashboard"],
+  ["status", "System Status"],
+  ["search", "Global Search"],
+  ["notifications", "Notification Center"],
+  ["logs", "Activity Logs"],
+  ["servers", "Server Management"],
+  ["commands", "Command Explorer"],
+  ["help", "Help Center"],
+  ["changelog", "Changelog"],
+  ["language", "Language Settings"],
+  ["settings", "Settings"],
+  ["terms", "Terms of Service"],
+  ["privacy", "Privacy Policy"]
+];
+
+const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%2318181b' width='64' height='64' rx='14'/%3E%3C/svg%3E";
+
+function toast(message) {
+  let el = $("toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.classList.remove("hidden");
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.add("hidden"), 3200);
+}
+
+function showPage(id, push = true) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const page = $("page-" + id);
+  if (page) page.classList.add("active");
+
+  document.querySelectorAll(".navbtn").forEach(b => {
+    b.classList.toggle("active", b.dataset.go === id);
+  });
+
+  if (push) history.replaceState(null, "", "#" + id);
+  closeDrawer();
+}
+
+function buildNav(container) {
+  container.innerHTML = "";
+  const groups = [
+    { label: "Main", items: ["home", "dashboard", "status"] },
+    { label: "Tools", items: ["servers", "logs", "commands", "search"] },
+    { label: "Info", items: ["notifications", "help", "changelog"] },
+    { label: "Account", items: ["settings", "language", "terms", "privacy"] }
+  ];
+
+  groups.forEach(group => {
+    const label = document.createElement("div");
+    label.className = "nav-label";
+    label.textContent = group.label;
+    container.appendChild(label);
+
+    group.items.forEach(id => {
+      const entry = pages.find(p => p[0] === id);
+      if (!entry) return;
+      const btn = document.createElement("button");
+      btn.className = "navbtn";
+      btn.dataset.go = id;
+      btn.innerHTML = `<span class="ns">›</span><span>${entry[1]}</span>`;
+      btn.addEventListener("click", () => showPage(id));
+      container.appendChild(btn);
+    });
+  });
+}
+
+buildNav($("sidebar"));
+buildNav($("drawer"));
+
+function openDrawer() {
+  $("drawer").classList.add("open");
+  $("scrim").classList.add("open");
+  $("menuToggle").setAttribute("aria-expanded", "true");
+}
+function closeDrawer() {
+  $("drawer").classList.remove("open");
+  $("scrim").classList.remove("open");
+  $("menuToggle").setAttribute("aria-expanded", "false");
+}
+$("menuToggle").addEventListener("click", () => {
+  $("drawer").classList.contains("open") ? closeDrawer() : openDrawer();
+});
+$("scrim").addEventListener("click", closeDrawer);
+
+document.querySelectorAll("[data-go]").forEach(el => {
+  el.addEventListener("click", e => {
+    e.preventDefault();
+    showPage(el.dataset.go);
+  });
+});
+
+/* ===== AUTH ===== */
+function login() {
+  window.location.href = api("/auth/discord");
+}
+["loginBtn", "homeLoginBtn", "dashboardLoginBtn", "settingsLoginBtn"].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener("click", login);
+});
+
+async function request(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (options.method === "POST") headers.set("Content-Type", "application/json");
+  return fetch(api(path), {
+    ...options,
+    headers,
+    credentials: "include",
+    cache: "no-store",
+    mode: "cors"
+  });
+}
+
+let currentUser = null;
+function setUser(user) {
+  currentUser = user;
+  const loggedIn = !!user;
+
+  ["loginBtn", "dashboardLoginBtn", "settingsLoginBtn", "homeLoginBtn"].forEach(id => {
+    const el = $(id);
+    if (el) el.classList.toggle("hidden", loggedIn);
+  });
+  $("accountBtn")?.classList.toggle("hidden", !loggedIn);
+  $("logoutBtn")?.classList.toggle("hidden", !loggedIn);
+  $("settingsLogoutBtn")?.classList.toggle("hidden", !loggedIn);
+  if ($("settingsProfile")) $("settingsProfile").hidden = !loggedIn;
+
+  if (!user) {
+    $("headerAvatar").src = fallbackAvatar;
+    $("profileAvatar").src = fallbackAvatar;
+    if ($("settingsAvatar")) $("settingsAvatar").src = fallbackAvatar;
+    $("profileName").textContent = "Not signed in";
+    $("profileId").textContent = "";
+    $("authBadge").textContent = "Signed out";
+    $("accountMessage").textContent = "Log in with Discord to view your account.";
+    if ($("settingsAccountText")) $("settingsAccountText").textContent = "You are not signed in.";
+    $("homeAccountMessage").textContent = "Sign in with Discord to display your account profile.";
+    managedServers = [];
+    selectedGuildId = "";
+    $("serverSelect").replaceChildren(new Option("Log in to load servers", ""));
+    resetServerDetails();
+    serverMessage("Please log in with Discord before loading servers.");
+    isOwner = false;
+    if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
+    if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
+    return;
+  }
+
+  const avatar = user.avatarUrl || (user.avatar && user.id
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : fallbackAvatar);
+  const displayName = user.global_name || user.globalName || user.username || "Discord user";
+  const isPremium = user.is_premium === true;
+
+  $("headerAvatar").src = avatar;
+  $("profileAvatar").src = avatar;
+  if ($("settingsAvatar")) $("settingsAvatar").src = avatar;
+
+  if (isPremium) {
+    ["headerAvatar", "profileAvatar", "settingsAvatar"].forEach(id => {
+      const el = $(id);
+      if (el && !el.parentElement.classList.contains("premium-container")) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "premium-container";
+        const shard = document.createElement("div");
+        shard.className = "premium-shard";
+        el.parentNode.insertBefore(wrapper, el);
+        wrapper.appendChild(el);
+        wrapper.appendChild(shard);
+      }
+    });
+    $("authBadge").textContent = "Premium Member";
+    $("authBadge").style.background = "linear-gradient(135deg, #22d3ee, #a855f7)";
+    $("authBadge").style.color = "white";
+    $("authBadge").style.border = "none";
+    const card = $("premium-settings-card");
+    if (card) card.style.display = "block";
+  }
+
+  if ($("settingsName")) $("settingsName").textContent = displayName;
+  if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
+  $("profileName").textContent = displayName;
+  $("profileId").textContent = "Discord ID: " + (user.id || "");
+  $("authBadge").textContent = isPremium ? "Premium Member" : "Signed in";
+  $("accountMessage").textContent = "Your Discord session is active.";
+  if ($("settingsAccountText")) $("settingsAccountText").textContent = "Signed in as " + displayName + ".";
+  $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
+  $("homeLoginBtn")?.classList.add("hidden");
+  checkOwner();
+}
+
+async function refreshAccount() {
+  $("authBadge").textContent = "Checking session";
+  $("accountMessage").textContent = "Checking your login session...";
+
+  try {
+    const response = await request("/api/me");
+    if (response.status === 401) { setUser(null); return; }
+    if (!response.ok) throw new Error("Session check failed (" + response.status + ")");
+    const data = await response.json();
+    if (data.authenticated === true && data.user) {
+      setUser(data.user);
+    } else {
+      setUser(null);
+    }
+  } catch (error) {
+    console.error("Rhymo session check failed:", error);
+    $("authBadge").textContent = "Session unavailable";
+    $("accountMessage").textContent = "Your browser could not verify the login session.";
+    if ($("settingsAccountText")) $("settingsAccountText").textContent = "Your session could not be verified by this browser.";
+  }
+}
+
+async function logout() {
+  try {
+    const response = await request("/auth/logout", { method: "POST", body: "{}" });
+    if (!response.ok) throw new Error("Logout failed");
+    setUser(null);
+    showPage("home");
+    toast("You have been logged out.");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toast("Logout could not be completed.");
+  }
+}
+$("logoutBtn")?.addEventListener("click", logout);
+$("settingsLogoutBtn")?.addEventListener("click", logout);
+$("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
+
+/* ===== SEARCH ===== */
+const searchIndex = [
+  ...pages.map(([id, label]) => ({ title: label, description: "Rhymo website page", page: id })),
+  { title: "Discord login", description: "Sign in, account profile, session, and logout", page: "dashboard" },
+  { title: "Add Rhymo to Discord", description: "Install the bot from Settings", page: "settings" },
+  { title: "Privacy and data", description: "Privacy Policy and account sessions", page: "privacy" },
+  { title: "Terms and usage", description: "Terms of Service", page: "terms" },
+  { title: "OAuth2 help", description: "Login troubleshooting", page: "help" },
+  { title: "Moderation activity", description: "Activity log interface", page: "logs" },
+  { title: "Server permissions", description: "Server selection and permissions", page: "servers" },
+  { title: "Bot uptime", description: "System health monitoring", page: "status" },
+  { title: "Announcements", description: "Maintenance and release notifications", page: "notifications" }
+];
+
+function renderSearch(query) {
+  const q = query.trim().toLowerCase();
+  const target = $("searchResults");
+  if (!target) return;
+  if (!q) {
+    target.innerHTML = '<div class="empty">Enter a search term to find pages and help topics.</div>';
+    return;
+  }
+  const matches = searchIndex.filter(x => (x.title + " " + x.description).toLowerCase().includes(q));
+  target.innerHTML = "";
+  if (!matches.length) {
+    target.innerHTML = '<div class="empty">No matching pages or help topics found.</div>';
+    return;
+  }
+  matches.forEach(item => {
+    const b = document.createElement("button");
+    b.className = "result";
+    const title = document.createElement("strong");
+    title.textContent = item.title;
+    const desc = document.createElement("small");
+    desc.textContent = item.description;
+    b.append(title, desc);
+    b.addEventListener("click", () => showPage(item.page));
+    target.appendChild(b);
+  });
+}
+
+$("globalSearch")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    $("searchPageInput").value = e.target.value;
+    showPage("search");
+    renderSearch(e.target.value);
+  }
+});
+$("globalSearch")?.addEventListener("input", e => {
+  if (e.target.value.trim().length >= 2) {
+    $("searchPageInput").value = e.target.value;
+    showPage("search");
+    renderSearch(e.target.value);
+  }
+});
+$("searchPageInput")?.addEventListener("input", e => renderSearch(e.target.value));
+
+/* ===== SERVER MANAGEMENT ===== */
+let managedServers = [];
+let selectedGuildId = "";
+
+function serverMessage(message) {
+  $("serverMessage").textContent = message;
+}
+
+function resetServerDetails() {
+  $("selectedServerName").textContent = "Server details";
+  $("selectedServerDescription").textContent = "Select a server to view its details.";
+  $("selectedBotStatus").textContent = "--";
+  $("selectedLogCount").textContent = "--";
+  $("loadServerDetailsBtn").disabled = true;
+  $("loadServerLogsBtn").disabled = true;
+  $("serverInviteBtn").classList.add("hidden");
+  $("serverLogs").replaceChildren();
+  const empty = document.createElement("div");
+  empty.className = "empty";
+  empty.textContent = "Select a server to view its recorded activity.";
+  $("serverLogs").appendChild(empty);
+}
+
+async function loadServers() {
+  if (!currentUser) {
+    serverMessage("Please log in with Discord before loading servers.");
+    return;
+  }
+  const button = $("loadServersBtn");
+  button.disabled = true;
+  button.textContent = "Loading...";
+  serverMessage("Loading your manageable Discord servers...");
+
+  try {
+    const response = await request("/api/servers");
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      setUser(null);
+      serverMessage("Your Discord session expired. Please log in again.");
+      return;
+    }
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+
+    managedServers = Array.isArray(data.servers) ? data.servers : [];
+    const select = $("serverSelect");
+    select.replaceChildren();
+
+    if (!managedServers.length) {
+      select.add(new Option("No manageable servers found", ""));
+      selectedGuildId = "";
+      resetServerDetails();
+      serverMessage("No servers with the required management permissions were found.");
+      return;
+    }
+
+    select.add(new Option("Choose a server...", ""));
+    managedServers.forEach(server => {
+      const status = server.botInstalled === true ? " — Rhymo installed"
+        : server.botInstalled === false ? " — Rhymo not installed" : "";
+      select.add(new Option(server.name + status, server.id));
+    });
+
+    serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue.`);
+    if (selectedGuildId && managedServers.some(s => s.id === selectedGuildId)) {
+      select.value = selectedGuildId;
+      await loadServerDetails();
+    } else {
+      selectedGuildId = "";
+      resetServerDetails();
+    }
+  } catch (error) {
+    console.error("Loading servers failed:", error);
+    serverMessage(error.message || "Could not load servers.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Load servers";
+  }
+}
+
+async function loadServerDetails() {
+  const guildId = $("serverSelect").value;
+  if (!guildId) {
+    selectedGuildId = "";
+    resetServerDetails();
+    serverMessage("Choose a server first.");
+    return;
+  }
+  selectedGuildId = guildId;
+  const selected = managedServers.find(item => item.id === guildId);
+  $("selectedServerName").textContent = selected?.name || "Selected server";
+  $("selectedServerDescription").textContent = "Loading server details...";
+  $("selectedBotStatus").textContent = "Checking...";
+  $("selectedLogCount").textContent = "--";
+  $("loadServerDetailsBtn").disabled = true;
+  $("loadServerLogsBtn").disabled = true;
+  $("serverInviteBtn").classList.add("hidden");
+
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId));
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      setUser(null);
+      throw new Error("Your Discord session expired. Please log in again.");
+    }
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    if (selectedGuildId !== guildId) return;
+
+    const details = data.server;
+    if (!details) throw new Error("The backend returned no server details.");
+
+    $("selectedServerName").textContent = details.name || "Selected server";
+    $("selectedServerDescription").textContent =
+      "Server ID: " + details.id + (details.owner ? " · You own this server" : "");
+
+    if (details.botInstalled === true) $("selectedBotStatus").textContent = "Installed";
+    else if (details.botInstalled === false) $("selectedBotStatus").textContent = "Not installed";
+    else $("selectedBotStatus").textContent = "Status unavailable";
+
+    $("selectedLogCount").textContent = String(data.activityLogCount ?? 0);
+    $("loadServerDetailsBtn").disabled = false;
+    $("loadServerLogsBtn").disabled = false;
+
+    if (details.botInstalled === false) {
+      $("serverInviteBtn").href = INVITE_URL;
+      $("serverInviteBtn").classList.remove("hidden");
+    }
+    serverMessage("Server details loaded successfully.");
+  } catch (error) {
+    console.error("Loading server details failed:", error);
+    $("selectedServerDescription").textContent = error.message || "Could not load server details.";
+    serverMessage(error.message || "Could not load server details.");
+  }
+}
+
+async function loadServerLogs() {
+  const guildId = selectedGuildId;
+  if (!guildId) {
+    serverMessage("Choose a server first.");
+    return;
+  }
+  const target = $("serverLogs");
+  target.replaceChildren();
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "Loading activity logs...";
+  target.appendChild(loading);
+  $("loadServerLogsBtn").disabled = true;
+
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/logs");
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      setUser(null);
+      throw new Error("Your Discord session expired. Please log in again.");
+    }
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    if (selectedGuildId !== guildId) return;
+
+    const logs = Array.isArray(data.logs) ? data.logs : [];
+    target.replaceChildren();
+    if (!logs.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No activity has been recorded for this server.";
+      target.appendChild(empty);
+      return;
+    }
+    logs.forEach(log => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      const title = document.createElement("strong");
+      title.textContent = log.event_type || "Activity";
+      const date = document.createElement("p");
+      date.textContent = log.created_at ? new Date(log.created_at).toLocaleString() : "Date unavailable";
+      const details = document.createElement("p");
+      const safeDetails = log.details && typeof log.details === "object" ? JSON.stringify(log.details) : "{}";
+      details.textContent = safeDetails.length > 500 ? safeDetails.slice(0, 500) + "..." : safeDetails;
+      item.append(title, date, details);
+      target.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Loading activity logs failed:", error);
+    target.replaceChildren();
+    const message = document.createElement("div");
+    message.className = "empty";
+    message.textContent = error.message || "Could not load activity logs.";
+    target.appendChild(message);
+  } finally {
+    $("loadServerLogsBtn").disabled = !selectedGuildId;
+  }
+}
+
+$("loadServersBtn")?.addEventListener("click", loadServers);
+$("serverSelect")?.addEventListener("change", loadServerDetails);
+$("loadServerDetailsBtn")?.addEventListener("click", loadServerDetails);
+$("loadServerLogsBtn")?.addEventListener("click", loadServerLogs);
+$("configBtn")?.addEventListener("click", () => {
+  if (!selectedGuildId) { toast("Select a server first."); return; }
+  loadServerDetails();
+});
+$("moderationBtn")?.addEventListener("click", () => {
+  if (!selectedGuildId) { toast("Select a server first."); return; }
+  loadServerLogs();
+});
+
+/* ===== NOTIFICATIONS ===== */
+/* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
+let isOwner = false;
+
+async function checkOwner() {
+  try {
+    const response = await request("/api/admin/me");
+    if (!response.ok) { isOwner = false; return; }
+    const data = await response.json();
+    isOwner = data.owner === true;
+  } catch {
+    isOwner = false;
+  }
+  // Show/hide owner panels
+  const announcePanel = $("announceAdminPanel");
+  const changelogPanel = $("changelogAdminPanel");
+  if (announcePanel) announcePanel.style.display = isOwner ? "block" : "none";
+  if (changelogPanel) changelogPanel.style.display = isOwner ? "block" : "none";
+}
+
+function renderPostList(targetId, posts, emptyText) {
+  const target = $(targetId);
+  if (!target) return;
+  target.replaceChildren();
+  if (!posts.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = emptyText;
+    target.appendChild(empty);
+    return;
+  }
+  posts.forEach(post => {
+    const item = document.createElement("div");
+    item.className = "list-item";
+    const title = document.createElement("strong");
+    title.textContent = post.title || "Untitled";
+    const date = document.createElement("p");
+    date.textContent = post.created_at ? new Date(post.created_at).toLocaleString() : "";
+    const content = document.createElement("p");
+    content.textContent = post.content || "";
+    item.append(title, date, content);
+    target.appendChild(item);
+  });
+}
+
+async function loadSitePosts() {
+  try {
+    const response = await request("/api/site-posts");
+    if (!response.ok) throw new Error("Failed to load posts");
+    const data = await response.json();
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+    const announcements = posts.filter(p => p.type === "announcement");
+    const changelog = posts.filter(p => p.type === "changelog");
+    renderPostList("notificationList", announcements, "No announcements have been published.");
+    renderPostList("changelogList", changelog, "No changelog entries published yet.");
+  } catch (error) {
+    console.error("Loading site posts failed:", error);
+    renderPostList("notificationList", [], "Announcements are temporarily unavailable.");
+    renderPostList("changelogList", [], "Changelog is temporarily unavailable.");
+  }
+}
+
+async function createSitePost(type, title, content, published) {
+  const response = await request("/api/admin/posts", {
+    method: "POST",
+    body: JSON.stringify({ type, title, content, published })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Could not create post");
+  return data.post;
+}
+
+async function handleCreatePost(type, titleId, contentId, msgId, published) {
+  if (!isOwner) return;
+  const titleEl = $(titleId);
+  const contentEl = $(contentId);
+  const msgEl = $(msgId);
+  const title = (titleEl?.value || "").trim();
+  const content = (contentEl?.value || "").trim();
+  if (!title || !content) {
+    if (msgEl) msgEl.textContent = "Please enter both a title and content.";
+    return;
+  }
+  if (msgEl) msgEl.textContent = published ? "Publishing..." : "Saving draft...";
+  try {
+    await createSitePost(type, title, content, published);
+    if (titleEl) titleEl.value = "";
+    if (contentEl) contentEl.value = "";
+    if (msgEl) msgEl.textContent = published ? "Published successfully." : "Draft saved.";
+    toast(published ? "Post published." : "Draft saved.");
+    await loadSitePosts();
+  } catch (error) {
+    console.error("Create post failed:", error);
+    if (msgEl) msgEl.textContent = error.message || "Failed to create post.";
+    toast(error.message || "Failed to create post.");
+  }
+}
+
+// Announcement buttons
+$("publishAnnounceBtn")?.addEventListener("click", () =>
+  handleCreatePost("announcement", "announceTitle", "announceContent", "announceAdminMsg", true));
+$("draftAnnounceBtn")?.addEventListener("click", () =>
+  handleCreatePost("announcement", "announceTitle", "announceContent", "announceAdminMsg", false));
+
+// Changelog buttons
+$("publishChangelogBtn")?.addEventListener("click", () =>
+  handleCreatePost("changelog", "changelogTitle", "changelogContent", "changelogAdminMsg", true));
+$("draftChangelogBtn")?.addEventListener("click", () =>
+  handleCreatePost("changelog", "changelogTitle", "changelogContent", "changelogAdminMsg", false));
+
+async function refreshNotifications() {
+  await loadSitePosts();
+}
+
+/* ===== LANGUAGE & ACCENT ===== */
+const translations = {
+  en: { Home: "Home", Dashboard: "Dashboard", "System Status": "System Status", "Global Search": "Global Search", "Notification Center": "Notification Center", "Activity Logs": "Activity Logs", "Server Management": "Server Management", "Command Explorer": "Command Explorer", "Help Center": "Help Center", Changelog: "Changelog", "Language Settings": "Language Settings", Settings: "Settings", "Terms of Service": "Terms of Service", "Privacy Policy": "Privacy Policy" },
+  so: { Home: "Bogga Hore", Dashboard: "Xarunta Maamulka", "System Status": "Xaaladda Nidaamka", "Global Search": "Raadin Guud", "Notification Center": "Ogeysiisyada", "Activity Logs": "Diiwaanka Hawlaha", "Server Management": "Maamulka Server-ka", "Command Explorer": "Baadh Amarada", "Help Center": "Xarunta Caawinta", Changelog: "Isbeddellada", "Language Settings": "Dejinta Luqadda", Settings: "Dejinta", "Terms of Service": "Shuruudaha Adeegga", "Privacy Policy": "Siyaasadda Asturnaanta" }
+};
+
+function setLanguage(lang) {
+  const dict = translations[lang] || translations.en;
+  document.querySelectorAll(".navbtn[data-go]").forEach(b => {
+    const entry = pages.find(p => p[0] === b.dataset.go);
+    if (entry) b.querySelector("span:last-child").textContent = dict[entry[1]] || entry[1];
+  });
+  if ($("languageMessage")) {
+    $("languageMessage").textContent = lang === "so"
+      ? "Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi."
+      : "English is selected.";
+  }
+  if ($("languageSelect")) $("languageSelect").value = lang;
+  if ($("settingsLanguage")) $("settingsLanguage").value = lang;
+  try { localStorage.setItem("rhymo-language", lang); } catch {}
+}
+
+$("languageSelect")?.addEventListener("change", e => setLanguage(e.target.value));
+$("settingsLanguage")?.addEventListener("change", e => setLanguage(e.target.value));
+
+$("accentSelect")?.addEventListener("change", e => {
+  document.documentElement.style.setProperty("--accent", e.target.value);
+  try { localStorage.setItem("rhymo-accent", e.target.value); } catch {}
+});
+
+try {
+  const savedAccent = localStorage.getItem("rhymo-accent");
+  if (savedAccent && ["#818cf8", "#a78bfa", "#34d399"].includes(savedAccent)) {
+    document.documentElement.style.setProperty("--accent", savedAccent);
+    if ($("accentSelect")) $("accentSelect").value = savedAccent;
+  }
+  setLanguage(localStorage.getItem("rhymo-language") || "en");
+} catch {
+  setLanguage("en");
+}
+
+/* ===== BOT METRICS ===== */
+async function refreshBotMetrics() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bot/metrics`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Request failed");
+    const metrics = await response.json();
+    $("botOnline").textContent = metrics.online ? "Online" : "Offline";
+    $("botHeartbeat").textContent = metrics.online ? "Heartbeat active" : "Heartbeat stale";
+    $("botUptime").textContent = Number.isFinite(Number(metrics.uptimeSeconds))
+      ? Math.floor(Number(metrics.uptimeSeconds)) + " seconds" : "--";
+    $("botLatency").textContent = Number.isFinite(Number(metrics.latencyMs))
+      ? Number(metrics.latencyMs).toFixed(2) + " ms" : "--";
+    $("botServers").textContent = Number.isFinite(Number(metrics.serverCount))
+      ? String(metrics.serverCount) : "--";
+    $("botLastHeartbeat").textContent = metrics.lastHeartbeat
+      ? "Last heartbeat: " + new Date(metrics.lastHeartbeat).toLocaleString()
+      : "No heartbeat received.";
+  } catch (error) {
+    console.error("Bot metrics failed:", error);
+    $("botOnline").textContent = "Unavailable";
+    $("botHeartbeat").textContent = "Connection failed";
+    $("botUptime").textContent = "--";
+    $("botLatency").textContent = "--";
+    $("botServers").textContent = "--";
+    $("botLastHeartbeat").textContent = "Could not load bot metrics.";
+  }
+}
+
+refreshBotMetrics();
+setInterval(refreshBotMetrics, 15000);
+refreshNotifications();
+
+const params = new URLSearchParams(location.search);
+if (params.get("login") === "success") toast("Discord authorized. Checking your dashboard session...");
+if (params.get("login") === "cancelled") toast("Discord login was cancelled.");
+if (params.has("login")) {
+  params.delete("login");
+  history.replaceState(null, "", location.pathname + (location.hash || ""));
+}
+
+const initialPage = location.hash.slice(1);
+showPage(pages.some(p => p[0] === initialPage) ? initialPage : "home", false);
+renderSearch("");
+
+refreshAccount().then(() => checkOwner());
+</script>
+</body>
+</html>
