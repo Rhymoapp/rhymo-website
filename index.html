@@ -689,6 +689,72 @@ footer {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
 }
 
+/* Invite banner */
+.invite-banner {
+  background:
+    linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(24, 24, 27, 0.5)),
+    var(--surface);
+}
+.invite-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Feature icons */
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+  background: rgba(129, 140, 248, 0.12);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+}
+
+/* Post cards */
+.post-card {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.post-card:last-child { border-bottom: 0; }
+.post-card strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+}
+.post-card .post-date {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+.post-card .post-body {
+  font-size: 14px;
+  color: #d4d4d8;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Status dots */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.status-dot.online { background: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6); }
+.status-dot.offline { background: #f87171; box-shadow: 0 0 10px rgba(248, 113, 113, 0.45); }
+.status-dot.unknown { background: #a1a1aa; }
+
 /* Accent color picker */
 .accent-picker {
   display: flex;
@@ -824,32 +890,82 @@ footer {
   <div class="hero">
     <div class="eyebrow">Discord bot dashboard</div>
     <h1>Welcome to Rhymo.</h1>
-    <p>Welcome to the official Rhymo website. You can check its live status, view changelogs and announcements, etc. Note that Server Management section has been discontinued, so expect bugs there if you try to use that section. Premium subscription has also been discontinued.</p>
-    <div class="actions"><button class="primary" data-go="dashboard">Open dashboard</button><button data-go="status">View system status</button></div>
+    <p>Official dashboard for Rhymo — live status, announcements, changelogs, and account tools in one place.</p>
+    <div class="actions">
+      <button class="primary" data-go="dashboard">Open dashboard</button>
+      <a class="btn primary" href="https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+      <button data-go="status">View system status</button>
+    </div>
   </div>
   <div class="grid">
-            <article class="panel full premium-card">
-              <h3 style="margin: 0 0 6px 0;">Premium Membership</h3>
-              <p class="muted" style="margin: 0 0 14px 0; font-size: 14px;">Since premium subscriptions have been discontinued, you can't buy premium.</p>
-              <a href="https://buy.stripe.com/test_fZu9AUc1O9Psfai7Kqf7i00" class="btn-premium">Subscribe ($3/mo)</a>
-              <a href="https://stripe.com" class="btn-premium-secondary">Manage / Cancel Subscription</a>
-            </article>
+    <article class="panel full invite-banner">
+      <div class="invite-banner-inner">
+        <div>
+          <h2 style="margin:0 0 6px;">Add Rhymo to your server</h2>
+          <p class="muted" style="margin:0;">Invite the bot with Administrator permission and slash commands ready to go.</p>
+        </div>
+        <a class="btn primary" href="https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+      </div>
+    </article>
 
-            <article id="premium-settings-card" class="panel full" style="display: none; margin-bottom: 20px;">
-              <h2 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">Premium Customization</h2>
-              <p class="muted" style="font-size: 14px; margin-bottom: 14px;">Choose your personalized dashboard accent theme:</p>
-              <div class="premium-theme-picker">
-                <div class="theme-swatch" style="background: #fbbf24;" onclick="applyPremiumTheme('midnight-gold')" title="Midnight Gold"></div>
-                <div class="theme-swatch" style="background: #f43f5e;" onclick="applyPremiumTheme('cyberpunk-crimson')" title="Cyberpunk Crimson"></div>
-                <div class="theme-swatch" style="background: #fafafa; border: 1px solid #52525b;" onclick="applyPremiumTheme('obsidian-dark')" title="Obsidian Dark"></div>
-                <div class="theme-swatch" style="background: #818cf8;" onclick="applyPremiumTheme('default')" title="Standard Rhymo Blue"></div>
-              </div>
-            </article>
+    <article class="panel third"><h2>System Status</h2><p>Live bot monitoring and service health.</p><button data-go="status">View status</button></article>
+    <article class="panel third"><h2>Announcements</h2><p>Updates, maintenance, and release notes.</p><button data-go="notifications">Open notifications</button></article>
+    <article class="panel third"><h2>Features</h2><p>See what Rhymo can do on your server.</p><button data-go="features">Explore features</button></article>
 
-    <article class="panel third"><h2>System Status</h2><p>Review live bot monitoring and service health.</p><button data-go="status">View status</button></article>
-    <article class="panel third"><h2>Notifications</h2><p>Check announcements and maintenance information.</p><button data-go="notifications">Open notifications</button></article>
-    <article class="panel third"><h2>Server Management</h2><p>Choose a Discord server you manage.</p><button data-go="servers">Open servers</button></article>
-    <article class="panel full"><h2>Welcome to your workspace</h2><p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p><button class="primary" id="homeLoginBtn">Login with Discord</button></article>
+    <article class="panel"><h2>Changelog</h2><p>Recent improvements and fixes.</p><button data-go="changelog">View changelog</button></article>
+    <article class="panel"><h2>Help Center</h2><p>Login help, invites, and common questions.</p><button data-go="help">Get help</button></article>
+
+    <article class="panel full">
+      <h2>Your workspace</h2>
+      <p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p>
+      <button class="primary" id="homeLoginBtn">Login with Discord</button>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-features">
+  <div class="eyebrow">Product</div>
+  <h1>Features</h1>
+  <p class="sub">What Rhymo brings to your Discord server and this dashboard.</p>
+  <div class="grid">
+    <article class="panel">
+      <div class="feature-icon">⚡</div>
+      <h2>Live status monitoring</h2>
+      <p>Track bot online state, uptime, latency, and server count from the System Status page in real time.</p>
+    </article>
+    <article class="panel">
+      <div class="feature-icon">📢</div>
+      <h2>Announcements</h2>
+      <p>Official updates and maintenance notices published by the Rhymo team, visible to everyone on the site.</p>
+    </article>
+    <article class="panel">
+      <div class="feature-icon">📝</div>
+      <h2>Changelog</h2>
+      <p>A clear history of product changes so you always know what shipped and when.</p>
+    </article>
+    <article class="panel">
+      <div class="feature-icon">🔐</div>
+      <h2>Discord login</h2>
+      <p>Sign in securely with Discord OAuth2. Your session powers account views and owner tools.</p>
+    </article>
+    <article class="panel">
+      <div class="feature-icon">🎨</div>
+      <h2>Custom accents</h2>
+      <p>Personalize the dashboard with 18 accent colors that update buttons, highlights, and glows.</p>
+    </article>
+    <article class="panel">
+      <div class="feature-icon">🤖</div>
+      <h2>Bot invite</h2>
+      <p>One-click invite with Administrator permission and slash command support ready out of the box.</p>
+    </article>
+    <article class="panel full">
+      <h2>Ready to try it?</h2>
+      <p class="muted">Add Rhymo to a server you manage, then explore status and announcements here.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+        <button data-go="status">View system status</button>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -1096,7 +1212,7 @@ footer {
     <article class="panel full">
       <h2>Add Rhymo to Discord</h2>
       <p class="muted">Install Rhymo on a server you manage.</p>
-      <a class="btn primary" id="inviteBtn" href="#" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+      <a class="btn primary" id="inviteBtn" href="https://discord.com/oauth2/authorize?client_id=1534695566846726204&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer">Add to Discord</a>
     </article>
     <article class="panel full">
       <p id="settingsLoginPrompt" class="muted">You are not signed in.</p>
@@ -1391,6 +1507,7 @@ const api = path => API_BASE_URL + path;
 
 const pages = [
   ["home", "Home"],
+  ["features", "Features"],
   ["dashboard", "Dashboard"],
   ["status", "System Status"],
   ["search", "Global Search"],
@@ -1437,7 +1554,7 @@ function showPage(id, push = true) {
 function buildNav(container) {
   container.innerHTML = "";
   const groups = [
-    { label: "Main", items: ["home", "dashboard", "status"] },
+    { label: "Main", items: ["home", "features", "dashboard", "status"] },
     { label: "Tools", items: ["servers", "logs", "commands", "search"] },
     { label: "Info", items: ["notifications", "help", "changelog"] },
     { label: "Account", items: ["settings", "language", "terms", "privacy"] }
@@ -1920,12 +2037,14 @@ function renderPostList(targetId, posts, emptyText) {
   }
   posts.forEach(post => {
     const item = document.createElement("div");
-    item.className = "list-item";
+    item.className = "post-card";
     const title = document.createElement("strong");
     title.textContent = post.title || "Untitled";
     const date = document.createElement("p");
+    date.className = "post-date";
     date.textContent = post.created_at ? new Date(post.created_at).toLocaleString() : "";
     const content = document.createElement("p");
+    content.className = "post-body";
     content.textContent = post.content || "";
     item.append(title, date, content);
     target.appendChild(item);
@@ -2003,8 +2122,8 @@ async function refreshNotifications() {
 
 /* ===== LANGUAGE & ACCENT ===== */
 const translations = {
-  en: { Home: "Home", Dashboard: "Dashboard", "System Status": "System Status", "Global Search": "Global Search", "Notification Center": "Notification Center", "Activity Logs": "Activity Logs", "Server Management": "Server Management", "Command Explorer": "Command Explorer", "Help Center": "Help Center", Changelog: "Changelog", "Language Settings": "Language Settings", Settings: "Settings", "Terms of Service": "Terms of Service", "Privacy Policy": "Privacy Policy" },
-  so: { Home: "Bogga Hore", Dashboard: "Xarunta Maamulka", "System Status": "Xaaladda Nidaamka", "Global Search": "Raadin Guud", "Notification Center": "Ogeysiisyada", "Activity Logs": "Diiwaanka Hawlaha", "Server Management": "Maamulka Server-ka", "Command Explorer": "Baadh Amarada", "Help Center": "Xarunta Caawinta", Changelog: "Isbeddellada", "Language Settings": "Dejinta Luqadda", Settings: "Dejinta", "Terms of Service": "Shuruudaha Adeegga", "Privacy Policy": "Siyaasadda Asturnaanta" }
+  en: { Home: "Home", Features: "Features", Dashboard: "Dashboard", "System Status": "System Status", "Global Search": "Global Search", "Notification Center": "Notification Center", "Activity Logs": "Activity Logs", "Server Management": "Server Management", "Command Explorer": "Command Explorer", "Help Center": "Help Center", Changelog: "Changelog", "Language Settings": "Language Settings", Settings: "Settings", "Terms of Service": "Terms of Service", "Privacy Policy": "Privacy Policy" },
+  so: { Home: "Bogga Hore", Features: "Astaamaha", Dashboard: "Xarunta Maamulka", "System Status": "Xaaladda Nidaamka", "Global Search": "Raadin Guud", "Notification Center": "Ogeysiisyada", "Activity Logs": "Diiwaanka Hawlaha", "Server Management": "Maamulka Server-ka", "Command Explorer": "Baadh Amarada", "Help Center": "Xarunta Caawinta", Changelog: "Isbeddellada", "Language Settings": "Dejinta Luqadda", Settings: "Dejinta", "Terms of Service": "Shuruudaha Adeegga", "Privacy Policy": "Siyaasadda Asturnaanta" }
 };
 
 function setLanguage(lang) {
@@ -2092,7 +2211,9 @@ async function refreshBotMetrics() {
     const response = await fetch(`${API_BASE_URL}/api/bot/metrics`, { cache: "no-store" });
     if (!response.ok) throw new Error("Request failed");
     const metrics = await response.json();
-    $("botOnline").textContent = metrics.online ? "Online" : "Offline";
+    $("botOnline").innerHTML = metrics.online
+      ? '<span class="status-dot online"></span>Online'
+      : '<span class="status-dot offline"></span>Offline';
     $("botHeartbeat").textContent = metrics.online ? "Heartbeat active" : "Heartbeat stale";
     $("botUptime").textContent = Number.isFinite(Number(metrics.uptimeSeconds))
       ? Math.floor(Number(metrics.uptimeSeconds)) + " seconds" : "--";
@@ -2105,7 +2226,7 @@ async function refreshBotMetrics() {
       : "No heartbeat received.";
   } catch (error) {
     console.error("Bot metrics failed:", error);
-    $("botOnline").textContent = "Unavailable";
+    $("botOnline").innerHTML = '<span class="status-dot unknown"></span>Unavailable';
     $("botHeartbeat").textContent = "Connection failed";
     $("botUptime").textContent = "--";
     $("botLatency").textContent = "--";
