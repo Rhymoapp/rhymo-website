@@ -1823,7 +1823,36 @@ function setUser(user) {
 }
 
 async function refreshAccount() {
-  const params = new URLSearchParams(window.location.search); if (params.has("auth_data")) { const data = JSON.parse(decodeURIComponent(params.get("auth_data"))); localStorage.setItem("rhymo_user", JSON.stringify(data)); setUser(data); history.replaceState(null, "", window.location.pathname + window.location.hash); return; } const saved = localStorage.getItem("rhymo_user"); if (saved) { setUser(JSON.parse(saved)); return; }
+  const params = new URLSearchParams(window.location.search);
+
+  // OAuth return path — works even when Safari blocks cross-site cookies
+  if (params.has("auth_data")) {
+    try {
+      const data = JSON.parse(decodeURIComponent(params.get("auth_data")));
+      if (data && data.id) {
+        localStorage.setItem("rhymo_user", JSON.stringify(data));
+        setUser(data);
+        toast("Signed in as " + (data.global_name || data.username || "Discord user") + ".");
+      }
+    } catch (error) {
+      console.error("Could not parse auth_data:", error);
+      toast("Sign-in data was invalid. Please try again.");
+    }
+    history.replaceState(null, "", window.location.pathname + (window.location.hash || ""));
+    return;
+  }
+
+  const saved = localStorage.getItem("rhymo_user");
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data && data.id) {
+        setUser(data);
+        return;
+      }
+    } catch {}
+  }
+
   $("authBadge").textContent = "Checking session";
   $("accountMessage").textContent = "Checking your login session...";
 
@@ -1833,29 +1862,29 @@ async function refreshAccount() {
     if (!response.ok) throw new Error("Session check failed (" + response.status + ")");
     const data = await response.json();
     if (data.authenticated === true && data.user) {
+      try { localStorage.setItem("rhymo_user", JSON.stringify(data.user)); } catch {}
       setUser(data.user);
     } else {
       setUser(null);
     }
   } catch (error) {
     console.error("Rhymo session check failed:", error);
-    $("authBadge").textContent = "Session unavailable";
-    $("accountMessage").textContent = "Your browser could not verify the login session.";
-    if ($("settingsAccountText")) $("settingsAccountText").textContent = "Your session could not be verified by this browser.";
+    $("authBadge").textContent = "Signed out";
+    $("accountMessage").textContent = "Sign in with Discord to view your account.";
+    if ($("settingsAccountText")) $("settingsAccountText").textContent = "You are not signed in.";
   }
 }
 
 async function logout() {
   try {
-    const response = await request("/auth/logout", { method: "POST", body: "{}" });
-    if (!response.ok) throw new Error("Logout failed");
-    setUser(null);
-    showPage("home");
-    toast("You have been logged out.");
+    await request("/auth/logout", { method: "POST", body: "{}" });
   } catch (error) {
-    console.error("Logout failed:", error);
-    toast("Logout could not be completed.");
+    console.error("Logout request failed:", error);
   }
+  try { localStorage.removeItem("rhymo_user"); } catch {}
+  setUser(null);
+  showPage("home");
+  toast("You have been logged out.");
 }
 $("logoutBtn")?.addEventListener("click", logout);
 $("settingsLogoutBtn")?.addEventListener("click", logout);
