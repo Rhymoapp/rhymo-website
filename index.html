@@ -687,6 +687,33 @@ footer {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
 }
 
+/* Accent color picker */
+.accent-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.accent-swatch {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), inset 0 0 0 1px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.accent-swatch:hover {
+  transform: scale(1.14);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.28), 0 4px 14px rgba(0,0,0,0.35);
+}
+.accent-swatch.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--swatch) 55%, transparent), 0 4px 16px rgba(0,0,0,0.4);
+  transform: scale(1.12);
+}
+
 .premium-card {
   display: flex;
   flex-direction: column;
@@ -1010,15 +1037,50 @@ footer {
         <button id="settingsLogoutBtn">Log out</button>
       </div>
     </article>
-    <article class="panel">
+    <article class="panel full">
       <h2>Accent color</h2>
-      <label class="field"><span>Choose accent</span>
-        <select id="accentSelect">
-          <option value="#818cf8">Indigo</option>
-          <option value="#a78bfa">Violet</option>
-          <option value="#34d399">Emerald</option>
-        </select>
-      </label>
+      <p class="muted" style="margin-bottom:12px;">Pick a color that highlights buttons, links, and active states across the dashboard.</p>
+      <div class="accent-picker" id="accentPicker">
+        <button type="button" class="accent-swatch" data-accent="#818cf8" style="--swatch:#818cf8" title="Indigo" aria-label="Indigo"></button>
+        <button type="button" class="accent-swatch" data-accent="#6366f1" style="--swatch:#6366f1" title="Royal Indigo" aria-label="Royal Indigo"></button>
+        <button type="button" class="accent-swatch" data-accent="#a78bfa" style="--swatch:#a78bfa" title="Violet" aria-label="Violet"></button>
+        <button type="button" class="accent-swatch" data-accent="#c084fc" style="--swatch:#c084fc" title="Orchid" aria-label="Orchid"></button>
+        <button type="button" class="accent-swatch" data-accent="#e879f9" style="--swatch:#e879f9" title="Fuchsia" aria-label="Fuchsia"></button>
+        <button type="button" class="accent-swatch" data-accent="#f472b6" style="--swatch:#f472b6" title="Pink" aria-label="Pink"></button>
+        <button type="button" class="accent-swatch" data-accent="#fb7185" style="--swatch:#fb7185" title="Rose" aria-label="Rose"></button>
+        <button type="button" class="accent-swatch" data-accent="#f43f5e" style="--swatch:#f43f5e" title="Crimson" aria-label="Crimson"></button>
+        <button type="button" class="accent-swatch" data-accent="#f97316" style="--swatch:#f97316" title="Orange" aria-label="Orange"></button>
+        <button type="button" class="accent-swatch" data-accent="#fbbf24" style="--swatch:#fbbf24" title="Amber" aria-label="Amber"></button>
+        <button type="button" class="accent-swatch" data-accent="#eab308" style="--swatch:#eab308" title="Gold" aria-label="Gold"></button>
+        <button type="button" class="accent-swatch" data-accent="#a3e635" style="--swatch:#a3e635" title="Lime" aria-label="Lime"></button>
+        <button type="button" class="accent-swatch" data-accent="#34d399" style="--swatch:#34d399" title="Emerald" aria-label="Emerald"></button>
+        <button type="button" class="accent-swatch" data-accent="#2dd4bf" style="--swatch:#2dd4bf" title="Teal" aria-label="Teal"></button>
+        <button type="button" class="accent-swatch" data-accent="#22d3ee" style="--swatch:#22d3ee" title="Cyan" aria-label="Cyan"></button>
+        <button type="button" class="accent-swatch" data-accent="#38bdf8" style="--swatch:#38bdf8" title="Sky" aria-label="Sky"></button>
+        <button type="button" class="accent-swatch" data-accent="#60a5fa" style="--swatch:#60a5fa" title="Blue" aria-label="Blue"></button>
+        <button type="button" class="accent-swatch" data-accent="#94a3b8" style="--swatch:#94a3b8" title="Slate" aria-label="Slate"></button>
+      </div>
+      <p id="accentLabel" class="muted" style="margin-top:10px;font-size:13px;">Current: Indigo</p>
+      <select id="accentSelect" class="hidden" aria-hidden="true">
+        <option value="#818cf8">Indigo</option>
+        <option value="#6366f1">Royal Indigo</option>
+        <option value="#a78bfa">Violet</option>
+        <option value="#c084fc">Orchid</option>
+        <option value="#e879f9">Fuchsia</option>
+        <option value="#f472b6">Pink</option>
+        <option value="#fb7185">Rose</option>
+        <option value="#f43f5e">Crimson</option>
+        <option value="#f97316">Orange</option>
+        <option value="#fbbf24">Amber</option>
+        <option value="#eab308">Gold</option>
+        <option value="#a3e635">Lime</option>
+        <option value="#34d399">Emerald</option>
+        <option value="#2dd4bf">Teal</option>
+        <option value="#22d3ee">Cyan</option>
+        <option value="#38bdf8">Sky</option>
+        <option value="#60a5fa">Blue</option>
+        <option value="#94a3b8">Slate</option>
+      </select>
     </article>
     <article class="panel">
       <h2>Language</h2>
@@ -1962,19 +2024,63 @@ function setLanguage(lang) {
 $("languageSelect")?.addEventListener("change", e => setLanguage(e.target.value));
 $("settingsLanguage")?.addEventListener("change", e => setLanguage(e.target.value));
 
-$("accentSelect")?.addEventListener("change", e => {
-  document.documentElement.style.setProperty("--accent", e.target.value);
-  try { localStorage.setItem("rhymo-accent", e.target.value); } catch {}
+const ACCENT_COLORS = {
+  "#818cf8": "Indigo",
+  "#6366f1": "Royal Indigo",
+  "#a78bfa": "Violet",
+  "#c084fc": "Orchid",
+  "#e879f9": "Fuchsia",
+  "#f472b6": "Pink",
+  "#fb7185": "Rose",
+  "#f43f5e": "Crimson",
+  "#f97316": "Orange",
+  "#fbbf24": "Amber",
+  "#eab308": "Gold",
+  "#a3e635": "Lime",
+  "#34d399": "Emerald",
+  "#2dd4bf": "Teal",
+  "#22d3ee": "Cyan",
+  "#38bdf8": "Sky",
+  "#60a5fa": "Blue",
+  "#94a3b8": "Slate"
+};
+
+function applyAccent(color) {
+  if (!ACCENT_COLORS[color]) return;
+  document.documentElement.style.setProperty("--accent", color);
+  // derive a slightly darker accent-2 for gradients
+  document.documentElement.style.setProperty("--accent-2", color);
+  document.documentElement.style.setProperty(
+    "--glow",
+    color.replace("#", "rgba(") // fallback; better: use color-mix below
+  );
+  // soft glow using color-mix where supported
+  document.documentElement.style.setProperty(
+    "--glow",
+    `color-mix(in srgb, ${color} 28%, transparent)`
+  );
+  try { localStorage.setItem("rhymo-accent", color); } catch {}
+  if ($("accentSelect")) $("accentSelect").value = color;
+  if ($("accentLabel")) $("accentLabel").textContent = "Current: " + ACCENT_COLORS[color];
+  document.querySelectorAll(".accent-swatch").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.accent === color);
+  });
+}
+
+$("accentPicker")?.addEventListener("click", e => {
+  const btn = e.target.closest(".accent-swatch");
+  if (!btn) return;
+  applyAccent(btn.dataset.accent);
 });
+
+$("accentSelect")?.addEventListener("change", e => applyAccent(e.target.value));
 
 try {
   const savedAccent = localStorage.getItem("rhymo-accent");
-  if (savedAccent && ["#818cf8", "#a78bfa", "#34d399"].includes(savedAccent)) {
-    document.documentElement.style.setProperty("--accent", savedAccent);
-    if ($("accentSelect")) $("accentSelect").value = savedAccent;
-  }
+  applyAccent(savedAccent && ACCENT_COLORS[savedAccent] ? savedAccent : "#818cf8");
   setLanguage(localStorage.getItem("rhymo-language") || "en");
 } catch {
+  applyAccent("#818cf8");
   setLanguage("en");
 }
 
