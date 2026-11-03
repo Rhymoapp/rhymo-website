@@ -1730,7 +1730,14 @@ function login() {
 
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
-  if (options.method === "POST") headers.set("Content-Type", "application/json");
+  if (options.method === "POST" || options.method === "PATCH" || options.method === "DELETE") {
+    if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  }
+  try {
+    const savedUser = JSON.parse(localStorage.getItem("rhymo_user") || "null");
+    if (savedUser?.id) headers.set("X-User-ID", savedUser.id);
+    if (savedUser?.sid) headers.set("X-Rhymo-Session", savedUser.sid);
+  } catch {}
   return fetch(api(path), {
     ...options,
     headers,
@@ -2529,7 +2536,8 @@ showPage(pages.some(p => p[0] === initialPage) ? initialPage : "home", false);
 renderSearch("");
 
 refreshAccount().then(() => checkOwner());
-window.request = async function(path, options = {}) { const savedUser = JSON.parse(localStorage.getItem("rhymo_user") || "null"); const headers = new Headers(options.headers || {}); if (options.method === "POST") headers.set("Content-Type", "application/json"); if (savedUser?.id) headers.set("X-User-ID", savedUser.id); return fetch(api(path), { ...options, headers, credentials: "include", cache: "no-store", mode: "cors" }); };
+// request() above already attaches X-User-ID + X-Rhymo-Session from localStorage
+
 </script>
 </body>
 </html>
