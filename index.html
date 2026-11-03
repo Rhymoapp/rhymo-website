@@ -753,6 +753,49 @@ footer {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
 }
 
+/* Server management */
+.server-picker-card .panel-head {
+  align-items: flex-start;
+}
+.server-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.server-stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.server-stat-card {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.server-stat-label {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.server-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .server-stat-row { grid-template-columns: 1fr; }
+  .server-details-header { flex-direction: column; }
+}
+
 /* Invite banner */
 .invite-banner {
   background:
@@ -1149,16 +1192,19 @@ footer {
 <section class="page" id="page-servers">
   <div class="eyebrow">Administration</div>
   <h1>Server Management</h1>
-  <p class="sub">Choose a server you manage to check Rhymo’s status and recent activity there.</p>
+  <p class="sub">Pick a server you manage. We’ll show whether Rhymo is installed, how much activity is recorded, and recent logs.</p>
 
   <div class="grid">
-    <article class="panel full">
+    <article class="panel full server-picker-card">
       <div class="panel-head">
-        <h2>Select a server</h2>
+        <div>
+          <h2 style="margin:0;">Your servers</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers where you have manage permissions show up here.</p>
+        </div>
         <button id="loadServersBtn">Refresh</button>
       </div>
       <label class="field">
-        <span>Your Discord servers</span>
+        <span>Choose a server</span>
         <select id="serverSelect">
           <option value="">Servers appear here after you sign in</option>
         </select>
@@ -1166,45 +1212,49 @@ footer {
       <div id="serverMessage" class="notice" role="status">Sign in with Discord and your servers will show up here automatically.</div>
     </article>
 
-    <article class="panel full">
-      <h2 id="selectedServerName">Server details</h2>
-      <p id="selectedServerDescription" class="muted">Select a server to view its details.</p>
-      <div class="grid">
-        <article class="panel">
-          <h3>Rhymo installation</h3>
-          <div class="stat" id="selectedBotStatus">--</div>
-        </article>
-        <article class="panel">
-          <h3>Recorded activity</h3>
-          <div class="stat" id="selectedLogCount">--</div>
-        </article>
+    <article class="panel full" id="serverDetailsCard">
+      <div class="server-details-header">
+        <div>
+          <h2 id="selectedServerName" style="margin:0;">No server selected</h2>
+          <p id="selectedServerDescription" class="muted" style="margin:6px 0 0;">Choose a server above to see its details.</p>
+        </div>
+        <div class="actions" style="margin:0;">
+          <button class="primary" id="loadServerDetailsBtn" disabled>Refresh</button>
+          <button id="loadServerLogsBtn" disabled>Load logs</button>
+          <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo</a>
+        </div>
       </div>
-      <div class="actions">
-        <button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button>
-        <button id="loadServerLogsBtn" disabled>View activity logs</button>
-        <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo to Discord</a>
+
+      <div class="server-stat-row">
+        <div class="server-stat-card">
+          <div class="server-stat-label">Rhymo status</div>
+          <div class="server-stat-value" id="selectedBotStatus">—</div>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Whether the bot is in this server</p>
+        </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Activity events</div>
+          <div class="server-stat-value" id="selectedLogCount">—</div>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Recorded actions for this server</p>
+        </div>
       </div>
     </article>
 
     <article class="panel full">
-      <h2>Activity logs</h2>
+      <div class="panel-head">
+        <h2 style="margin:0;">Activity logs</h2>
+        <span class="pill">Selected server</span>
+      </div>
       <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view its recorded activity.</div></div>
     </article>
 
-    <article class="panel">
-      <h2>Configuration</h2>
-      <p>Server details and recorded activity are available through the connected backend.</p>
-      <button id="configBtn">View server details</button>
-    </article>
-    <article class="panel">
-      <h2>Moderation settings</h2>
-      <p>Moderation changes require separately implemented and authorized backend actions.</p>
-      <button id="moderationBtn">View activity logs</button>
-    </article>
     <article class="panel full">
-      <h2>Permissions and security</h2>
-      <p>Only servers returned by Discord where your account has management permissions are available. Signing in does not automatically authorize moderation actions.</p>
+      <h2>About permissions</h2>
+      <p class="muted" style="margin:0;">You only see servers Discord says you can manage. Signing in here doesn’t grant extra moderation power — it just lets you inspect status and logs for those servers.</p>
     </article>
+
+    <!-- kept for existing JS hooks -->
+    <button id="configBtn" class="hidden" aria-hidden="true">View server details</button>
+    <button id="moderationBtn" class="hidden" aria-hidden="true">View activity logs</button>
   </div>
 </section>
 
@@ -1991,10 +2041,10 @@ function serverMessage(message) {
 }
 
 function resetServerDetails() {
-  $("selectedServerName").textContent = "Server details";
-  $("selectedServerDescription").textContent = "Select a server to view its details.";
-  $("selectedBotStatus").textContent = "--";
-  $("selectedLogCount").textContent = "--";
+  $("selectedServerName").textContent = "No server selected";
+  $("selectedServerDescription").textContent = "Choose a server above to see its details.";
+  $("selectedBotStatus").textContent = "—";
+  $("selectedLogCount").textContent = "—";
   $("loadServerDetailsBtn").disabled = true;
   $("loadServerLogsBtn").disabled = true;
   $("serverInviteBtn").classList.add("hidden");
