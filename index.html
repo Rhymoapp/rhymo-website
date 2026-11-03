@@ -1127,15 +1127,15 @@ footer {
     <article class="panel full">
       <div class="panel-head">
         <h2>Select a server</h2>
-        <button class="primary" id="loadServersBtn">Load servers</button>
+        <button id="loadServersBtn">Refresh</button>
       </div>
       <label class="field">
         <span>Your Discord servers</span>
         <select id="serverSelect">
-          <option value="">Load your servers first</option>
+          <option value="">Servers appear here after you sign in</option>
         </select>
       </label>
-      <div id="serverMessage" class="notice" role="status">Sign in with Discord, then load your servers.</div>
+      <div id="serverMessage" class="notice" role="status">Sign in with Discord and your servers will show up here automatically.</div>
     </article>
 
     <article class="panel full">
@@ -1659,6 +1659,11 @@ function showPage(id, push = true) {
 
   if (push) history.replaceState(null, "", "#" + id);
   closeDrawer();
+
+  // Auto-load servers when opening Server Management or Activity Logs
+  if ((id === "servers" || id === "logs") && currentUser && typeof loadServers === "function") {
+    if (!managedServers.length) loadServers();
+  }
 }
 
 function buildNav(container) {
@@ -1811,6 +1816,10 @@ function setUser(user) {
   $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
   $("homeLoginBtn")?.classList.add("hidden");
   checkOwner();
+  // Auto-load manageable servers after login
+  if (typeof loadServers === "function") {
+    loadServers();
+  }
 }
 
 async function refreshAccount() {
@@ -1984,7 +1993,7 @@ async function loadServers() {
     serverMessage(error.message || "Could not load servers.");
   } finally {
     button.disabled = false;
-    button.textContent = "Load servers";
+    button.textContent = "Refresh";
   }
 }
 
