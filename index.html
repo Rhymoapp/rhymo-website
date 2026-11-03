@@ -180,6 +180,38 @@ button:disabled {
   transform: translateY(-2px);
 }
 
+/* Discord OAuth button */
+.btn-discord {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #fff;
+  color: #1e1f22;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-discord svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.btn-discord:hover {
+  background: #f2f3f5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.btn-discord:active {
+  transform: translateY(0);
+}
+
 /* ========== TOP BAR ========== */
 .topbar {
   height: 64px;
@@ -716,6 +748,41 @@ footer {
   border: 1px solid rgba(129, 140, 248, 0.2);
 }
 
+/* Command explorer */
+.command-card {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 4px;
+}
+.command-card:last-child { border-bottom: 0; }
+.command-card .cmd-name {
+  font-weight: 750;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+}
+.command-card .cmd-name code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--accent);
+  font-size: 14px;
+}
+.command-card .cmd-cat {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.command-card .cmd-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: #d4d4d8;
+  line-height: 1.55;
+}
+
 /* Post cards */
 .post-card {
   padding: 16px 0;
@@ -874,7 +941,7 @@ footer {
   <a href="#home" class="brand" data-go="home"><img class="avatar" src="https://cdn.discordapp.com/attachments/1566572363951247370/1566961204914815037/IMG_1541.png?ex=6aeb1a97&is=6ae9c917&hm=10efcc60aab8b519922a55bc24e31f0d05fc7654668d69c02a114f96aa4e2eaa" alt="Rhymo bot avatar"><span>Rhymo</span></a>
   <label class="top-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo"></label>
   <div class="top-actions">
-    <button class="primary" id="loginBtn">Login with Discord</button>
+    <button class="btn-discord" id="loginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
     <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
   </div>
 </header>
@@ -918,7 +985,7 @@ footer {
     <article class="panel full">
       <h2>Your workspace</h2>
       <p id="homeAccountMessage" class="muted">Sign in with Discord to display your account profile.</p>
-      <button class="primary" id="homeLoginBtn">Login with Discord</button>
+      <button class="btn-discord" id="homeLoginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
     </article>
   </div>
 </section>
@@ -975,7 +1042,7 @@ footer {
     <article class="panel full">
       <div class="row"><img class="profile-pic" id="profileAvatar" alt="Your Discord avatar"><div><div class="profile-name" id="profileName">Checking session...</div><div class="muted" id="profileId"></div><span class="pill" id="authBadge">Checking session</span></div></div>
       <hr><p id="accountMessage" class="muted">Checking your login session...</p>
-      <div class="actions"><button class="primary" id="dashboardLoginBtn">Login with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
+      <div class="actions"><button class="btn-discord" id="dashboardLoginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button><button id="logoutBtn" class="hidden">Log out</button></div>
     </article>
     <article class="panel"><h2>Account</h2><p>Your profile is loaded from the authenticated session, not browser storage.</p><button data-go="settings">Account settings</button></article>
     <article class="panel"><h2>Help and support</h2><p>Find information about Rhymo's website and login.</p><button data-go="help">Open Help Center</button></article>
@@ -1090,7 +1157,7 @@ footer {
 <section class="page" id="page-help">
   <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Guidance for using Rhymo's website and account features.</p>
   <div class="grid">
-    <article class="panel full"><h2>How do I sign in?</h2><p>Choose Login with Discord and approve the requested permissions. The backend validates the callback and creates a session.</p></article>
+    <article class="panel full"><h2>How do I sign in?</h2><p>Choose Continue with Discord and approve the requested permissions. The backend validates the callback and creates a session.</p></article>
     <article class="panel full"><h2>Why can't I log in?</h2><p>Check that the backend is deployed and the Discord redirect URL exactly matches the configured callback. Safari privacy protections can block cross-site cookies.</p></article>
     <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and select Add to Discord. Review the requested permissions before authorizing installation.</p></article>
     <article class="panel full"><h2>How do I select a server?</h2><p>Open Server Management, sign in, load your servers, then choose one from the list.</p></article>
@@ -1121,8 +1188,24 @@ footer {
 </section>
 
 <section class="page" id="page-commands">
-  <div class="eyebrow">Reference</div><h1>Command Explorer</h1><p class="sub">Browse available Rhymo commands.</p>
-  <div class="panel full"><div class="empty">Command list is loaded from the backend when available.</div></div>
+  <div class="eyebrow">Reference</div>
+  <h1>Command Explorer</h1>
+  <p class="sub">Browse Rhymo bot commands by category. Search to filter by name or description.</p>
+  <div class="grid">
+    <article class="panel full">
+      <label class="field" style="margin:0;">
+        <span>Search commands</span>
+        <input id="commandSearch" type="search" placeholder="e.g. ban, welcome, prefix..." autocomplete="off">
+      </label>
+    </article>
+    <article class="panel full">
+      <div class="panel-head">
+        <h2 style="margin:0;">Commands</h2>
+        <span class="pill" id="commandCount">—</span>
+      </div>
+      <div id="commandList"><div class="empty">Loading commands...</div></div>
+    </article>
+  </div>
 </section>
 
 <section class="page" id="page-language">
@@ -1216,7 +1299,7 @@ footer {
     </article>
     <article class="panel full">
       <p id="settingsLoginPrompt" class="muted">You are not signed in.</p>
-      <button class="primary" id="settingsLoginBtn">Login with Discord</button>
+      <button class="btn-discord" id="settingsLoginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
     </article>
   </div>
 </section>
@@ -2115,6 +2198,137 @@ $("publishChangelogBtn")?.addEventListener("click", () =>
   handleCreatePost("changelog", "changelogTitle", "changelogContent", "changelogAdminMsg", true));
 $("draftChangelogBtn")?.addEventListener("click", () =>
   handleCreatePost("changelog", "changelogTitle", "changelogContent", "changelogAdminMsg", false));
+
+/* ===== COMMAND EXPLORER ===== */
+const RHYMO_COMMANDS = [
+  // General / Bot info
+  { name: "/help", category: "General", description: "Show help for Rhymo commands and how to use them." },
+  { name: "/botinfo", category: "General", description: "Display bot information, version, and runtime stats." },
+  { name: "/ping", category: "General", description: "Check bot latency and responsiveness." },
+  { name: "/invite", category: "General", description: "Get the invite link to add Rhymo to another server." },
+
+  // Prefix / config
+  { name: "/prefix", category: "Config", description: "View the current command prefix for this server." },
+  { name: "/prefix set", category: "Config", description: "Change the server command prefix." },
+  { name: "/prefix reset", category: "Config", description: "Reset the prefix back to the default." },
+  { name: "/prefix list", category: "Config", description: "List allowed or configured prefixes." },
+
+  // Welcomer
+  { name: "/welcome setup", category: "Welcomer", description: "Configure the welcome channel and message for new members." },
+  { name: "/welcome test", category: "Welcomer", description: "Send a test welcome message to preview your setup." },
+  { name: "/welcome disable", category: "Welcomer", description: "Turn off welcome messages for this server." },
+  { name: "/goodbye setup", category: "Welcomer", description: "Configure leave/goodbye messages." },
+
+  // Moderation
+  { name: "/ban", category: "Moderation", description: "Ban a member from the server with an optional reason." },
+  { name: "/kick", category: "Moderation", description: "Kick a member from the server." },
+  { name: "/mute", category: "Moderation", description: "Timeout or mute a member for a set duration." },
+  { name: "/unmute", category: "Moderation", description: "Remove a mute/timeout from a member." },
+  { name: "/warn", category: "Moderation", description: "Warn a member and log it to moderation history." },
+  { name: "/warnings", category: "Moderation", description: "View warnings for a member." },
+  { name: "/purge", category: "Moderation", description: "Bulk-delete recent messages in a channel." },
+  { name: "/slowmode", category: "Moderation", description: "Set channel slowmode delay." },
+
+  // Text moderation
+  { name: "/filter status", category: "Text Moderation", description: "Show whether the word/link filter is enabled." },
+  { name: "/filter add", category: "Text Moderation", description: "Add a blocked word or phrase." },
+  { name: "/filter remove", category: "Text Moderation", description: "Remove a word or phrase from the filter." },
+  { name: "/filter list", category: "Text Moderation", description: "List filtered words for this server." },
+
+  // Investigation / logs
+  { name: "/userinfo", category: "Investigation", description: "Inspect a user's profile, roles, and join date." },
+  { name: "/serverinfo", category: "Investigation", description: "Show server stats, owner, and boost level." },
+  { name: "/avatar", category: "Investigation", description: "Display a user's avatar in full size." },
+  { name: "/roles", category: "Investigation", description: "List roles on the server or for a member." },
+
+  // Nuke recovery / safety
+  { name: "/backup create", category: "Safety", description: "Create a lightweight server structure backup snapshot." },
+  { name: "/backup list", category: "Safety", description: "List available backups for this server." },
+  { name: "/lockdown", category: "Safety", description: "Lock channels quickly during a raid or emergency." },
+  { name: "/unlock", category: "Safety", description: "Restore channels after a lockdown." },
+
+  // Utility
+  { name: "/convert", category: "Utility", description: "Convert units, timestamps, or simple values." },
+  { name: "/remind", category: "Utility", description: "Set a personal reminder (if enabled on the bot)." },
+  { name: "/poll", category: "Utility", description: "Create a quick reaction poll in the channel." }
+];
+
+let commandCatalog = RHYMO_COMMANDS.slice();
+let commandsFromApi = false;
+
+function renderCommands(filter = "") {
+  const target = $("commandList");
+  const countEl = $("commandCount");
+  if (!target) return;
+
+  const q = filter.trim().toLowerCase();
+  const source = commandCatalog;
+  const list = !q
+    ? source
+    : source.filter(c =>
+        (c.name + " " + (c.description || "") + " " + (c.category || "")).toLowerCase().includes(q)
+      );
+
+  target.replaceChildren();
+  if (countEl) {
+    countEl.textContent =
+      list.length + " command" + (list.length === 1 ? "" : "s") +
+      (commandsFromApi ? " · live" : " · offline catalog");
+  }
+
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No commands match your search.";
+    target.appendChild(empty);
+    return;
+  }
+
+  list.forEach(cmd => {
+    const card = document.createElement("div");
+    card.className = "command-card";
+    const catEl = document.createElement("div");
+    catEl.className = "cmd-cat";
+    catEl.textContent = cmd.category || "General";
+    const name = document.createElement("div");
+    name.className = "cmd-name";
+    const code = document.createElement("code");
+    code.textContent = cmd.name;
+    name.appendChild(code);
+    const desc = document.createElement("p");
+    desc.className = "cmd-desc";
+    desc.textContent = cmd.description || "No description provided.";
+    card.append(catEl, name, desc);
+    target.appendChild(card);
+  });
+}
+
+async function loadLiveCommands() {
+  try {
+    const response = await request("/api/commands");
+    if (!response.ok) throw new Error("Failed to load commands");
+    const data = await response.json();
+    const rows = Array.isArray(data.commands) ? data.commands : [];
+    if (rows.length) {
+      commandCatalog = rows.map(r => ({
+        name: r.name,
+        description: r.description || "",
+        category: r.category || "General"
+      }));
+      commandsFromApi = true;
+    } else {
+      commandsFromApi = false;
+    }
+  } catch (error) {
+    console.error("Live commands unavailable:", error);
+    commandsFromApi = false;
+  }
+  renderCommands($("commandSearch")?.value || "");
+}
+
+$("commandSearch")?.addEventListener("input", e => renderCommands(e.target.value));
+loadLiveCommands();
+setInterval(loadLiveCommands, 60000);
 
 async function refreshNotifications() {
   await loadSitePosts();
