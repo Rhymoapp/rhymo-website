@@ -1984,8 +1984,8 @@ async function loadServers() {
     const response = await request("/api/servers");
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      setUser(null);
-      serverMessage("Your Discord session expired. Please log in again.");
+      // Keep the local signed-in profile; only server APIs need the session cookie
+      serverMessage("Server list needs a full Discord session. Try signing in again in Chrome, or use Refresh after login.");
       return;
     }
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
@@ -2048,8 +2048,7 @@ async function loadServerDetails() {
     const response = await request("/api/servers/" + encodeURIComponent(guildId));
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      setUser(null);
-      throw new Error("Your Discord session expired. Please log in again.");
+      throw new Error("Server details need a full Discord session. Try signing in again.");
     }
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     if (selectedGuildId !== guildId) return;
@@ -2099,8 +2098,7 @@ async function loadServerLogs() {
     const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/logs");
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      setUser(null);
-      throw new Error("Your Discord session expired. Please log in again.");
+      throw new Error("Activity logs need a full Discord session. Try signing in again.");
     }
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
     if (selectedGuildId !== guildId) return;
