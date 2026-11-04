@@ -7,58 +7,7 @@
 <title>Rhymo Discord</title>
 <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1566572363951247370/1566961204914815037/IMG_1541.png?ex=6aeb1a97&is=6ae9c917&hm=10efcc60aab8b519922a55bc24e31f0d05fc7654668d69c02a114f96aa4e2eaa">
 <link rel="apple-touch-icon" href="https://cdn.discordapp.com/attachments/1566572363951247370/1566961204914815037/IMG_1541.png?ex=6aeb1a97&is=6ae9c917&hm=10efcc60aab8b519922a55bc24e31f0d05fc7654668d69c02a114f96aa4e2eaa">
-<script>
-function applyPremiumTheme(themeName) {
-  document.body.classList.remove("theme-midnight-gold", "theme-cyberpunk-crimson", "theme-obsidian-dark");
-  if (themeName !== "default") {
-    document.body.classList.add(`theme-${themeName}`);
-    localStorage.setItem("rhymo_premium_theme", themeName);
-  } else {
-    localStorage.removeItem("rhymo_premium_theme");
-  }
-}
-window.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem("rhymo_premium_theme");
-  if (savedTheme) document.body.classList.add(`theme-${savedTheme}`);
-});
-</script>
-
 <style>
-/* ========== PREMIUM THEMES ========== */
-body.theme-midnight-gold {
-  --bg: #0c0a09;
-  --surface: rgba(28, 25, 23, 0.75);
-  --surface-2: #1c1917;
-  --border: rgba(251, 191, 36, 0.2);
-  --text: #fafaf9;
-  --muted: #a8a29e;
-  --accent: #fbbf24;
-  --accent-2: #d97706;
-  --glow: rgba(251, 191, 36, 0.2);
-}
-body.theme-cyberpunk-crimson {
-  --bg: #0a0406;
-  --surface: rgba(30, 8, 16, 0.8);
-  --surface-2: #2a0a14;
-  --border: rgba(244, 63, 94, 0.22);
-  --text: #fff1f2;
-  --muted: #fda4af;
-  --accent: #f43f5e;
-  --accent-2: #e11d48;
-  --glow: rgba(244, 63, 94, 0.22);
-}
-body.theme-obsidian-dark {
-  --bg: #09090b;
-  --surface: rgba(24, 24, 27, 0.8);
-  --surface-2: #18181b;
-  --border: rgba(255, 255, 255, 0.1);
-  --text: #fafafa;
-  --muted: #a1a1aa;
-  --accent: #e4e4e7;
-  --accent-2: #a1a1aa;
-  --glow: rgba(255, 255, 255, 0.08);
-}
-
 /* ========== DESIGN SYSTEM ========== */
 :root {
   --bg: #09090b;
@@ -270,13 +219,6 @@ button:disabled {
   padding: 0;
   overflow: hidden;
   position: relative;
-}
-#accountBtn .premium-container {
-  width: 100%;
-  height: 100%;
-  display: block;
-  position: relative;
-  line-height: 0;
 }
 #accountBtn .avatar,
 #accountBtn img {
@@ -732,27 +674,6 @@ footer {
   backdrop-filter: blur(12px);
 }
 
-/* ========== PREMIUM ========== */
-.premium-theme-picker {
-  display: flex;
-  gap: 12px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-.theme-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform 0.18s, box-shadow 0.18s;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
-}
-.theme-swatch:hover {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
-}
-
 /* Server management */
 .server-picker-card .panel-head {
   align-items: flex-start;
@@ -962,70 +883,6 @@ footer {
   border-color: #fff;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--swatch) 55%, transparent), 0 4px 16px rgba(0,0,0,0.4);
   transform: scale(1.12);
-}
-
-.premium-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.btn-premium {
-  display: block;
-  width: 100%;
-  text-align: center;
-  background: linear-gradient(135deg, #22d3ee, #a855f7);
-  color: white;
-  padding: 14px 0;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  box-shadow: 0 6px 22px rgba(168, 85, 247, 0.3);
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.btn-premium:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.5);
-  filter: brightness(1.07);
-}
-.btn-premium-secondary {
-  display: block;
-  width: 100%;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.04);
-  color: #e4e4e7;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px 0;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 13.5px;
-  transition: background 0.18s, border-color 0.18s;
-}
-.btn-premium-secondary:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.18);
-}
-
-/* Premium avatar shard */
-.premium-container {
-  position: relative;
-  display: inline-block;
-}
-.premium-shard {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 9px;
-  height: 9px;
-  background: linear-gradient(135deg, #22d3ee, #a855f7);
-  transform: rotate(45deg);
-  box-shadow: 0 0 10px #22d3ee, 0 0 18px #a855f7;
-  animation: floatShard 2.2s ease-in-out infinite;
-  z-index: 5;
-}
-@keyframes floatShard {
-  0%, 100% { transform: rotate(45deg) translateY(0); }
-  50%      { transform: rotate(45deg) translateY(-4px); }
 }
 
 /* ========== RESPONSIVE ========== */
@@ -1525,58 +1382,53 @@ footer {
     </article>
 
     <article class="panel full">
-      <h2>7. Premium Subscriptions (Discontinued)</h2>
-      <p>Premium Subscriptions have been doscontinued due to decicions. The developer team has decided to discontinue premium products.</p>
-    </article>
-
-    <article class="panel full">
-      <h2>8. Intellectual Property</h2>
+      <h2>7. Intellectual Property</h2>
       <p>The Service, including but not limited to the Rhymo name, logos, branding, website design, user interface, original text, graphics, and software, is owned by the Rhymo operators or their licensors and is protected by copyright, trademark, and other intellectual property laws.</p>
       <p>You are granted a limited, non-exclusive, non-transferable, revocable license to access and use the Service for its intended purpose. You may not copy, modify, distribute, sell, lease, reverse engineer, or create derivative works from any part of the Service without prior written permission, except as allowed by applicable law.</p>
     </article>
 
     <article class="panel full">
-      <h2>9. User Content and Feedback</h2>
+      <h2>8. User Content and Feedback</h2>
       <p>If you submit feedback, suggestions, or ideas about Rhymo, you grant us a perpetual, worldwide, royalty-free license to use, modify, and incorporate that feedback into the Service without any obligation to compensate you.</p>
       <p>You retain ownership of any content you submit through the Service, but you are responsible for ensuring you have the rights to submit it and that it does not violate any law or third-party rights.</p>
     </article>
 
     <article class="panel full">
-      <h2>10. Third-Party Services</h2>
+      <h2>9. Third-Party Services</h2>
       <p>Rhymo relies on third-party services, including Discord, hosting providers, and databases. Your use of those services is subject to their respective terms and privacy policies. We are not responsible for the availability, accuracy, or practices of third-party services.</p>
     </article>
 
     <article class="panel full">
-      <h2>11. Disclaimer of Warranties</h2>
+      <h2>10. Disclaimer of Warranties</h2>
       <p>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.</p>
       <p>We do not warrant that the Service will be uninterrupted, secure, error-free, or free of harmful components, or that any data will be accurate or preserved.</p>
     </article>
 
     <article class="panel full">
-      <h2>12. Limitation of Liability</h2>
+      <h2>11. Limitation of Liability</h2>
       <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL RHYMO, ITS OPERATORS, AFFILIATES, OR SERVICE PROVIDERS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, GOODWILL, OR BUSINESS OPPORTUNITIES, ARISING OUT OF OR RELATED TO YOUR USE OF (OR INABILITY TO USE) THE SERVICE, REGARDLESS OF THE THEORY OF LIABILITY AND EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
-      <p>OUR TOTAL AGGREGATE LIABILITY FOR ANY CLAIMS ARISING OUT OF OR RELATED TO THE SERVICE SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID US FOR PREMIUM FEATURES IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED U.S. DOLLARS (US $100).</p>
+      <p>OUR TOTAL AGGREGATE LIABILITY FOR ANY CLAIMS ARISING OUT OF OR RELATED TO THE SERVICE SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID US FOR THE SERVICE IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED U.S. DOLLARS (US $100).</p>
     </article>
 
     <article class="panel full">
-      <h2>13. Termination</h2>
+      <h2>12. Termination</h2>
       <p>We may suspend or terminate your access to the Service at any time, with or without cause or notice, including if we reasonably believe you have violated these Terms.</p>
       <p>You may stop using the Service at any time. Provisions of these Terms that by their nature should survive termination (including ownership, disclaimers, limitations of liability, and indemnification) will survive.</p>
     </article>
 
     <article class="panel full">
-      <h2>14. Changes to These Terms</h2>
+      <h2>13. Changes to These Terms</h2>
       <p>We may revise these Terms from time to time. When we do, we will update the “Last updated” date at the top of this page. Material changes may also be communicated through the website, dashboard, or other reasonable means.</p>
       <p>Your continued use of the Service after the revised Terms become effective constitutes your acceptance of the changes. If you do not agree to the new Terms, you must stop using the Service.</p>
     </article>
 
     <article class="panel full">
-      <h2>15. Governing Law</h2>
+      <h2>14. Governing Law</h2>
       <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the Rhymo operators primarily operate, without regard to conflict-of-law principles. Any disputes arising under these Terms shall be resolved in the courts of that jurisdiction, unless applicable law provides otherwise.</p>
     </article>
 
     <article class="panel full">
-      <h2>16. General Provisions</h2>
+      <h2>15. General Provisions</h2>
       <p>If any provision of these Terms is found to be unenforceable, the remaining provisions will remain in full effect. Our failure to enforce any right or provision shall not constitute a waiver of that right or provision. These Terms constitute the entire agreement between you and us regarding the Service and supersede any prior agreements on the subject.</p>
       <p>You may not assign or transfer these Terms without our prior written consent. We may assign these Terms without restriction.</p>
     </article>
@@ -1652,7 +1504,7 @@ footer {
       <h2>5. How We Share Information</h2>
       <p>We may share information in these limited situations:</p>
       <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
-        <li><strong>Service providers</strong> — hosting, database, payment processing (e.g. Stripe), and infrastructure providers that help us run Rhymo. They are only permitted to process data on our behalf.</li>
+        <li><strong>Service providers</strong> — hosting, database, and infrastructure providers that help us run Rhymo. They are only permitted to process data on our behalf.</li>
         <li><strong>Discord</strong> — the Service interacts with Discord’s API; your use of Discord is governed by Discord’s own Privacy Policy and Terms.</li>
         <li><strong>Legal requirements</strong> — if required by law, regulation, legal process, or governmental request.</li>
         <li><strong>Protection of rights</strong> — to protect the safety, rights, or property of Rhymo, our users, or the public.</li>
@@ -1672,7 +1524,7 @@ footer {
       <p>We use cookies and browser local storage for essential functions such as:</p>
       <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
         <li>Keeping you signed in (session cookies)</li>
-        <li>Remembering preferences (language, accent color, premium theme)</li>
+        <li>Remembering preferences (language and accent color)</li>
       </ul>
       <p>You can control cookies through your browser settings. Disabling certain cookies may affect the functionality of the dashboard (for example, staying logged in).</p>
     </article>
@@ -1710,7 +1562,7 @@ footer {
 
     <article class="panel full">
       <h2>12. Third-Party Links and Services</h2>
-      <p>The Service may link to or integrate with third-party sites and services (including Discord and payment providers). This Privacy Policy does not apply to those third parties. We encourage you to review their privacy policies.</p>
+      <p>The Service may link to or integrate with third-party sites and services, including Discord. This Privacy Policy does not apply to those third parties. We encourage you to review their privacy policies.</p>
     </article>
 
     <article class="panel full">
@@ -1916,38 +1768,15 @@ function setUser(user) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : fallbackAvatar);
   const displayName = user.global_name || user.globalName || user.username || "Discord user";
-  const isPremium = user.is_premium === true;
-
   $("headerAvatar").src = avatar;
   $("profileAvatar").src = avatar;
   if ($("settingsAvatar")) $("settingsAvatar").src = avatar;
-
-  if (isPremium) {
-    ["headerAvatar", "profileAvatar", "settingsAvatar"].forEach(id => {
-      const el = $(id);
-      if (el && !el.parentElement.classList.contains("premium-container")) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "premium-container";
-        const shard = document.createElement("div");
-        shard.className = "premium-shard";
-        el.parentNode.insertBefore(wrapper, el);
-        wrapper.appendChild(el);
-        wrapper.appendChild(shard);
-      }
-    });
-    $("authBadge").textContent = "Premium Member";
-    $("authBadge").style.background = "linear-gradient(135deg, #22d3ee, #a855f7)";
-    $("authBadge").style.color = "white";
-    $("authBadge").style.border = "none";
-    const card = $("premium-settings-card");
-    if (card) card.style.display = "block";
-  }
 
   if ($("settingsName")) $("settingsName").textContent = displayName;
   if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
   $("profileName").textContent = displayName;
   $("profileId").textContent = "Discord ID: " + (user.id || "");
-  $("authBadge").textContent = isPremium ? "Premium Member" : "Signed in";
+  $("authBadge").textContent = "Signed in";
   $("accountMessage").textContent = "Your Discord session is active.";
   if ($("settingsAccountText")) $("settingsAccountText").textContent = "Signed in as " + displayName + ".";
   $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
