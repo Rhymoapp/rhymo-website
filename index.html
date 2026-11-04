@@ -1021,7 +1021,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
 }
 .welcome-title {
   margin: 0;
-  font-size: clamp(3.5rem, 11vw, 7.4rem);
+  font-size: clamp(2.75rem, 11vw, 7.4rem);
   font-weight: 850;
   line-height: 0.98;
   letter-spacing: -0.075em;
@@ -1044,7 +1044,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
   animation: welcomeRise 0.75s cubic-bezier(0.2,0.8,0.2,1) 0.2s both;
 }
 .welcome-login {
-  min-width: 250px;
+  min-width: min(250px, 100%);
   margin-top: 32px;
   opacity: 0;
   transform: translateY(38px);
@@ -1086,6 +1086,14 @@ body.session-checking > :not(#sessionBoot):not(script) {
 @keyframes welcomeRise {
   from { opacity: 0; transform: translateY(42px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 400px) {
+  .welcome-screen { padding: 20px; }
+  .welcome-title { font-size: clamp(2.45rem, 10.5vw, 3rem); }
+  .welcome-eyebrow { font-size: 9.5px; letter-spacing: 0.18em; }
+  .welcome-copy { margin-top: 18px; }
+  .welcome-login { margin-top: 24px; }
+  .welcome-hint { margin-top: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .session-boot-spinner { animation-duration: 1.8s; }
