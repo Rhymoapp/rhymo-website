@@ -713,6 +713,19 @@ footer {
   flex-direction: column;
   gap: 14px;
 }
+.ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ai-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
 .ai-panel-header {
   display: flex;
   align-items: flex-start;
@@ -1501,40 +1514,46 @@ body.session-checking > :not(#sessionBoot):not(script) {
 <section class="page" id="page-ai-assistant">
   <div class="eyebrow">Assistant</div>
   <h1>AI Assistant</h1>
-  <p class="sub">Ask questions and get help from Meta Llama on Groq. It can’t access your Discord servers or logs.</p>
+  <p class="sub">Quick help from Rhymo AI. Sign in, type a question, and optionally attach a photo or text file.</p>
   <div class="grid">
     <article class="panel full ai-panel">
       <div class="ai-panel-header">
         <div>
           <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · up to 200 messages per chat</p>
         </div>
-        <button type="button" id="aiNewChatBtn">New chat</button>
+        <div class="ai-header-actions">
+          <span class="pill" id="aiMessageCount">0 / 200</span>
+          <button type="button" id="aiNewChatBtn">New chat</button>
+        </div>
       </div>
 
       <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
         <div class="ai-message ai-message-assistant">
           <span class="ai-message-label">Rhymo AI</span>
-          <div class="ai-message-body">Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?</div>
+          <div class="ai-message-body">Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.</div>
         </div>
       </div>
 
-      <p class="ai-privacy-note">Messages are sent to Groq’s API and processed by Meta Llama. Don’t include passwords, API keys, or other sensitive information.</p>
+      <p class="ai-privacy-note">Messages go to Groq (Meta Llama). Don’t send passwords, tokens, or private keys. This chat stops at 200 messages — start a new chat anytime.</p>
 
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
-          <span>Your message</span>
-          <textarea id="aiPrompt" rows="3" maxlength="3000" placeholder="Ask a question, or attach a photo / text file…" disabled></textarea>
+          <span class="ai-label-row">
+            <span>Message</span>
+            <span class="muted" id="aiCharCount">0 / 2000</span>
+          </span>
+          <textarea id="aiPrompt" rows="3" maxlength="2000" placeholder="Ask anything… Shift+Enter for a new line" disabled></textarea>
         </label>
         <div id="aiAttachmentPreview" class="ai-attachment-preview" hidden></div>
         <div class="ai-compose-footer">
           <div class="ai-attach-row">
             <input type="file" id="aiFileInput" accept="image/*,.txt,.md,.json,.js,.ts,.py,.html,.css,.csv" multiple hidden>
-            <button type="button" id="aiAttachBtn" disabled>Attach files</button>
-            <button type="button" class="btn-discord" id="aiLoginBtn">Sign in with Discord to chat</button>
+            <button type="button" id="aiAttachBtn" disabled title="Images or text files">+ Attach</button>
+            <button type="button" class="btn-discord" id="aiLoginBtn">Sign in to chat</button>
           </div>
           <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
-          <button type="submit" class="primary" id="aiSendBtn" disabled>Send message</button>
+          <button type="submit" class="primary" id="aiSendBtn" disabled>Send</button>
         </div>
       </form>
     </article>
@@ -2444,8 +2463,95 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?\n\nI can format **bold text**, `inline code`, and full code blocks you can copy or download.";
+const AI_GREETING = "Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.";
+const AI_MAX_CHAT_MESSAGES = 200; // total user + assistant messages in one chat
+const AI_API_HISTORY_LIMIT = 10;  // only recent turns are sent to the API (saves usage)
+const AI_MAX_INPUT_CHARS = 2000;
+const AI_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
+const AI_COOLDOWN_KEY = "rhymo_ai_cooldown_until";
 let aiCodeDownloadCounter = 0;
+let aiCooldownTimer = null;
+
+function getAiMessageCount() {
+  return aiConversation.length;
+}
+
+function getAiCooldownUntil() {
+  try {
+    const raw = localStorage.getItem(AI_COOLDOWN_KEY);
+    const value = raw ? Number(raw) : 0;
+    return Number.isFinite(value) ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function isAiCooldownActive() {
+  return Date.now() < getAiCooldownUntil();
+}
+
+function startAiCooldown() {
+  const until = Date.now() + AI_COOLDOWN_MS;
+  try {
+    localStorage.setItem(AI_COOLDOWN_KEY, String(until));
+  } catch {}
+  updateAiAssistantControls();
+  startAiCooldownTicker();
+}
+
+function clearAiCooldownIfExpired() {
+  const until = getAiCooldownUntil();
+  if (until && Date.now() >= until) {
+    try { localStorage.removeItem(AI_COOLDOWN_KEY); } catch {}
+  }
+}
+
+function formatAiCooldownRemaining() {
+  const remaining = Math.max(0, getAiCooldownUntil() - Date.now());
+  const totalMinutes = Math.ceil(remaining / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours <= 0) return minutes <= 1 ? "about 1 minute" : minutes + " minutes";
+  if (minutes === 0) return hours + (hours === 1 ? " hour" : " hours");
+  return hours + "h " + minutes + "m";
+}
+
+function getAiLimitMessage() {
+  if (!isAiCooldownActive()) {
+    return "You’ve hit message limit. Come back in 2 hours.";
+  }
+  return "You’ve hit message limit. Come back in 2 hours (" + formatAiCooldownRemaining() + " left).";
+}
+
+function startAiCooldownTicker() {
+  if (aiCooldownTimer) clearInterval(aiCooldownTimer);
+  aiCooldownTimer = setInterval(() => {
+    clearAiCooldownIfExpired();
+    if (!isAiCooldownActive()) {
+      clearInterval(aiCooldownTimer);
+      aiCooldownTimer = null;
+      const status = $("aiStatus");
+      if (status && currentUser) status.textContent = "Ready — press Send or Enter.";
+      updateAiAssistantControls();
+      return;
+    }
+    const status = $("aiStatus");
+    if (status) status.textContent = getAiLimitMessage();
+    updateAiAssistantControls();
+  }, 30000);
+}
+
+function updateAiMessageCount() {
+  const el = $("aiMessageCount");
+  if (el) el.textContent = getAiMessageCount() + " / " + AI_MAX_CHAT_MESSAGES;
+}
+
+function updateAiCharCount() {
+  const el = $("aiCharCount");
+  const prompt = $("aiPrompt");
+  if (!el || !prompt) return;
+  el.textContent = (prompt.value || "").length + " / " + AI_MAX_INPUT_CHARS;
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -2515,24 +2621,37 @@ let aiPendingAttachments = [];
 
 function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
+  clearAiCooldownIfExpired();
+  const coolingDown = isAiCooldownActive();
+  const atLimit = getAiMessageCount() >= AI_MAX_CHAT_MESSAGES;
+  const blocked = coolingDown || atLimit;
   const prompt = $("aiPrompt");
   const sendButton = $("aiSendBtn");
   const loginButton = $("aiLoginBtn");
   const attachButton = $("aiAttachBtn");
   const status = $("aiStatus");
 
-  if (prompt) prompt.disabled = !loggedIn || aiSending;
-  if (sendButton) sendButton.disabled = !loggedIn || aiSending;
-  if (attachButton) attachButton.disabled = !loggedIn || aiSending;
+  if (prompt) prompt.disabled = !loggedIn || aiSending || blocked;
+  if (sendButton) sendButton.disabled = !loggedIn || aiSending || blocked;
+  if (attachButton) attachButton.disabled = !loggedIn || aiSending || blocked;
   if (loginButton) loginButton.classList.toggle("hidden", loggedIn);
+  updateAiMessageCount();
+  updateAiCharCount();
 
   if (status) {
     if (!loggedIn) {
-      status.textContent = "Sign in with Discord to send a message.";
+      status.textContent = "Sign in with Discord to chat.";
+    } else if (coolingDown || atLimit) {
+      status.textContent = getAiLimitMessage();
     } else if (aiSending) {
       status.textContent = "Rhymo AI is thinking…";
-    } else if (status.textContent === "Sign in with Discord to send a message.") {
-      status.textContent = "Ready to chat.";
+    } else if (
+      status.textContent === "Sign in with Discord to chat." ||
+      status.textContent === "Sign in with Discord to send a message." ||
+      status.textContent.startsWith("You’ve hit message limit") ||
+      status.textContent.startsWith("This chat reached")
+    ) {
+      status.textContent = "Ready — press Send or Enter.";
     }
   }
 }
@@ -2766,8 +2885,8 @@ function resetAIChat() {
   const status = $("aiStatus");
   if (status) {
     status.textContent = currentUser
-      ? "Ready to chat."
-      : "Sign in with Discord to send a message.";
+      ? "Ready — press Send or Enter."
+      : "Sign in with Discord to chat.";
   }
   updateAiAssistantControls();
 }
@@ -2776,8 +2895,21 @@ async function sendAiMessage(event) {
   event.preventDefault();
   if (!currentUser || aiSending) return;
 
+  if (isAiCooldownActive()) {
+    $("aiStatus").textContent = getAiLimitMessage();
+    updateAiAssistantControls();
+    return;
+  }
+
+  if (getAiMessageCount() >= AI_MAX_CHAT_MESSAGES) {
+    startAiCooldown();
+    $("aiStatus").textContent = getAiLimitMessage();
+    updateAiAssistantControls();
+    return;
+  }
+
   const prompt = $("aiPrompt");
-  const text = prompt?.value.trim() || "";
+  const text = (prompt?.value || "").trim().slice(0, AI_MAX_INPUT_CHARS);
   const attachments = aiPendingAttachments.slice();
   if (!text && !attachments.length) return;
 
@@ -2793,7 +2925,7 @@ async function sendAiMessage(event) {
         combinedText += `\n\n[Attached file: ${item.name}]\n${item.text}`;
       }
     });
-    parts.push({ type: "text", text: combinedText.slice(0, 3000) });
+    parts.push({ type: "text", text: combinedText.slice(0, AI_MAX_INPUT_CHARS) });
     attachments.forEach(item => {
       if (item.kind === "image" && item.dataUrl) {
         parts.push({
@@ -2827,7 +2959,7 @@ async function sendAiMessage(event) {
 
   try {
     // Only send last 12 turns; strip huge image payloads from older turns
-    const payloadMessages = aiConversation.slice(-12).map(message => {
+    const payloadMessages = aiConversation.slice(-AI_API_HISTORY_LIMIT).map(message => {
       if (message.role !== "user" || typeof message.content === "string") {
         return {
           role: message.role,
@@ -2867,7 +2999,12 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
-    $("aiStatus").textContent = "Ready to chat.";
+    if (getAiMessageCount() >= AI_MAX_CHAT_MESSAGES) {
+      startAiCooldown();
+      $("aiStatus").textContent = getAiLimitMessage();
+    } else {
+      $("aiStatus").textContent = "Ready — press Send or Enter.";
+    }
   } catch (error) {
     if (requestVersion !== aiRequestVersion) return;
     thinkingMessage?.remove();
@@ -2892,12 +3029,18 @@ $("aiFileInput")?.addEventListener("change", async event => {
     event.target.value = "";
   }
 });
+$("aiPrompt")?.addEventListener("input", updateAiCharCount);
 $("aiPrompt")?.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
     $("aiChatForm")?.requestSubmit();
   }
 });
+clearAiCooldownIfExpired();
+if (isAiCooldownActive()) startAiCooldownTicker();
+updateAiMessageCount();
+updateAiCharCount();
+updateAiAssistantControls();
 
 /* ===== SEARCH ===== */
 const searchIndex = [
