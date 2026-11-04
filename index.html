@@ -1342,6 +1342,20 @@ body.session-checking > :not(#sessionBoot):not(script) {
     <article class="panel full">
       <div class="panel-head">
         <div>
+          <h2 style="margin:0;">Recently executed commands</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="commandLogsLiveLabel">Server admins only · logs older than 12 hours are removed</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="pill" id="commandLogsLivePill">Idle</span>
+          <button id="loadCommandLogsBtn" disabled>Refresh</button>
+        </div>
+      </div>
+      <div id="commandLogs" aria-live="polite"><div class="empty">Select a server you manage to see recent commands.</div></div>
+    </article>
+
+    <article class="panel full">
+      <div class="panel-head">
+        <div>
           <h2 style="margin:0;">Activity logs</h2>
           <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Live updates when a server is selected</p>
         </div>
@@ -1363,7 +1377,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
     </article>
     <article class="panel">
       <h2>What gets logged</h2>
-      <p class="muted" style="margin:0;">When the bot records moderation or admin events for a server, they show up here automatically. New events appear while this page is open.</p>
+      <p class="muted" style="margin:0;">Command runs and moderation events show up here for servers you manage. Entries older than 12 hours are deleted automatically to save storage.</p>
     </article>
 
     <article class="panel full">
@@ -2264,6 +2278,7 @@ function resetServerDetails() {
   $("selectedLogCount").textContent = "—";
   $("loadServerDetailsBtn").disabled = true;
   if ($("loadServerLogsBtn")) $("loadServerLogsBtn").disabled = true;
+  if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
   if ($("copyServerIdBtn")) $("copyServerIdBtn").disabled = true;
   $("serverInviteBtn")?.classList.add("hidden");
   $("serverInviteBtnExtra")?.classList.add("hidden");
@@ -2272,6 +2287,14 @@ function resetServerDetails() {
   empty.className = "empty";
   empty.textContent = "Select a server to view live activity.";
   $("serverLogs").appendChild(empty);
+  if ($("commandLogs")) {
+    $("commandLogs").replaceChildren();
+    const cmdEmpty = document.createElement("div");
+    cmdEmpty.className = "empty";
+    cmdEmpty.textContent = "Select a server you manage to see recent commands.";
+    $("commandLogs").appendChild(cmdEmpty);
+  }
+  setCommandLogsLiveState("Idle");
 }
 
 async function loadServers(options = {}) {
@@ -2366,21 +2389,42 @@ function setLogsLiveState(state, extra = "") {
   }
 }
 
+function setCommandLogsLiveState(state, extra = "") {
+  const pill = $("commandLogsLivePill");
+  const label = $("commandLogsLiveLabel");
+  if (pill) {
+    pill.textContent = state;
+    pill.classList.toggle("pill-live", state === "Live");
+  }
+  if (label) {
+    label.textContent = extra || (
+      state === "Live"
+        ? "Server admins only · auto-refresh every 12 seconds · 12h retention"
+        : "Server admins only · logs older than 12 hours are removed"
+    );
+  }
+}
+
 function stopLogsPolling() {
   if (logsPollTimer) {
     clearInterval(logsPollTimer);
     logsPollTimer = null;
   }
   setLogsLiveState("Idle");
+  setCommandLogsLiveState("Idle");
 }
 
 function startLogsPolling() {
   stopLogsPolling();
   if (!selectedGuildId) return;
   setLogsLiveState("Live");
+  setCommandLogsLiveState("Live");
   logsPollTimer = setInterval(() => {
-    if (selectedGuildId && isServerManagementVisible()) loadServerLogs({ silent: true });
-  }, SERVER_DETAILS_REFRESH_MS);
+    if (selectedGuildId && isServerManagementVisible()) {
+      loadServerLogs({ silent: true });
+      loadCommandLogs({ silent: true });
+    }
+  }, 12000);
 }
 
 document.addEventListener("visibilitychange", () => {
@@ -2389,8 +2433,107 @@ document.addEventListener("visibilitychange", () => {
   if (selectedGuildId) {
     loadServerDetails({ silent: true, skipLogs: true });
     loadServerLogs({ silent: true });
+    loadCommandLogs({ silent: true });
   }
 });
+
+async function loadCommandLogs(options = {}) {
+  const silent = options.silent === true;
+  const guildId = selectedGuildId;
+  const target = $("commandLogs");
+  if (!target) return;
+
+  if (!guildId) {
+    target.replaceChildren();
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Select a server you manage to see recent commands.";
+    target.appendChild(empty);
+    if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
+    setCommandLogsLiveState("Idle");
+    return;
+  }
+
+  if (!silent) {
+    target.replaceChildren();
+    const loading = document.createElement("div");
+    loading.className = "empty";
+    loading.textContent = "Loading recent commands...";
+    target.appendChild(loading);
+  }
+  if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
+
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/command-logs");
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(data.error || "Only server admins can view command history.");
+    }
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    if (selectedGuildId !== guildId) return;
+
+    const rows = Array.isArray(data.commands) ? data.commands : [];
+    target.replaceChildren();
+
+    if (!rows.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No commands recorded in the last 12 hours.";
+      target.appendChild(empty);
+    } else {
+      rows.forEach(log => {
+        const item = document.createElement("div");
+        item.className = "log-card";
+
+        const top = document.createElement("div");
+        top.className = "log-card-top";
+        const event = document.createElement("div");
+        event.className = "log-event";
+        const details = log.details && typeof log.details === "object" ? log.details : {};
+        const commandName = details.command || details.name || details.cmd || log.event_type || "Command";
+        event.textContent = String(commandName).startsWith("/") ? commandName : "/" + String(commandName).replace(/^\//, "");
+        const time = document.createElement("div");
+        time.className = "log-time";
+        time.textContent = log.created_at
+          ? new Date(log.created_at).toLocaleString()
+          : "Unknown time";
+        top.append(event, time);
+        item.appendChild(top);
+
+        if (log.actor_id) {
+          const meta = document.createElement("p");
+          meta.className = "log-meta";
+          meta.textContent = "User ID: " + log.actor_id;
+          item.appendChild(meta);
+        }
+
+        const body = document.createElement("p");
+        body.className = "log-details";
+        const extra = [];
+        if (details.channel_id) extra.push("channel " + details.channel_id);
+        if (details.options) extra.push(typeof details.options === "string" ? details.options : JSON.stringify(details.options));
+        body.textContent = extra.length ? extra.join(" · ") : "Command executed";
+        item.appendChild(body);
+        target.appendChild(item);
+      });
+    }
+
+    const now = new Date().toLocaleTimeString();
+    setCommandLogsLiveState("Live", "Last updated " + now + " · admins only · 12h retention");
+  } catch (error) {
+    console.error("Loading command logs failed:", error);
+    if (!silent) {
+      target.replaceChildren();
+      const message = document.createElement("div");
+      message.className = "empty";
+      message.textContent = error.message || "Could not load command history.";
+      target.appendChild(message);
+    }
+    setCommandLogsLiveState("Error", error.message || "Could not refresh command history");
+  } finally {
+    if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = !selectedGuildId;
+  }
+}
 
 async function loadServerDetails(options = {}) {
   const silent = options.silent === true;
@@ -2450,6 +2593,7 @@ async function loadServerDetails(options = {}) {
     $("selectedLogCount").textContent = String(data.activityLogCount ?? 0);
     $("loadServerDetailsBtn").disabled = false;
     $("loadServerLogsBtn").disabled = false;
+    if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
     $("copyServerIdBtn").disabled = false;
 
     if (details.botInstalled === false) {
@@ -2474,6 +2618,7 @@ async function loadServerDetails(options = {}) {
 
     if (!skipLogs && !silent) {
       await loadServerLogs({ silent: false });
+      await loadCommandLogs({ silent: false });
       startLogsPolling();
     }
     startServerDetailsPolling();
@@ -2487,6 +2632,7 @@ async function loadServerDetails(options = {}) {
     if (selectedGuildId === guildId) {
       $("loadServerDetailsBtn").disabled = false;
       $("loadServerLogsBtn").disabled = false;
+      if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
       $("copyServerIdBtn").disabled = false;
     }
   }
@@ -2587,6 +2733,7 @@ $("loadServersBtn")?.addEventListener("click", loadServers);
 $("serverSelect")?.addEventListener("change", loadServerDetails);
 $("loadServerDetailsBtn")?.addEventListener("click", loadServerDetails);
 $("loadServerLogsBtn")?.addEventListener("click", () => loadServerLogs({ silent: false }));
+$("loadCommandLogsBtn")?.addEventListener("click", () => loadCommandLogs({ silent: false }));
 $("copyServerIdBtn")?.addEventListener("click", async () => {
   if (!selectedGuildId) return;
   try {
