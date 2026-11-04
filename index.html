@@ -1356,13 +1356,13 @@ body.session-checking > :not(#sessionBoot):not(script) {
 <section class="page" id="page-ai-assistant">
   <div class="eyebrow">Assistant</div>
   <h1>AI Assistant</h1>
-  <p class="sub">Ask questions and get help from Meta Llama. It can’t access your Discord servers or logs.</p>
+  <p class="sub">Ask questions and get help from Meta Llama on Groq. It can’t access your Discord servers or logs.</p>
   <div class="grid">
     <article class="panel full ai-panel">
       <div class="ai-panel-header">
         <div>
           <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Powered by Meta Llama</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq</p>
         </div>
         <button type="button" id="aiNewChatBtn">New chat</button>
       </div>
@@ -1370,11 +1370,11 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
         <div class="ai-message ai-message-assistant">
           <span class="ai-message-label">Rhymo AI</span>
-          <div class="ai-message-body">Hi! I’m Rhymo AI, powered by Meta Llama. What can I help you with?</div>
+          <div class="ai-message-body">Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?</div>
         </div>
       </div>
 
-      <p class="ai-privacy-note">Messages are sent to Meta Llama to generate replies. Don’t include passwords, API keys, or other sensitive information.</p>
+      <p class="ai-privacy-note">Messages are sent to Groq’s API and processed by Meta Llama. Don’t include passwords, API keys, or other sensitive information.</p>
 
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
@@ -2294,7 +2294,7 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama. What can I help you with?";
+const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?";
 
 function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
@@ -2432,7 +2432,7 @@ const searchIndex = [
   { title: "Moderation activity", description: "Review activity and recent commands for a server", page: "servers" },
   { title: "Server permissions", description: "Server selection and permissions", page: "servers" },
   { title: "Bot uptime", description: "System health monitoring", page: "status" },
-  { title: "AI assistant", description: "Chat with Meta Llama", page: "ai-assistant" },
+  { title: "AI assistant", description: "Chat with Meta Llama via Groq", page: "ai-assistant" },
   { title: "Announcements", description: "Maintenance and release notifications", page: "notifications" }
 ];
 
