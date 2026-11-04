@@ -1114,8 +1114,10 @@ footer {
         <div>
           <h2 id="selectedServerName" style="margin:0;">No server selected</h2>
           <p id="selectedServerDescription" class="muted" style="margin:6px 0 0;">Choose a server above to see its details.</p>
+          <p id="serverDetailsLiveLabel" class="muted" aria-live="polite" style="margin:6px 0 0;font-size:12.5px;">Choose a server to start live updates.</p>
         </div>
         <div class="actions" style="margin:0;">
+          <span class="pill" id="serverDetailsLivePill">Idle</span>
           <button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button>
           <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo</a>
         </div>
@@ -1645,6 +1647,13 @@ function showPage(id, push = true) {
   // Auto-load servers when opening Server Management or Activity Logs
   if ((id === "servers" || id === "logs") && currentUser && typeof loadServers === "function") {
     if (!managedServers.length) loadServers();
+    else if (id === "servers") {
+      loadServers({ silent: true });
+      if (selectedGuildId) {
+        loadServerDetails({ silent: true, skipLogs: true });
+        loadServerLogs({ silent: true });
+      }
+    }
   }
 }
 
@@ -1744,6 +1753,7 @@ function setUser(user) {
   if ($("settingsProfile")) $("settingsProfile").hidden = !loggedIn;
 
   if (!user) {
+    stopServerListPolling();
     $("headerAvatar").src = fallbackAvatar;
     $("profileAvatar").src = fallbackAvatar;
     if ($("settingsAvatar")) $("settingsAvatar").src = fallbackAvatar;
@@ -1914,17 +1924,72 @@ $("globalSearch")?.addEventListener("input", e => {
 $("searchPageInput")?.addEventListener("input", e => renderSearch(e.target.value));
 
 /* ===== SERVER MANAGEMENT ===== */
+const SERVER_LIST_REFRESH_MS = 60000;
+const SERVER_DETAILS_REFRESH_MS = 15000;
 let managedServers = [];
 let selectedGuildId = "";
+let serverListPollTimer = null;
+let serverDetailsPollTimer = null;
+let serverListRequestActive = false;
+let serverDetailsRequestsInFlight = new Set();
+
+function isServerManagementVisible() {
+  return !document.hidden && $("page-servers")?.classList.contains("active");
+}
+
+function setServerDetailsLiveState(state, message = "") {
+  const pill = $("serverDetailsLivePill");
+  const label = $("serverDetailsLiveLabel");
+  if (pill) {
+    pill.textContent = state;
+    pill.classList.toggle("pill-live", state === "Live");
+  }
+  if (label && message) label.textContent = message;
+}
+
+function stopServerListPolling() {
+  if (serverListPollTimer) {
+    clearInterval(serverListPollTimer);
+    serverListPollTimer = null;
+  }
+}
+
+function startServerListPolling() {
+  if (serverListPollTimer) return;
+  serverListPollTimer = setInterval(() => {
+    if (currentUser && isServerManagementVisible()) {
+      loadServers({ silent: true });
+    }
+  }, SERVER_LIST_REFRESH_MS);
+}
+
+function stopServerDetailsPolling() {
+  if (serverDetailsPollTimer) {
+    clearInterval(serverDetailsPollTimer);
+    serverDetailsPollTimer = null;
+  }
+}
+
+function startServerDetailsPolling() {
+  stopServerDetailsPolling();
+  if (!selectedGuildId) return;
+  serverDetailsPollTimer = setInterval(() => {
+    if (selectedGuildId && isServerManagementVisible()) {
+      loadServerDetails({ silent: true, skipLogs: true });
+    }
+  }, SERVER_DETAILS_REFRESH_MS);
+}
 
 function serverMessage(message) {
   $("serverMessage").textContent = message;
 }
 
 function resetServerDetails() {
+  stopServerDetailsPolling();
   stopLogsPolling();
   $("selectedServerName").textContent = "No server selected";
   $("selectedServerDescription").textContent = "Choose a server above to see its details.";
+  setServerDetailsLiveState("Idle", "Choose a server to start live updates.");
   $("selectedBotStatus").textContent = "—";
   $("selectedLogCount").textContent = "—";
   $("loadServerDetailsBtn").disabled = true;
@@ -1939,15 +2004,22 @@ function resetServerDetails() {
   $("serverLogs").appendChild(empty);
 }
 
-async function loadServers() {
+async function loadServers(options = {}) {
+  const silent = options.silent === true;
   if (!currentUser) {
+    stopServerListPolling();
     serverMessage("Please log in with Discord before loading servers.");
     return;
   }
+  if (serverListRequestActive) return;
+  serverListRequestActive = true;
+  startServerListPolling();
   const button = $("loadServersBtn");
-  button.disabled = true;
-  button.textContent = "Loading...";
-  serverMessage("Loading your manageable Discord servers...");
+  if (!silent) {
+    button.disabled = true;
+    button.textContent = "Loading...";
+    serverMessage("Loading your manageable Discord servers...");
+  }
 
   try {
     const response = await request("/api/servers");
@@ -1961,6 +2033,7 @@ async function loadServers() {
 
     managedServers = Array.isArray(data.servers) ? data.servers : [];
     const select = $("serverSelect");
+    const previousSelection = selectedGuildId;
     select.replaceChildren();
 
     if (!managedServers.length) {
@@ -1978,20 +2051,30 @@ async function loadServers() {
       select.add(new Option(server.name + status, server.id));
     });
 
-    serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue.`);
+    if (!silent) serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue. The list refreshes every minute.`);
     if (selectedGuildId && managedServers.some(s => s.id === selectedGuildId)) {
       select.value = selectedGuildId;
-      await loadServerDetails();
+      if (!silent) await loadServerDetails();
     } else {
       selectedGuildId = "";
-      resetServerDetails();
+      if (previousSelection) {
+        resetServerDetails();
+        serverMessage("The selected server is no longer available to your account.");
+      } else if (!silent) {
+        resetServerDetails();
+      }
     }
   } catch (error) {
     console.error("Loading servers failed:", error);
-    serverMessage(error.message || "Could not load servers.");
+    serverMessage(silent
+      ? "Could not refresh the server list. Showing the last loaded list."
+      : error.message || "Could not load servers.");
   } finally {
-    button.disabled = false;
-    button.textContent = "Refresh";
+    serverListRequestActive = false;
+    if (!silent) {
+      button.disabled = false;
+      button.textContent = "Refresh";
+    }
   }
 }
 
@@ -2026,30 +2109,45 @@ function startLogsPolling() {
   if (!selectedGuildId) return;
   setLogsLiveState("Live");
   logsPollTimer = setInterval(() => {
-    if (selectedGuildId) loadServerLogs({ silent: true });
-  }, 15000);
+    if (selectedGuildId && isServerManagementVisible()) loadServerLogs({ silent: true });
+  }, SERVER_DETAILS_REFRESH_MS);
 }
 
-async function loadServerDetails() {
+document.addEventListener("visibilitychange", () => {
+  if (!currentUser || !isServerManagementVisible()) return;
+  loadServers({ silent: true });
+  if (selectedGuildId) {
+    loadServerDetails({ silent: true, skipLogs: true });
+    loadServerLogs({ silent: true });
+  }
+});
+
+async function loadServerDetails(options = {}) {
+  const silent = options.silent === true;
+  const skipLogs = options.skipLogs === true;
   const guildId = $("serverSelect").value;
   if (!guildId) {
     selectedGuildId = "";
-    stopLogsPolling();
     resetServerDetails();
     serverMessage("Choose a server first.");
     return;
   }
+  if (serverDetailsRequestsInFlight.has(guildId)) return;
+  serverDetailsRequestsInFlight.add(guildId);
   selectedGuildId = guildId;
   const selected = managedServers.find(item => item.id === guildId);
   $("selectedServerName").textContent = selected?.name || "Selected server";
-  $("selectedServerDescription").textContent = "Loading server details...";
-  $("selectedBotStatus").textContent = "Checking...";
-  $("selectedLogCount").textContent = "—";
-  $("loadServerDetailsBtn").disabled = true;
-  $("loadServerLogsBtn").disabled = true;
-  $("copyServerIdBtn").disabled = true;
-  $("serverInviteBtn")?.classList.add("hidden");
-  $("serverInviteBtnExtra")?.classList.add("hidden");
+  if (!silent) {
+    $("selectedServerDescription").textContent = "Loading server details...";
+    $("selectedBotStatus").textContent = "Checking...";
+    $("selectedLogCount").textContent = "—";
+    $("loadServerDetailsBtn").disabled = true;
+    $("loadServerLogsBtn").disabled = true;
+    $("copyServerIdBtn").disabled = true;
+    setServerDetailsLiveState("Updating", "Fetching current server and bot status...");
+    $("serverInviteBtn")?.classList.add("hidden");
+    $("serverInviteBtnExtra")?.classList.add("hidden");
+  }
 
   try {
     const response = await request("/api/servers/" + encodeURIComponent(guildId));
@@ -2067,9 +2165,17 @@ async function loadServerDetails() {
     $("selectedServerDescription").textContent =
       "Server ID: " + details.id + (details.owner ? " · You own this server" : "");
 
-    if (details.botInstalled === true) $("selectedBotStatus").textContent = "Installed";
-    else if (details.botInstalled === false) $("selectedBotStatus").textContent = "Not installed";
-    else $("selectedBotStatus").textContent = "Status unavailable";
+    if (details.botOnline === false) {
+      $("selectedBotStatus").textContent = details.lastHeartbeat
+        ? "Heartbeat stale"
+        : "Awaiting heartbeat";
+    } else if (details.botInstalled === true) {
+      $("selectedBotStatus").textContent = "Installed · online";
+    } else if (details.botInstalled === false) {
+      $("selectedBotStatus").textContent = "Not installed";
+    } else {
+      $("selectedBotStatus").textContent = "Status unavailable";
+    }
 
     $("selectedLogCount").textContent = String(data.activityLogCount ?? 0);
     $("loadServerDetailsBtn").disabled = false;
@@ -2086,16 +2192,33 @@ async function loadServerDetails() {
         $("serverInviteBtnExtra").classList.remove("hidden");
       }
     }
-    serverMessage("Showing details for " + (details.name || "this server") + ".");
+    if (!silent) serverMessage("Showing details for " + (details.name || "this server") + ".");
 
-    // Load logs immediately and keep them live
-    await loadServerLogs({ silent: false });
-    startLogsPolling();
+    const updatedAt = new Date().toLocaleTimeString();
+    const heartbeatMessage = details.botOnline === true
+      ? `Bot heartbeat received${details.lastHeartbeat ? " at " + new Date(details.lastHeartbeat).toLocaleTimeString() : ""}.`
+      : details.lastHeartbeat
+        ? `Last bot heartbeat at ${new Date(details.lastHeartbeat).toLocaleTimeString()}.`
+        : "Waiting for the bot to send its first heartbeat.";
+    setServerDetailsLiveState("Live", `Dashboard updated ${updatedAt} · auto-refresh every 15 seconds · ${heartbeatMessage}`);
+
+    if (!skipLogs && !silent) {
+      await loadServerLogs({ silent: false });
+      startLogsPolling();
+    }
+    startServerDetailsPolling();
   } catch (error) {
     console.error("Loading server details failed:", error);
     $("selectedServerDescription").textContent = error.message || "Could not load server details.";
     serverMessage(error.message || "Could not load server details.");
-    stopLogsPolling();
+    setServerDetailsLiveState("Error", "Live server details could not be refreshed.");
+  } finally {
+    serverDetailsRequestsInFlight.delete(guildId);
+    if (selectedGuildId === guildId) {
+      $("loadServerDetailsBtn").disabled = false;
+      $("loadServerLogsBtn").disabled = false;
+      $("copyServerIdBtn").disabled = false;
+    }
   }
 }
 
@@ -2126,7 +2249,7 @@ async function loadServerLogs(options = {}) {
     if (selectedGuildId !== guildId) return;
 
     const logs = Array.isArray(data.logs) ? data.logs : [];
-    $("selectedLogCount").textContent = String(logs.length);
+    $("selectedLogCount").textContent = String(data.totalCount ?? logs.length);
     target.replaceChildren();
 
     if (!logs.length) {
