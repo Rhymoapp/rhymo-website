@@ -686,6 +686,28 @@ footer {
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
+.server-details-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.server-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.server-info-item {
+  min-width: 0;
+}
+.server-info-item h3 {
+  margin: 0 0 4px;
+}
+.server-info-item p {
+  margin: 0;
+  font-size: 13px;
+}
 .server-stat-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -755,6 +777,8 @@ footer {
 @media (max-width: 600px) {
   .server-stat-row { grid-template-columns: 1fr; }
   .server-details-header { flex-direction: column; }
+  .server-details-actions { justify-content: flex-start; }
+  .server-info-grid { grid-template-columns: 1fr; gap: 12px; }
 }
 
 /* Invite banner */
@@ -1283,11 +1307,6 @@ body.session-checking > :not(#sessionBoot):not(script) {
   </div>
 </section>
 
-<section class="page" id="page-logs">
-  <div class="eyebrow">Audit</div><h1>Activity Logs</h1><p class="sub">Pick a server you manage to review what Rhymo has recorded there.</p>
-  <div class="panel full"><h2>Recent activity</h2><p class="muted">Head to Server Management, choose a server, then come back to read its logs.</p><button class="primary" data-go="servers">Select a server</button></div>
-</section>
-
 <section class="page" id="page-servers">
   <div class="eyebrow">Administration</div>
   <h1>Server Management</h1>
@@ -1318,9 +1337,10 @@ body.session-checking > :not(#sessionBoot):not(script) {
           <p id="selectedServerDescription" class="muted" style="margin:6px 0 0;">Choose a server above to see its details.</p>
           <p id="serverDetailsLiveLabel" class="muted" aria-live="polite" style="margin:6px 0 0;font-size:12.5px;">Choose a server to start live updates.</p>
         </div>
-        <div class="actions" style="margin:0;">
+        <div class="server-details-actions">
           <span class="pill" id="serverDetailsLivePill">Idle</span>
           <button class="primary" id="loadServerDetailsBtn" disabled>Refresh details</button>
+          <button id="copyServerIdBtn" disabled>Copy server ID</button>
           <a class="btn primary hidden" id="serverInviteBtn" target="_blank" rel="noopener noreferrer">Add Rhymo</a>
         </div>
       </div>
@@ -1367,22 +1387,18 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view live activity.</div></div>
     </article>
 
-    <article class="panel">
-      <h2>Quick actions</h2>
-      <p class="muted">Useful shortcuts for the selected server.</p>
-      <div class="actions">
-        <button id="copyServerIdBtn" disabled>Copy server ID</button>
-        <a class="btn primary hidden" id="serverInviteBtnExtra" target="_blank" rel="noopener noreferrer">Invite Rhymo</a>
+    <article class="panel full server-info-card">
+      <h2>About this server</h2>
+      <div class="server-info-grid">
+        <div class="server-info-item">
+          <h3>Log retention</h3>
+          <p>Activity and command logs cover the last 12 hours. Older entries are removed during cleanup.</p>
+        </div>
+        <div class="server-info-item">
+          <h3>Access</h3>
+          <p>Only servers Discord says you can manage appear here. This dashboard does not grant additional server permissions.</p>
+        </div>
       </div>
-    </article>
-    <article class="panel">
-      <h2>What gets logged</h2>
-      <p class="muted" style="margin:0;">Command and moderation logs are kept for 12 hours. Older entries are removed during the next cleanup.</p>
-    </article>
-
-    <article class="panel full">
-      <h2>About permissions</h2>
-      <p class="muted" style="margin:0;">You only see servers Discord says you can manage. Signing in here doesn’t grant extra moderation power — it just lets you inspect status and logs for those servers.</p>
     </article>
 
     <!-- kept for existing JS hooks -->
@@ -1822,7 +1838,6 @@ const pages = [
   ["status", "System Status"],
   ["search", "Global Search"],
   ["notifications", "Notification Center"],
-  ["logs", "Activity Logs"],
   ["servers", "Server Management"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
@@ -1860,8 +1875,8 @@ function showPage(id, push = true) {
   if (push) history.replaceState(null, "", "#" + id);
   closeDrawer();
 
-  // Auto-load servers when opening Server Management or Activity Logs
-  if ((id === "servers" || id === "logs") && currentUser && typeof loadServers === "function") {
+  // Auto-load servers when opening Server Management.
+  if (id === "servers" && currentUser && typeof loadServers === "function") {
     if (!managedServers.length) loadServers();
     else if (id === "servers") {
       loadServers({ silent: true });
@@ -1877,7 +1892,7 @@ function buildNav(container) {
   container.innerHTML = "";
   const groups = [
     { label: "Main", items: ["home", "features", "dashboard", "status"] },
-    { label: "Tools", items: ["servers", "logs", "commands", "search"] },
+    { label: "Tools", items: ["servers", "commands", "search"] },
     { label: "Info", items: ["notifications", "help", "changelog"] },
     { label: "Account", items: ["settings", "language", "terms", "privacy"] }
   ];
@@ -2158,7 +2173,7 @@ const searchIndex = [
   { title: "Privacy and data", description: "Privacy Policy and account sessions", page: "privacy" },
   { title: "Terms and usage", description: "Terms of Service", page: "terms" },
   { title: "OAuth2 help", description: "Login troubleshooting", page: "help" },
-  { title: "Moderation activity", description: "Activity log interface", page: "logs" },
+  { title: "Moderation activity", description: "Review activity and recent commands for a server", page: "servers" },
   { title: "Server permissions", description: "Server selection and permissions", page: "servers" },
   { title: "Bot uptime", description: "System health monitoring", page: "status" },
   { title: "Announcements", description: "Maintenance and release notifications", page: "notifications" }
@@ -2283,7 +2298,6 @@ function resetServerDetails() {
   if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
   if ($("copyServerIdBtn")) $("copyServerIdBtn").disabled = true;
   $("serverInviteBtn")?.classList.add("hidden");
-  $("serverInviteBtnExtra")?.classList.add("hidden");
   $("serverLogs").replaceChildren();
   const empty = document.createElement("div");
   empty.className = "empty";
@@ -2598,7 +2612,6 @@ async function loadServerDetails(options = {}) {
     $("copyServerIdBtn").disabled = true;
     setServerDetailsLiveState("Updating", "Fetching current server and bot status...");
     $("serverInviteBtn")?.classList.add("hidden");
-    $("serverInviteBtnExtra")?.classList.add("hidden");
   }
 
   try {
@@ -2639,10 +2652,6 @@ async function loadServerDetails(options = {}) {
       if ($("serverInviteBtn")) {
         $("serverInviteBtn").href = INVITE_URL;
         $("serverInviteBtn").classList.remove("hidden");
-      }
-      if ($("serverInviteBtnExtra")) {
-        $("serverInviteBtnExtra").href = INVITE_URL;
-        $("serverInviteBtnExtra").classList.remove("hidden");
       }
     }
     if (!silent) serverMessage("Showing details for " + (details.name || "this server") + ".");
@@ -3167,7 +3176,11 @@ if (params.has("login")) {
 }
 
 const initialPage = location.hash.slice(1);
-showPage(pages.some(p => p[0] === initialPage) ? initialPage : "home", false);
+const initialRoute = initialPage === "logs" ? "servers" : initialPage;
+showPage(pages.some(p => p[0] === initialRoute) ? initialRoute : "home", false);
+if (initialPage === "logs") {
+  history.replaceState(null, "", location.pathname + "#servers");
+}
 renderSearch("");
 
 refreshAccount().then(() => checkOwner());
