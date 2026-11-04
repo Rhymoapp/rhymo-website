@@ -762,6 +762,78 @@ footer {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.ai-message-body.rich {
+  white-space: normal;
+}
+.ai-message-body.rich p {
+  margin: 0 0 10px;
+}
+.ai-message-body.rich p:last-child {
+  margin-bottom: 0;
+}
+.ai-message-body.rich strong {
+  font-weight: 750;
+  color: #f4f4f5;
+}
+.ai-message-body.rich em {
+  font-style: italic;
+  color: #e4e4e7;
+}
+.ai-message-body.rich code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+.ai-code-block {
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.35);
+}
+.ai-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+.ai-code-lang {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ai-code-actions {
+  display: flex;
+  gap: 6px;
+}
+.ai-code-actions button {
+  padding: 5px 9px;
+  font-size: 12px;
+}
+.ai-code-block pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+}
+.ai-code-block code {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #e4e4e7;
+}
 .ai-message-thinking .ai-message-body {
   color: var(--muted);
 }
@@ -2294,7 +2366,72 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?";
+const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?\n\nI can format **bold text**, `inline code`, and full code blocks you can copy or download.";
+let aiCodeDownloadCounter = 0;
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatInlineMarkdown(text) {
+  let html = escapeHtml(text);
+  // Inline code first so markup inside code is not styled
+  html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  return html;
+}
+
+function renderAiMarkdown(text) {
+  const source = String(text || "");
+  const parts = source.split(/(```[\s\S]*?```)/g);
+  let html = "";
+
+  parts.forEach(part => {
+    if (!part) return;
+    if (part.startsWith("```") && part.endsWith("```")) {
+      const inner = part.slice(3, -3);
+      const newlineIndex = inner.indexOf("\n");
+      let language = "text";
+      let code = inner;
+      if (newlineIndex !== -1) {
+        const maybeLang = inner.slice(0, newlineIndex).trim();
+        if (/^[a-zA-Z0-9_+#.-]+$/.test(maybeLang) && maybeLang.length <= 24) {
+          language = maybeLang.toLowerCase();
+          code = inner.slice(newlineIndex + 1);
+        }
+      }
+      code = code.replace(/^\n/, "").replace(/\n$/, "");
+      const id = "ai-code-" + (++aiCodeDownloadCounter);
+      html +=
+        `<div class="ai-code-block" data-code-id="${id}">` +
+        `<div class="ai-code-toolbar">` +
+        `<span class="ai-code-lang">${escapeHtml(language)}</span>` +
+        `<div class="ai-code-actions">` +
+        `<button type="button" data-code-copy="${id}">Copy</button>` +
+        `<button type="button" data-code-download="${id}">Download</button>` +
+        `</div></div>` +
+        `<pre><code id="${id}">${escapeHtml(code)}</code></pre>` +
+        `</div>`;
+      return;
+    }
+
+    const paragraphs = part.split(/\n{2,}/);
+    paragraphs.forEach(paragraph => {
+      const trimmed = paragraph.trim();
+      if (!trimmed) return;
+      const withBreaks = formatInlineMarkdown(trimmed).replace(/\n/g, "<br>");
+      html += `<p>${withBreaks}</p>`;
+    });
+  });
+
+  return html || `<p>${escapeHtml(source)}</p>`;
+}
 
 function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
@@ -2332,13 +2469,75 @@ function appendAiMessage(role, content, options = {}) {
 
   const body = document.createElement("div");
   body.className = "ai-message-body";
-  body.textContent = content;
+
+  // Render markdown for assistant replies; keep user text plain for safety
+  if (role === "assistant" && !options.thinking) {
+    body.classList.add("rich");
+    body.innerHTML = renderAiMarkdown(content);
+  } else {
+    body.textContent = content;
+  }
 
   message.append(label, body);
   target.appendChild(message);
   target.scrollTop = target.scrollHeight;
   return message;
 }
+
+// Copy / download code blocks from AI replies
+$("aiMessages")?.addEventListener("click", async event => {
+  const copyBtn = event.target.closest("[data-code-copy]");
+  const downloadBtn = event.target.closest("[data-code-download]");
+  if (!copyBtn && !downloadBtn) return;
+
+  const id = (copyBtn || downloadBtn).getAttribute(
+    copyBtn ? "data-code-copy" : "data-code-download"
+  );
+  const codeEl = document.getElementById(id);
+  if (!codeEl) return;
+  const code = codeEl.textContent || "";
+
+  if (copyBtn) {
+    try {
+      await navigator.clipboard.writeText(code);
+      const old = copyBtn.textContent;
+      copyBtn.textContent = "Copied";
+      setTimeout(() => { copyBtn.textContent = old; }, 1200);
+    } catch {
+      toast("Could not copy code.");
+    }
+    return;
+  }
+
+  if (downloadBtn) {
+    const block = downloadBtn.closest(".ai-code-block");
+    const lang = block?.querySelector(".ai-code-lang")?.textContent?.trim() || "txt";
+    const extensionMap = {
+      javascript: "js",
+      typescript: "ts",
+      python: "py",
+      html: "html",
+      css: "css",
+      json: "json",
+      bash: "sh",
+      shell: "sh",
+      sql: "sql",
+      text: "txt",
+      md: "md",
+      markdown: "md"
+    };
+    const ext = extensionMap[lang.toLowerCase()] || lang.toLowerCase() || "txt";
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `rhymo-ai-snippet.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+});
 
 function resetAIChat() {
   aiRequestVersion += 1;
