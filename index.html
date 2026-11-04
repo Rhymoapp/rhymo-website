@@ -926,9 +926,177 @@ footer {
   .hero { padding: clamp(36px, 4vw, 56px); }
   .stat { font-size: 36px; }
 }
+
+/* ========== WELCOME SCREEN ========== */
+body.session-checking {
+  overflow: hidden;
+}
+body.session-checking > :not(#sessionBoot):not(script) {
+  visibility: hidden !important;
+}
+.session-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  background: #09090b;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.session-boot[hidden] {
+  display: none !important;
+}
+.session-boot-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(255,255,255,0.14);
+  border-top-color: #a5b4fc;
+  border-radius: 50%;
+  animation: sessionSpin 0.8s linear infinite;
+}
+@keyframes sessionSpin {
+  to { transform: rotate(360deg); }
+}
+.welcome-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 28px;
+  background: #08090d;
+  color: #fafafa;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+.welcome-screen[hidden] {
+  display: none !important;
+}
+.welcome-screen.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.welcome-screen::before,
+.welcome-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.welcome-screen::before {
+  background:
+    radial-gradient(ellipse 58% 48% at 50% 42%, rgba(99,102,241,0.24), transparent 72%),
+    radial-gradient(ellipse 34% 38% at 82% 80%, rgba(34,211,238,0.1), transparent 74%),
+    radial-gradient(ellipse 35% 35% at 12% 12%, rgba(168,85,247,0.13), transparent 72%);
+}
+.welcome-screen::after {
+  opacity: 0.16;
+  background-image: linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+}
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 820px);
+  text-align: center;
+}
+.welcome-eyebrow {
+  margin: 0 0 22px;
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  animation: welcomeRise 0.75s cubic-bezier(0.2,0.8,0.2,1) both;
+}
+.welcome-title {
+  margin: 0;
+  font-size: clamp(3.5rem, 11vw, 7.4rem);
+  font-weight: 850;
+  line-height: 0.98;
+  letter-spacing: -0.075em;
+  animation: welcomeRise 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.08s both;
+}
+.welcome-title span {
+  display: inline-block;
+  padding-bottom: 0.08em;
+  background: linear-gradient(115deg, #eef2ff 8%, #a5b4fc 48%, #67e8f9 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.welcome-copy {
+  max-width: 520px;
+  margin: 22px auto 0;
+  color: #a1a1aa;
+  font-size: clamp(15px, 2vw, 17px);
+  line-height: 1.7;
+  animation: welcomeRise 0.75s cubic-bezier(0.2,0.8,0.2,1) 0.2s both;
+}
+.welcome-login {
+  min-width: 250px;
+  margin-top: 32px;
+  opacity: 0;
+  transform: translateY(38px);
+  animation: welcomeRise 0.65s cubic-bezier(0.2,0.8,0.2,1) 1s both;
+}
+.welcome-login:disabled {
+  cursor: wait;
+}
+.welcome-hint {
+  margin: 14px 0 0;
+  color: #71717a;
+  font-size: 12px;
+  opacity: 0;
+  animation: welcomeRise 0.65s ease 1.08s both;
+}
+@keyframes welcomeRise {
+  from { opacity: 0; transform: translateY(42px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-boot-spinner { animation-duration: 1.8s; }
+  .welcome-eyebrow,
+  .welcome-title,
+  .welcome-copy,
+  .welcome-login,
+  .welcome-hint {
+    animation-duration: 0.01ms;
+  }
+  .welcome-login,
+  .welcome-hint {
+    animation-delay: 1s;
+  }
+}
 </style>
 </head>
-<body>
+<body class="session-checking">
+<div id="sessionBoot" class="session-boot" role="status" aria-live="polite">
+  <span class="session-boot-spinner" aria-hidden="true"></span>
+  <span>Checking your Rhymo session…</span>
+</div>
+<section id="welcomeScreen" class="welcome-screen" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-hidden="true" hidden>
+  <div class="welcome-content">
+    <p class="welcome-eyebrow">RHYMO · DISCORD COMPANION</p>
+    <h1 id="welcomeTitle" class="welcome-title">Welcome to<br><span>Rhymo.</span></h1>
+    <p class="welcome-copy">Keep an eye on your servers, bot status, and activity—all in one place.</p>
+    <button id="welcomeLoginBtn" class="btn-discord welcome-login" disabled>
+      <svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      Continue with Discord
+    </button>
+    <p class="welcome-hint">Sign in securely with your Discord account</p>
+  </div>
+</section>
 
 <header class="topbar">
   <button class="iconbtn" id="menuToggle" aria-label="Open navigation" aria-expanded="false"><span class="hamb"><i></i><i></i><i></i></span></button>
@@ -1718,6 +1886,7 @@ function login() {
   const el = $(id);
   if (el) el.addEventListener("click", login);
 });
+if ($("welcomeLoginBtn")) $("welcomeLoginBtn").addEventListener("click", login);
 
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
@@ -1739,9 +1908,52 @@ async function request(path, options = {}) {
 }
 
 let currentUser = null;
+let welcomeButtonTimer = null;
+let welcomeHideTimer = null;
+
+function setWelcomeScreenVisible(visible) {
+  const screen = $("welcomeScreen");
+  const button = $("welcomeLoginBtn");
+  const boot = $("sessionBoot");
+  if (welcomeButtonTimer) clearTimeout(welcomeButtonTimer);
+  if (welcomeHideTimer) clearTimeout(welcomeHideTimer);
+  welcomeButtonTimer = null;
+  welcomeHideTimer = null;
+  if (boot) boot.hidden = true;
+  document.body.classList.remove("session-checking");
+
+  if (!screen || !button) return;
+  document.querySelectorAll("header, main, footer, #drawer, #scrim").forEach(el => {
+    el.inert = visible;
+  });
+
+  if (visible) {
+    button.disabled = true;
+    screen.hidden = false;
+    screen.setAttribute("aria-hidden", "false");
+    screen.classList.remove("is-visible");
+    void screen.offsetWidth;
+    screen.classList.add("is-visible");
+    welcomeButtonTimer = setTimeout(() => {
+      if (!currentUser && screen.classList.contains("is-visible")) {
+        button.disabled = false;
+        button.focus({ preventScroll: true });
+      }
+    }, 1650);
+  } else {
+    button.disabled = true;
+    screen.setAttribute("aria-hidden", "true");
+    screen.classList.remove("is-visible");
+    welcomeHideTimer = setTimeout(() => {
+      if (screen.getAttribute("aria-hidden") === "true") screen.hidden = true;
+    }, 500);
+  }
+}
+
 function setUser(user) {
   currentUser = user;
   const loggedIn = !!user;
+  setWelcomeScreenVisible(!loggedIn);
 
   ["loginBtn", "dashboardLoginBtn", "settingsLoginBtn", "homeLoginBtn"].forEach(id => {
     const el = $(id);
@@ -1809,10 +2021,13 @@ async function refreshAccount() {
         localStorage.setItem("rhymo_user", JSON.stringify(data));
         setUser(data);
         toast("Signed in as " + (data.global_name || data.username || "Discord user") + ".");
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error("Could not parse auth_data:", error);
       toast("Sign-in data was invalid. Please try again.");
+      setUser(null);
     }
     history.replaceState(null, "", window.location.pathname + (window.location.hash || ""));
     return;
@@ -1845,9 +2060,7 @@ async function refreshAccount() {
     }
   } catch (error) {
     console.error("Rhymo session check failed:", error);
-    $("authBadge").textContent = "Signed out";
-    $("accountMessage").textContent = "Sign in with Discord to view your account.";
-    if ($("settingsAccountText")) $("settingsAccountText").textContent = "You are not signed in.";
+    setUser(null);
   }
 }
 
