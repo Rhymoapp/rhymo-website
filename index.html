@@ -759,8 +759,112 @@ footer {
   color: var(--text);
   font-size: 14px;
   line-height: 1.55;
-  white-space: pre-wrap;
+  white-space: normal;
   overflow-wrap: anywhere;
+}
+.ai-plain-text { white-space: pre-wrap; }
+.ai-markdown > :first-child { margin-top: 0; }
+.ai-markdown > :last-child { margin-bottom: 0; }
+.ai-markdown p { margin: 0 0 10px; }
+.ai-markdown h1,
+.ai-markdown h2,
+.ai-markdown h3 { margin: 12px 0 6px; line-height: 1.3; }
+.ai-markdown h1 { font-size: 1.25em; }
+.ai-markdown h2 { font-size: 1.14em; }
+.ai-markdown h3 { font-size: 1.05em; }
+.ai-markdown ul,
+.ai-markdown ol { margin: 4px 0 12px; padding-left: 22px; }
+.ai-markdown li + li { margin-top: 3px; }
+.ai-markdown code {
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.28);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+.ai-code-block {
+  margin: 10px 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.32);
+}
+.ai-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+.ai-code-toolbar button {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.ai-code-pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  color: var(--text);
+  font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+  tab-size: 2;
+}
+.ai-code-pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+.ai-attachment-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.ai-attachment-row button { padding: 8px 12px; }
+.ai-attachment-help { font-size: 12px; }
+.ai-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.ai-attachment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ai-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 7px 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+}
+.ai-attachment-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-attachment-chip button {
+  flex-shrink: 0;
+  padding: 3px 7px;
+  font-size: 11px;
 }
 .ai-message-thinking .ai-message-body {
   color: var(--muted);
@@ -1356,13 +1460,13 @@ body.session-checking > :not(#sessionBoot):not(script) {
 <section class="page" id="page-ai-assistant">
   <div class="eyebrow">Assistant</div>
   <h1>AI Assistant</h1>
-  <p class="sub">Ask questions and get help from Meta Llama on Groq. It can’t access your Discord servers or logs.</p>
+  <p class="sub">Ask questions and get help from Rhymo AI on Groq. It can’t access your Discord servers or logs.</p>
   <div class="grid">
     <article class="panel full ai-panel">
       <div class="ai-panel-header">
         <div>
           <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Powered by Groq</p>
         </div>
         <button type="button" id="aiNewChatBtn">New chat</button>
       </div>
@@ -1370,17 +1474,25 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
         <div class="ai-message ai-message-assistant">
           <span class="ai-message-label">Rhymo AI</span>
-          <div class="ai-message-body">Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?</div>
+          <div class="ai-message-body">Hi! I’m Rhymo AI, powered by Groq. What can I help you with?</div>
         </div>
       </div>
 
-      <p class="ai-privacy-note">Messages are sent to Groq’s API and processed by Meta Llama. Don’t include passwords, API keys, or other sensitive information.</p>
+      <p class="ai-privacy-note">Messages and attached text/code files are sent to Rhymo’s backend and Groq’s API. Don’t include passwords, API keys, or other sensitive information.</p>
 
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
           <span>Your message</span>
-          <textarea id="aiPrompt" rows="3" maxlength="3000" placeholder="Ask a question…" disabled></textarea>
+          <textarea id="aiPrompt" rows="3" maxlength="3000" placeholder="Ask a question, or attach a text/code file…" disabled></textarea>
         </label>
+        <div class="ai-attachment-row">
+          <button type="button" id="aiAttachBtn" disabled>Attach files</button>
+          <input class="ai-file-input" id="aiFileInput" type="file" multiple
+            accept=".txt,.md,.json,.csv,.html,.css,.js,.jsx,.ts,.tsx,.py,.java,.c,.h,.cpp,.cs,.go,.rs,.php,.rb,.sh,.sql,.yml,.yaml,.xml,.toml"
+            aria-label="Select text or code files" disabled>
+          <span class="muted ai-attachment-help">Text/code only · 3 files · 12 KB each · included with each message until removed</span>
+        </div>
+        <div id="aiAttachmentList" class="ai-attachment-list" aria-live="polite"></div>
         <div class="ai-compose-footer">
           <button type="button" class="btn-discord" id="aiLoginBtn">Sign in with Discord to chat</button>
           <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
@@ -2294,18 +2406,34 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi! I’m Rhymo AI, powered by Meta Llama via Groq. What can I help you with?";
+const AI_GREETING = "Hi! I’m Rhymo AI, powered by Groq. What can I help you with?";
+const AI_MAX_ATTACHMENTS = 3;
+const AI_MAX_ATTACHMENT_FILE_BYTES = 12 * 1024;
+const AI_MAX_ATTACHMENT_TOTAL_CHARS = 24000;
+const AI_ALLOWED_ATTACHMENT_EXTENSIONS = [
+  ".txt", ".md", ".json", ".csv", ".html", ".css", ".js", ".jsx",
+  ".ts", ".tsx", ".py", ".java", ".c", ".h", ".cpp", ".cs", ".go",
+  ".rs", ".php", ".rb", ".sh", ".sql", ".yml", ".yaml", ".xml", ".toml"
+];
+let aiAttachments = [];
 
 function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
   const prompt = $("aiPrompt");
   const sendButton = $("aiSendBtn");
   const loginButton = $("aiLoginBtn");
+  const attachButton = $("aiAttachBtn");
+  const fileInput = $("aiFileInput");
   const status = $("aiStatus");
 
   if (prompt) prompt.disabled = !loggedIn || aiSending;
   if (sendButton) sendButton.disabled = !loggedIn || aiSending;
   if (loginButton) loginButton.classList.toggle("hidden", loggedIn);
+  if (attachButton) attachButton.disabled = !loggedIn || aiSending;
+  if (fileInput) fileInput.disabled = !loggedIn || aiSending;
+  document.querySelectorAll("#aiAttachmentList button").forEach(button => {
+    button.disabled = aiSending;
+  });
 
   if (status) {
     if (!loggedIn) {
@@ -2318,12 +2446,290 @@ function updateAiAssistantControls() {
   }
 }
 
+function getAiFileExtension(filename) {
+  return String(filename || "").toLowerCase().match(/\.[a-z0-9]+$/)?.[0] || "";
+}
+
+function formatAiFileSize(bytes) {
+  return bytes < 1024
+    ? bytes + " B"
+    : (bytes / 1024).toFixed(1) + " KB";
+}
+
+function renderAiAttachments() {
+  const target = $("aiAttachmentList");
+  if (!target) return;
+
+  target.replaceChildren();
+  target.hidden = aiAttachments.length === 0;
+
+  aiAttachments.forEach((file, index) => {
+    const chip = document.createElement("div");
+    chip.className = "ai-attachment-chip";
+
+    const label = document.createElement("span");
+    label.textContent = file.name + " · " + formatAiFileSize(file.size);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+    removeButton.setAttribute("aria-label", "Remove " + file.name);
+    removeButton.disabled = aiSending;
+    removeButton.addEventListener("click", () => {
+      aiAttachments.splice(index, 1);
+      renderAiAttachments();
+      const status = $("aiStatus");
+      if (status) {
+        status.textContent = aiAttachments.length
+          ? "File removed. Remaining files stay attached to this chat."
+          : "Attached files removed.";
+      }
+    });
+
+    chip.append(label, removeButton);
+    target.appendChild(chip);
+  });
+}
+
+async function handleAiFileSelection(event) {
+  const input = event.currentTarget;
+  const selectedFiles = Array.from(input.files || []);
+  input.value = "";
+  if (!selectedFiles.length) return;
+
+  const status = $("aiStatus");
+  const feedback = [];
+  let added = 0;
+
+  if (aiAttachments.length + selectedFiles.length > AI_MAX_ATTACHMENTS) {
+    if (status) {
+      status.textContent = "You can attach up to " + AI_MAX_ATTACHMENTS +
+        " files. Remove a file before adding more.";
+    }
+    return;
+  }
+
+  for (const file of selectedFiles) {
+    if (!AI_ALLOWED_ATTACHMENT_EXTENSIONS.includes(getAiFileExtension(file.name))) {
+      feedback.push(file.name + " was skipped: choose a text or code file.");
+      continue;
+    }
+    if (file.size > AI_MAX_ATTACHMENT_FILE_BYTES) {
+      feedback.push(file.name + " was skipped: the limit is 12 KB per file.");
+      continue;
+    }
+
+    try {
+      const content = await file.text();
+      if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(content)) {
+        feedback.push(file.name + " was skipped: it does not look like a text file.");
+        continue;
+      }
+
+      const currentCharacters = aiAttachments.reduce(
+        (total, attachment) => total + attachment.content.length,
+        0
+      );
+      if (
+        content.length > AI_MAX_ATTACHMENT_FILE_BYTES ||
+        currentCharacters + content.length > AI_MAX_ATTACHMENT_TOTAL_CHARS
+      ) {
+        feedback.push(file.name + " was skipped: attached text would exceed the size limit.");
+        continue;
+      }
+
+      aiAttachments.push({
+        name: file.name,
+        content,
+        size: file.size
+      });
+      added += 1;
+    } catch {
+      feedback.push(file.name + " could not be read.");
+    }
+  }
+
+  renderAiAttachments();
+  updateAiAssistantControls();
+  if (added) {
+    feedback.unshift(
+      added + (added === 1 ? " file attached." : " files attached.") +
+      " They stay with this chat until removed or New chat."
+    );
+  }
+  if (status && feedback.length) status.textContent = feedback.join(" ");
+}
+
+function safeAiDownloadFilename(value) {
+  const cleaned = String(value || "generated-code.txt")
+    .replace(/\\/g, "/")
+    .split("/")
+    .pop()
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/[^A-Za-z0-9._-]/g, "_")
+    .replace(/^\.+/, "")
+    .slice(0, 100);
+  return cleaned || "generated-code.txt";
+}
+
+function downloadAiFile(filename, content) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function appendAiInlineMarkdown(target, text) {
+  const pattern = /(\*\*[^*\n]+?\*\*|\*[^*\n]+?\*|`[^`\n]+?`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      target.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+    }
+
+    const token = match[0];
+    let element;
+    let content;
+    if (token.startsWith("**") && token.endsWith("**")) {
+      element = document.createElement("strong");
+      content = token.slice(2, -2);
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      element = document.createElement("em");
+      content = token.slice(1, -1);
+    } else {
+      element = document.createElement("code");
+      content = token.slice(1, -1);
+    }
+    element.textContent = content;
+    target.appendChild(element);
+    lastIndex = match.index + token.length;
+  }
+
+  if (lastIndex < text.length) {
+    target.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
+}
+
+function renderAiMarkdown(target, source) {
+  target.replaceChildren();
+  target.classList.add("ai-markdown");
+
+  const lines = String(source || "").replace(/\r\n?/g, "\n").split("\n");
+  let index = 0;
+  const isFence = line => /^\s*```/.test(line);
+  const isHeading = line => /^\s{0,3}#{1,3}\s+/.test(line);
+  const isList = line => /^\s*(?:[-*]|\d+[.)])\s+/.test(line);
+
+  while (index < lines.length) {
+    if (!lines[index].trim()) {
+      index += 1;
+      continue;
+    }
+
+    const fence = lines[index].match(/^\s*```(.*)$/);
+    if (fence) {
+      const info = fence[1].trim();
+      const codeLines = [];
+      index += 1;
+      while (index < lines.length && !/^\s*```\s*$/.test(lines[index])) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+
+      const code = codeLines.join("\n");
+      const fileMatch = info.match(/^file:\s*(.+)$/i);
+      const filename = fileMatch ? safeAiDownloadFilename(fileMatch[1]) : "";
+      const block = document.createElement("div");
+      block.className = "ai-code-block";
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "ai-code-toolbar";
+      const caption = document.createElement("span");
+      caption.textContent = filename ? "File: " + filename : (info || "Code");
+      toolbar.appendChild(caption);
+
+      if (filename) {
+        const downloadButton = document.createElement("button");
+        downloadButton.type = "button";
+        downloadButton.textContent = "Download";
+        downloadButton.setAttribute("aria-label", "Download " + filename);
+        downloadButton.addEventListener("click", () => downloadAiFile(filename, code));
+        toolbar.appendChild(downloadButton);
+      }
+
+      const pre = document.createElement("pre");
+      pre.className = "ai-code-pre";
+      const codeElement = document.createElement("code");
+      codeElement.textContent = code;
+      pre.appendChild(codeElement);
+      block.append(toolbar, pre);
+      target.appendChild(block);
+      continue;
+    }
+
+    const heading = lines[index].match(/^\s{0,3}(#{1,3})\s+(.+?)\s*$/);
+    if (heading) {
+      const element = document.createElement("h" + heading[1].length);
+      appendAiInlineMarkdown(element, heading[2]);
+      target.appendChild(element);
+      index += 1;
+      continue;
+    }
+
+    if (isList(lines[index])) {
+      const ordered = /^\s*\d+[.)]\s+/.test(lines[index]);
+      const list = document.createElement(ordered ? "ol" : "ul");
+      while (
+        index < lines.length &&
+        isList(lines[index]) &&
+        ordered === /^\s*\d+[.)]\s+/.test(lines[index])
+      ) {
+        const item = document.createElement("li");
+        const text = lines[index].replace(/^\s*(?:[-*]|\d+[.)])\s+/, "");
+        appendAiInlineMarkdown(item, text);
+        list.appendChild(item);
+        index += 1;
+      }
+      target.appendChild(list);
+      continue;
+    }
+
+    const paragraphLines = [];
+    while (
+      index < lines.length &&
+      lines[index].trim() &&
+      !isFence(lines[index]) &&
+      !isHeading(lines[index]) &&
+      !isList(lines[index])
+    ) {
+      paragraphLines.push(lines[index]);
+      index += 1;
+    }
+
+    const paragraph = document.createElement("p");
+    paragraphLines.forEach((line, lineIndex) => {
+      if (lineIndex) paragraph.appendChild(document.createElement("br"));
+      appendAiInlineMarkdown(paragraph, line);
+    });
+    target.appendChild(paragraph);
+  }
+}
+
 function appendAiMessage(role, content, options = {}) {
   const target = $("aiMessages");
   if (!target) return null;
 
   const message = document.createElement("div");
-  message.className = `ai-message ai-message-${role}`;
+  message.className = "ai-message ai-message-" + role;
   if (options.thinking) message.classList.add("ai-message-thinking");
 
   const label = document.createElement("span");
@@ -2332,7 +2738,12 @@ function appendAiMessage(role, content, options = {}) {
 
   const body = document.createElement("div");
   body.className = "ai-message-body";
-  body.textContent = content;
+  if (role === "assistant" && !options.thinking) {
+    renderAiMarkdown(body, content);
+  } else {
+    if (role === "user") body.classList.add("ai-plain-text");
+    body.textContent = content;
+  }
 
   message.append(label, body);
   target.appendChild(message);
@@ -2344,6 +2755,8 @@ function resetAIChat() {
   aiRequestVersion += 1;
   aiSending = false;
   aiConversation = [];
+  aiAttachments = [];
+  renderAiAttachments();
 
   const target = $("aiMessages");
   if (target) {
@@ -2365,11 +2778,21 @@ async function sendAiMessage(event) {
   if (!currentUser || aiSending) return;
 
   const prompt = $("aiPrompt");
-  const content = prompt?.value.trim();
-  if (!content) return;
+  const userText = prompt?.value.trim() || "";
+  const attachmentsToSend = aiAttachments.map(file => ({
+    name: file.name,
+    content: file.content
+  }));
+  if (!userText && !attachmentsToSend.length) return;
+  const content = userText ||
+    "Please review the attached file(s) and help me understand them.";
 
   aiConversation.push({ role: "user", content });
-  appendAiMessage("user", content);
+  const attachedNames = attachmentsToSend.map(file => file.name);
+  const visibleContent = attachedNames.length
+    ? content + "\n\nAttached files: " + attachedNames.join(", ")
+    : content;
+  appendAiMessage("user", visibleContent);
   prompt.value = "";
 
   aiSending = true;
@@ -2380,7 +2803,10 @@ async function sendAiMessage(event) {
   try {
     const response = await request("/api/ai/chat", {
       method: "POST",
-      body: JSON.stringify({ messages: aiConversation.slice(-12) })
+      body: JSON.stringify({
+        messages: aiConversation.slice(-12),
+        attachments: attachmentsToSend
+      })
     });
     const data = await response.json().catch(() => ({}));
 
@@ -2414,6 +2840,10 @@ async function sendAiMessage(event) {
 
 $("aiChatForm")?.addEventListener("submit", sendAiMessage);
 $("aiNewChatBtn")?.addEventListener("click", resetAIChat);
+$("aiAttachBtn")?.addEventListener("click", () => {
+  if (currentUser && !aiSending) $("aiFileInput")?.click();
+});
+$("aiFileInput")?.addEventListener("change", handleAiFileSelection);
 $("aiPrompt")?.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
@@ -2432,7 +2862,7 @@ const searchIndex = [
   { title: "Moderation activity", description: "Review activity and recent commands for a server", page: "servers" },
   { title: "Server permissions", description: "Server selection and permissions", page: "servers" },
   { title: "Bot uptime", description: "System health monitoring", page: "status" },
-  { title: "AI assistant", description: "Chat with Meta Llama via Groq", page: "ai-assistant" },
+  { title: "AI assistant", description: "Chat with Rhymo AI via Groq", page: "ai-assistant" },
   { title: "Announcements", description: "Maintenance and release notifications", page: "notifications" }
 ];
 
