@@ -1291,14 +1291,14 @@ body.session-checking > :not(#sessionBoot):not(script) {
 <section class="page" id="page-servers">
   <div class="eyebrow">Administration</div>
   <h1>Server Management</h1>
-  <p class="sub">Pick a server you manage. We’ll show whether Rhymo is installed, how much activity is recorded, and recent logs.</p>
+  <p class="sub">Choose a server to check Rhymo status and review its recent activity.</p>
 
   <div class="grid">
     <article class="panel full server-picker-card">
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Your servers</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers where you have manage permissions show up here.</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers you manage are listed.</p>
         </div>
         <button id="loadServersBtn">Refresh</button>
       </div>
@@ -1334,7 +1334,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
         <div class="server-stat-card">
           <div class="server-stat-label">Activity events</div>
           <div class="server-stat-value" id="selectedLogCount">—</div>
-          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Recorded actions for this server</p>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Included in the 12-hour log history</p>
         </div>
       </div>
     </article>
@@ -1342,8 +1342,8 @@ body.session-checking > :not(#sessionBoot):not(script) {
     <article class="panel full">
       <div class="panel-head">
         <div>
-          <h2 style="margin:0;">Recently executed commands</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="commandLogsLiveLabel">Server admins only · logs older than 12 hours are removed</p>
+          <h2 style="margin:0;">Recent commands</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="commandLogsLiveLabel">Server admins only · 12-hour retention</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="pill" id="commandLogsLivePill">Idle</span>
@@ -1357,7 +1357,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Activity logs</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Live updates when a server is selected</p>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Server admins only · 12-hour retention</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="pill" id="logsLivePill">Idle</span>
@@ -1377,7 +1377,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
     </article>
     <article class="panel">
       <h2>What gets logged</h2>
-      <p class="muted" style="margin:0;">Command runs and moderation events show up here for servers you manage. Entries older than 12 hours are deleted automatically to save storage.</p>
+      <p class="muted" style="margin:0;">Command and moderation logs are kept for 12 hours. Older entries are removed during the next cleanup.</p>
     </article>
 
     <article class="panel full">
@@ -2210,6 +2210,8 @@ $("searchPageInput")?.addEventListener("input", e => renderSearch(e.target.value
 /* ===== SERVER MANAGEMENT ===== */
 const SERVER_LIST_REFRESH_MS = 60000;
 const SERVER_DETAILS_REFRESH_MS = 15000;
+const SERVER_LOG_REFRESH_MS = 12000;
+const SERVER_LOG_RETENTION_HOURS = 12;
 let managedServers = [];
 let selectedGuildId = "";
 let serverListPollTimer = null;
@@ -2383,8 +2385,8 @@ function setLogsLiveState(state, extra = "") {
   if (label) {
     label.textContent = extra || (
       state === "Live"
-        ? "Refreshing automatically every 15 seconds"
-        : "Live updates when a server is selected"
+        ? `Server admins only · auto-refresh every ${SERVER_LOG_REFRESH_MS / 1000}s · ${SERVER_LOG_RETENTION_HOURS}h retention`
+        : `Server admins only · ${SERVER_LOG_RETENTION_HOURS}h retention`
     );
   }
 }
@@ -2399,8 +2401,8 @@ function setCommandLogsLiveState(state, extra = "") {
   if (label) {
     label.textContent = extra || (
       state === "Live"
-        ? "Server admins only · auto-refresh every 12 seconds · 12h retention"
-        : "Server admins only · logs older than 12 hours are removed"
+        ? `Server admins only · auto-refresh every ${SERVER_LOG_REFRESH_MS / 1000}s · ${SERVER_LOG_RETENTION_HOURS}h retention`
+        : `Server admins only · ${SERVER_LOG_RETENTION_HOURS}h retention`
     );
   }
 }
@@ -2424,7 +2426,7 @@ function startLogsPolling() {
       loadServerLogs({ silent: true });
       loadCommandLogs({ silent: true });
     }
-  }, 12000);
+  }, SERVER_LOG_REFRESH_MS);
 }
 
 document.addEventListener("visibilitychange", () => {
@@ -2473,12 +2475,15 @@ async function loadCommandLogs(options = {}) {
     if (selectedGuildId !== guildId) return;
 
     const rows = Array.isArray(data.commands) ? data.commands : [];
+    const retentionHours = Number.isInteger(data.retentionHours) && data.retentionHours > 0
+      ? data.retentionHours
+      : SERVER_LOG_RETENTION_HOURS;
     target.replaceChildren();
 
     if (!rows.length) {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = "No commands recorded in the last 12 hours.";
+      empty.textContent = `No commands recorded in the last ${retentionHours} hours.`;
       target.appendChild(empty);
     } else {
       rows.forEach(log => {
@@ -2519,7 +2524,7 @@ async function loadCommandLogs(options = {}) {
     }
 
     const now = new Date().toLocaleTimeString();
-    setCommandLogsLiveState("Live", "Last updated " + now + " · admins only · 12h retention");
+    setCommandLogsLiveState("Live", `Last updated ${now} · admins only · ${retentionHours}h retention`);
   } catch (error) {
     console.error("Loading command logs failed:", error);
     if (!silent) {
@@ -2533,6 +2538,40 @@ async function loadCommandLogs(options = {}) {
   } finally {
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = !selectedGuildId;
   }
+}
+
+function humanizeLogLabel(value) {
+  return String(value || "Activity")
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b[a-z]/g, character => character.toUpperCase());
+}
+
+function formatLogValue(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    return value.map(formatLogValue).filter(Boolean).join(", ");
+  }
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function formatActivityDetails(details) {
+  if (details == null) return "";
+  if (typeof details !== "object") return String(details);
+  if (Array.isArray(details)) return details.map(formatLogValue).filter(Boolean).join(" · ");
+
+  return Object.entries(details)
+    .map(([key, value]) => {
+      const readableValue = formatLogValue(value);
+      return readableValue
+        ? `${humanizeLogLabel(key)}: ${readableValue}`
+        : "";
+    })
+    .filter(Boolean)
+    .join(" · ");
 }
 
 async function loadServerDetails(options = {}) {
@@ -2665,13 +2704,16 @@ async function loadServerLogs(options = {}) {
     if (selectedGuildId !== guildId) return;
 
     const logs = Array.isArray(data.logs) ? data.logs : [];
+    const retentionHours = Number.isInteger(data.retentionHours) && data.retentionHours > 0
+      ? data.retentionHours
+      : SERVER_LOG_RETENTION_HOURS;
     $("selectedLogCount").textContent = String(data.totalCount ?? logs.length);
     target.replaceChildren();
 
     if (!logs.length) {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = "No activity has been recorded for this server yet.";
+      empty.textContent = `No activity recorded in the last ${retentionHours} hours.`;
       target.appendChild(empty);
     } else {
       logs.forEach(log => {
@@ -2682,7 +2724,7 @@ async function loadServerLogs(options = {}) {
         top.className = "log-card-top";
         const event = document.createElement("div");
         event.className = "log-event";
-        event.textContent = log.event_type || "Activity";
+        event.textContent = humanizeLogLabel(log.event_type);
         const time = document.createElement("div");
         time.className = "log-time";
         time.textContent = log.created_at
@@ -2701,9 +2743,7 @@ async function loadServerLogs(options = {}) {
 
         const details = document.createElement("p");
         details.className = "log-details";
-        const safeDetails = log.details && typeof log.details === "object"
-          ? JSON.stringify(log.details, null, 0)
-          : (log.details ? String(log.details) : "");
+        const safeDetails = formatActivityDetails(log.details);
         details.textContent = safeDetails
           ? (safeDetails.length > 400 ? safeDetails.slice(0, 400) + "…" : safeDetails)
           : "No extra details";
@@ -2713,7 +2753,7 @@ async function loadServerLogs(options = {}) {
     }
 
     const now = new Date().toLocaleTimeString();
-    setLogsLiveState("Live", "Last updated " + now + " · auto-refresh on");
+    setLogsLiveState("Live", `Last updated ${now} · admins only · ${retentionHours}h retention`);
   } catch (error) {
     console.error("Loading activity logs failed:", error);
     if (!silent) {
