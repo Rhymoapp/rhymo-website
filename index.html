@@ -848,6 +848,79 @@ footer {
   min-height: 88px;
   resize: vertical;
 }
+.ai-attachment-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ai-attachment-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+}
+.ai-attachment-chip img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.ai-attachment-meta {
+  min-width: 0;
+  flex: 1;
+}
+.ai-attachment-meta strong {
+  display: block;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-attachment-meta span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+.ai-attachment-chip button {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.ai-attach-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ai-message-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ai-message-attachments img {
+  max-width: min(220px, 100%);
+  max-height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
+.ai-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 12px;
+  color: var(--muted);
+}
 .ai-compose-footer {
   display: flex;
   align-items: center;
@@ -1451,10 +1524,15 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
           <span>Your message</span>
-          <textarea id="aiPrompt" rows="3" maxlength="3000" placeholder="Ask a question…" disabled></textarea>
+          <textarea id="aiPrompt" rows="3" maxlength="3000" placeholder="Ask a question, or attach a photo / text file…" disabled></textarea>
         </label>
+        <div id="aiAttachmentPreview" class="ai-attachment-preview" hidden></div>
         <div class="ai-compose-footer">
-          <button type="button" class="btn-discord" id="aiLoginBtn">Sign in with Discord to chat</button>
+          <div class="ai-attach-row">
+            <input type="file" id="aiFileInput" accept="image/*,.txt,.md,.json,.js,.ts,.py,.html,.css,.csv" multiple hidden>
+            <button type="button" id="aiAttachBtn" disabled>Attach files</button>
+            <button type="button" class="btn-discord" id="aiLoginBtn">Sign in with Discord to chat</button>
+          </div>
           <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
           <button type="submit" class="primary" id="aiSendBtn" disabled>Send message</button>
         </div>
@@ -2433,15 +2511,19 @@ function renderAiMarkdown(text) {
   return html || `<p>${escapeHtml(source)}</p>`;
 }
 
+let aiPendingAttachments = [];
+
 function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
   const prompt = $("aiPrompt");
   const sendButton = $("aiSendBtn");
   const loginButton = $("aiLoginBtn");
+  const attachButton = $("aiAttachBtn");
   const status = $("aiStatus");
 
   if (prompt) prompt.disabled = !loggedIn || aiSending;
   if (sendButton) sendButton.disabled = !loggedIn || aiSending;
+  if (attachButton) attachButton.disabled = !loggedIn || aiSending;
   if (loginButton) loginButton.classList.toggle("hidden", loggedIn);
 
   if (status) {
@@ -2453,6 +2535,116 @@ function updateAiAssistantControls() {
       status.textContent = "Ready to chat.";
     }
   }
+}
+
+function renderAiAttachmentPreview() {
+  const host = $("aiAttachmentPreview");
+  if (!host) return;
+  host.replaceChildren();
+  if (!aiPendingAttachments.length) {
+    host.hidden = true;
+    return;
+  }
+  host.hidden = false;
+  aiPendingAttachments.forEach((item, index) => {
+    const chip = document.createElement("div");
+    chip.className = "ai-attachment-chip";
+    if (item.kind === "image" && item.previewUrl) {
+      const img = document.createElement("img");
+      img.src = item.previewUrl;
+      img.alt = item.name;
+      chip.appendChild(img);
+    }
+    const meta = document.createElement("div");
+    meta.className = "ai-attachment-meta";
+    const title = document.createElement("strong");
+    title.textContent = item.name;
+    const sub = document.createElement("span");
+    sub.textContent = item.kind === "image" ? "Image" : "Text file";
+    meta.append(title, sub);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Remove";
+    remove.addEventListener("click", () => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      aiPendingAttachments.splice(index, 1);
+      renderAiAttachmentPreview();
+    });
+    chip.append(meta, remove);
+    host.appendChild(chip);
+  });
+}
+
+function clearAiAttachments() {
+  aiPendingAttachments.forEach(item => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+  aiPendingAttachments = [];
+  renderAiAttachmentPreview();
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read file."));
+    reader.readAsText(file);
+  });
+}
+
+async function handleAiFilesSelected(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+
+  for (const file of files) {
+    if (aiPendingAttachments.length >= 4) {
+      toast("You can attach up to 4 files per message.");
+      break;
+    }
+    if (file.type.startsWith("image/")) {
+      if (file.size > 3 * 1024 * 1024) {
+        toast(file.name + " is too large (max 3MB per image).");
+        continue;
+      }
+      const dataUrl = await readFileAsDataUrl(file);
+      aiPendingAttachments.push({
+        kind: "image",
+        name: file.name,
+        mime: file.type,
+        dataUrl,
+        previewUrl: URL.createObjectURL(file)
+      });
+      continue;
+    }
+
+    const textLike =
+      file.type.startsWith("text/") ||
+      /\.(txt|md|json|js|ts|py|html|css|csv)$/i.test(file.name);
+    if (!textLike) {
+      toast(file.name + " is not a supported file type.");
+      continue;
+    }
+    if (file.size > 80 * 1024) {
+      toast(file.name + " is too large (max 80KB for text files).");
+      continue;
+    }
+    const text = await readFileAsText(file);
+    aiPendingAttachments.push({
+      kind: "text",
+      name: file.name,
+      text: text.slice(0, 20000)
+    });
+  }
+  renderAiAttachmentPreview();
 }
 
 function appendAiMessage(role, content, options = {}) {
@@ -2479,6 +2671,26 @@ function appendAiMessage(role, content, options = {}) {
   }
 
   message.append(label, body);
+
+  if (Array.isArray(options.attachments) && options.attachments.length) {
+    const row = document.createElement("div");
+    row.className = "ai-message-attachments";
+    options.attachments.forEach(item => {
+      if (item.kind === "image" && item.dataUrl) {
+        const img = document.createElement("img");
+        img.src = item.dataUrl;
+        img.alt = item.name || "Attached image";
+        row.appendChild(img);
+      } else {
+        const pill = document.createElement("span");
+        pill.className = "ai-file-pill";
+        pill.textContent = "📄 " + (item.name || "file");
+        row.appendChild(pill);
+      }
+    });
+    message.appendChild(row);
+  }
+
   target.appendChild(message);
   target.scrollTop = target.scrollHeight;
   return message;
@@ -2543,6 +2755,7 @@ function resetAIChat() {
   aiRequestVersion += 1;
   aiSending = false;
   aiConversation = [];
+  clearAiAttachments();
 
   const target = $("aiMessages");
   if (target) {
@@ -2564,12 +2777,48 @@ async function sendAiMessage(event) {
   if (!currentUser || aiSending) return;
 
   const prompt = $("aiPrompt");
-  const content = prompt?.value.trim();
-  if (!content) return;
+  const text = prompt?.value.trim() || "";
+  const attachments = aiPendingAttachments.slice();
+  if (!text && !attachments.length) return;
 
-  aiConversation.push({ role: "user", content });
-  appendAiMessage("user", content);
+  // Build API content: plain string or multimodal parts
+  let apiContent;
+  if (!attachments.length) {
+    apiContent = text;
+  } else {
+    const parts = [];
+    let combinedText = text || "Please review the attached file(s).";
+    attachments.forEach(item => {
+      if (item.kind === "text") {
+        combinedText += `\n\n[Attached file: ${item.name}]\n${item.text}`;
+      }
+    });
+    parts.push({ type: "text", text: combinedText.slice(0, 3000) });
+    attachments.forEach(item => {
+      if (item.kind === "image" && item.dataUrl) {
+        parts.push({
+          type: "image_url",
+          image_url: { url: item.dataUrl }
+        });
+      }
+    });
+    apiContent = parts;
+  }
+
+  const historyContent = typeof apiContent === "string"
+    ? apiContent
+    : (apiContent.find(part => part.type === "text")?.text || text || "Attachment");
+
+  aiConversation.push({ role: "user", content: apiContent });
+  appendAiMessage("user", historyContent, {
+    attachments: attachments.map(item => ({
+      kind: item.kind,
+      name: item.name,
+      dataUrl: item.dataUrl || null
+    }))
+  });
   prompt.value = "";
+  clearAiAttachments();
 
   aiSending = true;
   updateAiAssistantControls();
@@ -2577,9 +2826,29 @@ async function sendAiMessage(event) {
   const thinkingMessage = appendAiMessage("assistant", "Thinking…", { thinking: true });
 
   try {
+    // Only send last 12 turns; strip huge image payloads from older turns
+    const payloadMessages = aiConversation.slice(-12).map(message => {
+      if (message.role !== "user" || typeof message.content === "string") {
+        return {
+          role: message.role,
+          content: typeof message.content === "string"
+            ? message.content
+            : (message.content.find?.(part => part.type === "text")?.text || "")
+        };
+      }
+      // Keep images only on the latest user message to limit payload size
+      const isLatest = message === aiConversation[aiConversation.length - 1];
+      if (isLatest) return message;
+      const textPart = message.content.find(part => part.type === "text");
+      return {
+        role: "user",
+        content: textPart?.text || "Please review the attached file(s)."
+      };
+    });
+
     const response = await request("/api/ai/chat", {
       method: "POST",
-      body: JSON.stringify({ messages: aiConversation.slice(-12) })
+      body: JSON.stringify({ messages: payloadMessages })
     });
     const data = await response.json().catch(() => ({}));
 
@@ -2613,6 +2882,16 @@ async function sendAiMessage(event) {
 
 $("aiChatForm")?.addEventListener("submit", sendAiMessage);
 $("aiNewChatBtn")?.addEventListener("click", resetAIChat);
+$("aiAttachBtn")?.addEventListener("click", () => $("aiFileInput")?.click());
+$("aiFileInput")?.addEventListener("change", async event => {
+  try {
+    await handleAiFilesSelected(event.target.files);
+  } catch (error) {
+    toast(error.message || "Could not add that file.");
+  } finally {
+    event.target.value = "";
+  }
+});
 $("aiPrompt")?.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
