@@ -2587,7 +2587,7 @@ async function request(path, options = {}) {
   }
   try {
     const savedUser = JSON.parse(localStorage.getItem("rhymo_user") || "null");
-    if (savedUser?.id) headers.set("X-User-ID", savedUser.id);
+    // Only send session id — never a client-claimed user id (prevents identity spoofing)
     if (savedUser?.sid) headers.set("X-Rhymo-Session", savedUser.sid);
   } catch {}
   return fetch(api(path), {
