@@ -854,6 +854,28 @@ footer {
   margin: 0;
   font-size: 12px !important;
 }
+.ai-topic-disclaimers {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ai-topic-disclaimer {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #fbbf24 35%, var(--border));
+  background: color-mix(in srgb, #fbbf24 10%, rgba(0, 0, 0, 0.2));
+  color: #fde68a;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.ai-topic-disclaimer strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #fef3c7;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
 .ai-composer-form .field {
   margin: 0;
 }
@@ -1536,6 +1558,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
       </div>
 
       <p class="ai-privacy-note">AI may include mistakes; so double check answers.</p>
+      <div id="aiTopicDisclaimers" class="ai-topic-disclaimers" hidden></div>
 
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
@@ -2867,6 +2890,86 @@ async function handleAiFilesSelected(fileList) {
   renderAiAttachmentPreview();
 }
 
+const AI_TOPIC_PATTERNS = {
+  financial: {
+    label: "Financial disclaimer",
+    text: "This is not financial advice. Rhymo AI is not a financial advisor. Decisions about money, investing, taxes, or crypto can be risky — verify details and consider a qualified professional.",
+    patterns: [
+      /\b(stock|stocks|invest|investing|investment|portfolio|dividend|broker|etf|mutual fund|401k|ira|roth)\b/i,
+      /\b(crypto|bitcoin|ethereum|trading|forex|options trading|day trade)\b/i,
+      /\b(loan|mortgage|interest rate|credit score|budget|tax|taxes|irs|retirement)\b/i,
+      /\b(financial advice|money advice|should i buy|should i sell)\b/i
+    ]
+  },
+  medical: {
+    label: "Medical disclaimer",
+    text: "This is not medical advice. Rhymo AI is not a doctor or healthcare provider. For symptoms, conditions, medication, or emergencies, talk to a licensed clinician or seek urgent care.",
+    patterns: [
+      /\b(medical|medicine|medication|prescription|doctor|physician|clinic|hospital|diagnosis|diagnose)\b/i,
+      /\b(symptom|symptoms|treatment|therapy|disease|illness|infection|cancer|diabetes|blood pressure)\b/i,
+      /\b(mental health|depression|anxiety|suicid|overdose|pregnant|pregnancy)\b/i,
+      /\b(dosage|mg\b|pill|vaccine|antibiotics)\b/i
+    ]
+  },
+  legal: {
+    label: "Legal disclaimer",
+    text: "This is not legal advice. Rhymo AI is not a lawyer and this is not an attorney-client relationship. Laws vary by location — consult a licensed attorney for your situation.",
+    patterns: [
+      /\b(legal advice|lawyer|attorney|sue|lawsuit|litigation|court|judge|plaintiff|defendant)\b/i,
+      /\b(contract|liability|statute|regulation|compliance|copyright|trademark|patent)\b/i,
+      /\b(criminal|felony|misdemeanor|custody|divorce|immigration|visa|warrant)\b/i,
+      /\b(terms of service|privacy law|gdpr|hipaa|nda)\b/i
+    ]
+  }
+};
+
+let aiActiveTopics = new Set();
+
+function detectAiTopics(text) {
+  const found = [];
+  const source = String(text || "");
+  if (!source.trim()) return found;
+  Object.entries(AI_TOPIC_PATTERNS).forEach(([key, config]) => {
+    if (config.patterns.some(pattern => pattern.test(source))) found.push(key);
+  });
+  return found;
+}
+
+function updateAiTopicDisclaimers(text) {
+  detectAiTopics(text).forEach(topic => aiActiveTopics.add(topic));
+  renderAiTopicDisclaimers();
+}
+
+function renderAiTopicDisclaimers() {
+  const host = $("aiTopicDisclaimers");
+  if (!host) return;
+  host.replaceChildren();
+  if (!aiActiveTopics.size) {
+    host.hidden = true;
+    return;
+  }
+  host.hidden = false;
+  ["financial", "medical", "legal"].forEach(key => {
+    if (!aiActiveTopics.has(key)) return;
+    const config = AI_TOPIC_PATTERNS[key];
+    if (!config) return;
+    const box = document.createElement("div");
+    box.className = "ai-topic-disclaimer";
+    box.setAttribute("role", "note");
+    const title = document.createElement("strong");
+    title.textContent = config.label;
+    const body = document.createElement("span");
+    body.textContent = config.text;
+    box.append(title, body);
+    host.appendChild(box);
+  });
+}
+
+function clearAiTopicDisclaimers() {
+  aiActiveTopics = new Set();
+  renderAiTopicDisclaimers();
+}
+
 function appendAiMessage(role, content, options = {}) {
   const target = $("aiMessages");
   if (!target) return null;
@@ -2976,6 +3079,7 @@ function resetAIChat() {
   aiSending = false;
   aiConversation = [];
   clearAiAttachments();
+  clearAiTopicDisclaimers();
 
   const target = $("aiMessages");
   if (target) {
@@ -3044,6 +3148,7 @@ async function sendAiMessage(event) {
       dataUrl: item.dataUrl || null
     }))
   });
+  updateAiTopicDisclaimers(historyContent);
   prompt.value = "";
   clearAiAttachments();
 
@@ -3100,6 +3205,7 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
+    updateAiTopicDisclaimers(data.reply);
     // Server is source of truth for quota; keep local UI in sync
     applyServerAiUsage(data);
     if (data.cooldown || isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
