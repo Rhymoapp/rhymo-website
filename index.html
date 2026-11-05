@@ -2385,6 +2385,7 @@ function setUser(user) {
   $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
   $("homeLoginBtn")?.classList.add("hidden");
   updateAiAssistantControls();
+  if (typeof syncAiUsageFromServer === "function") syncAiUsageFromServer();
   checkOwner();
   // Auto-load manageable servers after login
   if (typeof loadServers === "function") {
@@ -2566,6 +2567,43 @@ function incrementAiUsageCount(by = 1) {
     return next;
   } catch {
     return getAiUsageCount();
+  }
+}
+
+function applyServerAiUsage(data = {}) {
+  if (!getAiUserStorageId()) return;
+  if (Number.isFinite(Number(data.usageCount))) {
+    aiStorageSet(
+      "rhymo_ai_usage_count",
+      Math.min(AI_MAX_CHAT_MESSAGES, Number(data.usageCount))
+    );
+    if (!aiStorageGet("rhymo_ai_usage_window_start")) {
+      aiStorageSet("rhymo_ai_usage_window_start", Date.now());
+    }
+  }
+  if (data.cooldownUntil) {
+    const until = new Date(data.cooldownUntil).getTime();
+    if (Number.isFinite(until) && until > Date.now()) {
+      aiStorageSet("rhymo_ai_cooldown_until", until);
+      startAiCooldownTicker();
+    }
+  }
+  updateAiAssistantControls();
+}
+
+async function syncAiUsageFromServer() {
+  if (!currentUser?.id) return;
+  try {
+    const response = await request("/api/ai/usage");
+    if (!response.ok) return;
+    const data = await response.json();
+    applyServerAiUsage(data);
+    if (data.blocked) {
+      const status = $("aiStatus");
+      if (status) status.textContent = data.message || getAiLimitMessage();
+    }
+  } catch (error) {
+    console.error("AI usage sync failed:", error);
   }
 }
 
@@ -3046,6 +3084,12 @@ async function sendAiMessage(event) {
       setUser(null);
       return;
     }
+    if (response.status === 429) {
+      applyServerAiUsage(data);
+      thinkingMessage?.remove();
+      $("aiStatus").textContent = data.error || getAiLimitMessage();
+      return;
+    }
     if (!response.ok) {
       throw new Error(data.error || `Request failed (${response.status})`);
     }
@@ -3056,9 +3100,9 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
-    // Count user + assistant toward the global 200 limit (survives New chat)
-    incrementAiUsageCount(2);
-    if (isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
+    // Server is source of truth for quota; keep local UI in sync
+    applyServerAiUsage(data);
+    if (data.cooldown || isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
       $("aiStatus").textContent = getAiLimitMessage();
     } else {
       $("aiStatus").textContent = "Ready — press Send or Enter.";
