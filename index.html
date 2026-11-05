@@ -2464,54 +2464,74 @@ $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
 const AI_GREETING = "Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.";
-const AI_MAX_CHAT_MESSAGES = 200; // global cap — NOT reset by New chat
+const AI_MAX_CHAT_MESSAGES = 200; // per Discord user — NOT reset by New chat
 const AI_API_HISTORY_LIMIT = 10;  // only recent turns are sent to the API (saves usage)
 const AI_MAX_INPUT_CHARS = 2000;
 const AI_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
-const AI_COOLDOWN_KEY = "rhymo_ai_cooldown_until";
-const AI_USAGE_COUNT_KEY = "rhymo_ai_usage_count";
-const AI_USAGE_WINDOW_KEY = "rhymo_ai_usage_window_start";
 let aiCodeDownloadCounter = 0;
 let aiCooldownTimer = null;
 
+// Quota is stored per Discord user ID so different accounts don't share limits
+function getAiUserStorageId() {
+  return currentUser?.id ? String(currentUser.id) : null;
+}
+
+function aiStorageKey(base) {
+  const userId = getAiUserStorageId();
+  return userId ? base + ":" + userId : null;
+}
+
+function aiStorageGet(base) {
+  const key = aiStorageKey(base);
+  if (!key) return null;
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function aiStorageSet(base, value) {
+  const key = aiStorageKey(base);
+  if (!key) return;
+  try { localStorage.setItem(key, String(value)); } catch {}
+}
+
+function aiStorageRemove(base) {
+  const key = aiStorageKey(base);
+  if (!key) return;
+  try { localStorage.removeItem(key); } catch {}
+}
+
 function getAiCooldownUntil() {
-  try {
-    const raw = localStorage.getItem(AI_COOLDOWN_KEY);
-    const value = raw ? Number(raw) : 0;
-    return Number.isFinite(value) ? value : 0;
-  } catch {
-    return 0;
-  }
+  const raw = aiStorageGet("rhymo_ai_cooldown_until");
+  const value = raw ? Number(raw) : 0;
+  return Number.isFinite(value) ? value : 0;
 }
 
 function isAiCooldownActive() {
+  if (!getAiUserStorageId()) return false;
   return Date.now() < getAiCooldownUntil();
 }
 
 function startAiCooldown() {
-  const until = Date.now() + AI_COOLDOWN_MS;
-  try {
-    localStorage.setItem(AI_COOLDOWN_KEY, String(until));
-  } catch {}
+  if (!getAiUserStorageId()) return;
+  aiStorageSet("rhymo_ai_cooldown_until", Date.now() + AI_COOLDOWN_MS);
   updateAiAssistantControls();
   startAiCooldownTicker();
 }
 
 function clearAiCooldownIfExpired() {
+  if (!getAiUserStorageId()) return;
   const until = getAiCooldownUntil();
   if (until && Date.now() >= until) {
-    try {
-      localStorage.removeItem(AI_COOLDOWN_KEY);
-      localStorage.removeItem(AI_USAGE_COUNT_KEY);
-      localStorage.removeItem(AI_USAGE_WINDOW_KEY);
-    } catch {}
+    aiStorageRemove("rhymo_ai_cooldown_until");
+    aiStorageRemove("rhymo_ai_usage_count");
+    aiStorageRemove("rhymo_ai_usage_window_start");
   }
 }
 
 function getAiUsageCount() {
+  if (!getAiUserStorageId()) return 0;
   try {
     if (isAiCooldownActive()) {
-      const raw = localStorage.getItem(AI_USAGE_COUNT_KEY);
+      const raw = aiStorageGet("rhymo_ai_usage_count");
       const value = raw ? Number(raw) : AI_MAX_CHAT_MESSAGES;
       return Math.min(
         AI_MAX_CHAT_MESSAGES,
@@ -2519,14 +2539,14 @@ function getAiUsageCount() {
       );
     }
 
-    const windowStart = Number(localStorage.getItem(AI_USAGE_WINDOW_KEY) || 0);
+    const windowStart = Number(aiStorageGet("rhymo_ai_usage_window_start") || 0);
     if (windowStart && Date.now() - windowStart > AI_COOLDOWN_MS) {
-      localStorage.removeItem(AI_USAGE_COUNT_KEY);
-      localStorage.removeItem(AI_USAGE_WINDOW_KEY);
+      aiStorageRemove("rhymo_ai_usage_count");
+      aiStorageRemove("rhymo_ai_usage_window_start");
       return 0;
     }
 
-    const raw = localStorage.getItem(AI_USAGE_COUNT_KEY);
+    const raw = aiStorageGet("rhymo_ai_usage_count");
     const value = raw ? Number(raw) : 0;
     return Number.isFinite(value) && value > 0 ? value : 0;
   } catch {
@@ -2535,12 +2555,13 @@ function getAiUsageCount() {
 }
 
 function incrementAiUsageCount(by = 1) {
+  if (!getAiUserStorageId()) return 0;
   try {
-    if (!localStorage.getItem(AI_USAGE_WINDOW_KEY)) {
-      localStorage.setItem(AI_USAGE_WINDOW_KEY, String(Date.now()));
+    if (!aiStorageGet("rhymo_ai_usage_window_start")) {
+      aiStorageSet("rhymo_ai_usage_window_start", Date.now());
     }
     const next = Math.min(AI_MAX_CHAT_MESSAGES, getAiUsageCount() + by);
-    localStorage.setItem(AI_USAGE_COUNT_KEY, String(next));
+    aiStorageSet("rhymo_ai_usage_count", next);
     if (next >= AI_MAX_CHAT_MESSAGES && !isAiCooldownActive()) startAiCooldown();
     return next;
   } catch {
