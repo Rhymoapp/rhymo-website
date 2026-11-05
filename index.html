@@ -1098,6 +1098,101 @@ body.drawer-open {
   .ai-compose-footer #aiStatus { flex-basis: 100%; }
 }
 
+/* Home server showcase (live guilds) */
+.home-servers-panel {
+  overflow: hidden;
+}
+.home-servers-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.server-marquee {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.server-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: max-content;
+  padding: 8px 0 4px;
+}
+.server-marquee-track.scrolling {
+  animation: serverMarquee 42s linear infinite;
+}
+.server-marquee:hover .server-marquee-track.scrolling {
+  animation-play-state: paused;
+}
+@keyframes serverMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.server-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: max-content;
+  flex-shrink: 0;
+}
+.server-chip-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+.server-chip-icon.placeholder {
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(168,85,247,0.25));
+}
+.server-chip-meta {
+  display: grid;
+  gap: 2px;
+}
+.server-chip-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 750;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.server-chip-name .verified {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #052e16;
+  display: inline-grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.server-chip-members {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .server-chip-icon { width: 44px; height: 44px; }
+  .server-chip-name { font-size: 15px; }
+  .server-marquee-track { gap: 22px; }
+}
+
 /* Invite banner */
 .invite-banner {
   background:
@@ -1822,6 +1917,21 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <h2>Your workspace</h2>
       <p id="homeAccountMessage" class="muted">Sign in with Discord to see your profile here.</p>
       <button class="btn-discord" id="homeLoginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
+    </article>
+
+    <article class="panel full home-servers-panel">
+      <div class="home-servers-header">
+        <div>
+          <h2 style="margin:0 0 4px;">Servers running Rhymo</h2>
+          <p class="muted" style="margin:0;" id="homeServersSubtitle">Live communities where Rhymo is online.</p>
+        </div>
+        <span class="pill" id="homeServersCount">—</span>
+      </div>
+      <div class="server-marquee" id="homeServerMarquee" aria-label="Servers using Rhymo">
+        <div class="server-marquee-track" id="homeServerTrack">
+          <div class="empty" id="homeServersEmpty">Loading servers…</div>
+        </div>
+      </div>
     </article>
   </div>
 </section>
@@ -4816,6 +4926,106 @@ try {
 }
 
 /* ===== BOT METRICS ===== */
+function formatMemberCount(n) {
+  const value = Number(n) || 0;
+  return value.toLocaleString() + (value === 1 ? " member" : " members");
+}
+
+function buildServerChip(server) {
+  const chip = document.createElement("div");
+  chip.className = "server-chip";
+
+  const name = String(server.name || "Discord Server");
+  if (server.icon) {
+    const img = document.createElement("img");
+    img.className = "server-chip-icon";
+    img.src = server.icon;
+    img.alt = "";
+    img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => {
+      const ph = document.createElement("div");
+      ph.className = "server-chip-icon placeholder";
+      ph.textContent = name.slice(0, 1).toUpperCase();
+      img.replaceWith(ph);
+    };
+    chip.appendChild(img);
+  } else {
+    const ph = document.createElement("div");
+    ph.className = "server-chip-icon placeholder";
+    ph.textContent = name.slice(0, 1).toUpperCase();
+    chip.appendChild(ph);
+  }
+
+  const meta = document.createElement("div");
+  meta.className = "server-chip-meta";
+  const nameRow = document.createElement("div");
+  nameRow.className = "server-chip-name";
+  nameRow.appendChild(document.createTextNode(name));
+  const verified = document.createElement("span");
+  verified.className = "verified";
+  verified.title = "Rhymo is in this server";
+  verified.textContent = "✓";
+  nameRow.appendChild(verified);
+  const members = document.createElement("div");
+  members.className = "server-chip-members";
+  members.textContent = formatMemberCount(server.memberCount);
+  meta.append(nameRow, members);
+  chip.appendChild(meta);
+  return chip;
+}
+
+async function refreshHomeServers() {
+  const track = $("homeServerTrack");
+  const countPill = $("homeServersCount");
+  const subtitle = $("homeServersSubtitle");
+  if (!track) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bot/servers`, { cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Failed to load servers");
+
+    const servers = Array.isArray(data.servers) ? data.servers : [];
+    track.replaceChildren();
+    track.classList.remove("scrolling");
+
+    if (!data.online || !servers.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = data.online
+        ? "Rhymo is online, but no server details are available yet."
+        : "Rhymo is offline — server list will appear when the bot is back.";
+      track.appendChild(empty);
+      if (countPill) countPill.textContent = "0 servers";
+      if (subtitle) subtitle.textContent = "Live communities where Rhymo is online.";
+      return;
+    }
+
+    // Duplicate list for seamless infinite scroll when enough servers
+    const renderList = servers.length >= 3 ? servers.concat(servers) : servers;
+    renderList.forEach(server => track.appendChild(buildServerChip(server)));
+    if (servers.length >= 3) track.classList.add("scrolling");
+
+    if (countPill) {
+      const total = Number(data.serverCount) || servers.length;
+      countPill.textContent = total + (total === 1 ? " server" : " servers");
+    }
+    if (subtitle) {
+      subtitle.textContent = "Live from Rhymo’s current server list · largest communities first";
+    }
+  } catch (error) {
+    console.error("Home servers failed:", error);
+    track.replaceChildren();
+    track.classList.remove("scrolling");
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Could not load live servers right now.";
+    track.appendChild(empty);
+    if (countPill) countPill.textContent = "—";
+  }
+}
+
 async function refreshBotMetrics() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/bot/metrics`, { cache: "no-store" });
@@ -4847,6 +5057,8 @@ async function refreshBotMetrics() {
 
 refreshBotMetrics();
 setInterval(refreshBotMetrics, 15000);
+refreshHomeServers();
+setInterval(refreshHomeServers, 30000);
 refreshNotifications();
 
 const params = new URLSearchParams(location.search);
