@@ -1520,7 +1520,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="ai-panel-header">
         <div>
           <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · up to 200 messages per chat</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · 200 messages, then a 2-hour cooldown</p>
         </div>
         <div class="ai-header-actions">
           <span class="pill" id="aiMessageCount">0 / 200</span>
@@ -1535,7 +1535,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
         </div>
       </div>
 
-      <p class="ai-privacy-note">Messages go to Groq (Meta Llama). Don’t send passwords, tokens, or private keys. This chat stops at 200 messages — start a new chat anytime.</p>
+      <p class="ai-privacy-note">Messages go to Groq (Meta Llama). Don’t send passwords, tokens, or private keys. After 200 messages you must wait 2 hours — New chat does not reset that limit.</p>
 
       <form id="aiChatForm" class="ai-composer-form">
         <label class="field" for="aiPrompt">
@@ -2464,17 +2464,15 @@ $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
 const AI_GREETING = "Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.";
-const AI_MAX_CHAT_MESSAGES = 200; // total user + assistant messages in one chat
+const AI_MAX_CHAT_MESSAGES = 200; // global cap — NOT reset by New chat
 const AI_API_HISTORY_LIMIT = 10;  // only recent turns are sent to the API (saves usage)
 const AI_MAX_INPUT_CHARS = 2000;
 const AI_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
 const AI_COOLDOWN_KEY = "rhymo_ai_cooldown_until";
+const AI_USAGE_COUNT_KEY = "rhymo_ai_usage_count";
+const AI_USAGE_WINDOW_KEY = "rhymo_ai_usage_window_start";
 let aiCodeDownloadCounter = 0;
 let aiCooldownTimer = null;
-
-function getAiMessageCount() {
-  return aiConversation.length;
-}
 
 function getAiCooldownUntil() {
   try {
@@ -2502,7 +2500,51 @@ function startAiCooldown() {
 function clearAiCooldownIfExpired() {
   const until = getAiCooldownUntil();
   if (until && Date.now() >= until) {
-    try { localStorage.removeItem(AI_COOLDOWN_KEY); } catch {}
+    try {
+      localStorage.removeItem(AI_COOLDOWN_KEY);
+      localStorage.removeItem(AI_USAGE_COUNT_KEY);
+      localStorage.removeItem(AI_USAGE_WINDOW_KEY);
+    } catch {}
+  }
+}
+
+function getAiUsageCount() {
+  try {
+    if (isAiCooldownActive()) {
+      const raw = localStorage.getItem(AI_USAGE_COUNT_KEY);
+      const value = raw ? Number(raw) : AI_MAX_CHAT_MESSAGES;
+      return Math.min(
+        AI_MAX_CHAT_MESSAGES,
+        Number.isFinite(value) ? value : AI_MAX_CHAT_MESSAGES
+      );
+    }
+
+    const windowStart = Number(localStorage.getItem(AI_USAGE_WINDOW_KEY) || 0);
+    if (windowStart && Date.now() - windowStart > AI_COOLDOWN_MS) {
+      localStorage.removeItem(AI_USAGE_COUNT_KEY);
+      localStorage.removeItem(AI_USAGE_WINDOW_KEY);
+      return 0;
+    }
+
+    const raw = localStorage.getItem(AI_USAGE_COUNT_KEY);
+    const value = raw ? Number(raw) : 0;
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function incrementAiUsageCount(by = 1) {
+  try {
+    if (!localStorage.getItem(AI_USAGE_WINDOW_KEY)) {
+      localStorage.setItem(AI_USAGE_WINDOW_KEY, String(Date.now()));
+    }
+    const next = Math.min(AI_MAX_CHAT_MESSAGES, getAiUsageCount() + by);
+    localStorage.setItem(AI_USAGE_COUNT_KEY, String(next));
+    if (next >= AI_MAX_CHAT_MESSAGES && !isAiCooldownActive()) startAiCooldown();
+    return next;
+  } catch {
+    return getAiUsageCount();
   }
 }
 
@@ -2543,7 +2585,7 @@ function startAiCooldownTicker() {
 
 function updateAiMessageCount() {
   const el = $("aiMessageCount");
-  if (el) el.textContent = getAiMessageCount() + " / " + AI_MAX_CHAT_MESSAGES;
+  if (el) el.textContent = getAiUsageCount() + " / " + AI_MAX_CHAT_MESSAGES;
 }
 
 function updateAiCharCount() {
@@ -2623,7 +2665,7 @@ function updateAiAssistantControls() {
   const loggedIn = !!currentUser;
   clearAiCooldownIfExpired();
   const coolingDown = isAiCooldownActive();
-  const atLimit = getAiMessageCount() >= AI_MAX_CHAT_MESSAGES;
+  const atLimit = getAiUsageCount() >= AI_MAX_CHAT_MESSAGES;
   const blocked = coolingDown || atLimit;
   const prompt = $("aiPrompt");
   const sendButton = $("aiSendBtn");
@@ -2895,14 +2937,8 @@ async function sendAiMessage(event) {
   event.preventDefault();
   if (!currentUser || aiSending) return;
 
-  if (isAiCooldownActive()) {
-    $("aiStatus").textContent = getAiLimitMessage();
-    updateAiAssistantControls();
-    return;
-  }
-
-  if (getAiMessageCount() >= AI_MAX_CHAT_MESSAGES) {
-    startAiCooldown();
+  if (isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
+    if (getAiUsageCount() >= AI_MAX_CHAT_MESSAGES && !isAiCooldownActive()) startAiCooldown();
     $("aiStatus").textContent = getAiLimitMessage();
     updateAiAssistantControls();
     return;
@@ -2999,8 +3035,9 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
-    if (getAiMessageCount() >= AI_MAX_CHAT_MESSAGES) {
-      startAiCooldown();
+    // Count user + assistant toward the global 200 limit (survives New chat)
+    incrementAiUsageCount(2);
+    if (isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
       $("aiStatus").textContent = getAiLimitMessage();
     } else {
       $("aiStatus").textContent = "Ready — press Send or Enter.";
