@@ -1185,6 +1185,47 @@ body.drawer-open {
   margin: 0;
   white-space: pre-wrap;
 }
+.post-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.post-card-actions button {
+  font-size: 12.5px;
+  padding: 7px 12px;
+}
+.post-card.editing {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(129, 140, 248, 0.06);
+}
+.post-edit-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.post-edit-form textarea {
+  min-height: 120px;
+}
+.post-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.post-badge.draft {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+}
 
 /* Status dots */
 .status-dot {
@@ -4261,29 +4302,206 @@ function renderPostList(targetId, posts, emptyText) {
   posts.forEach(post => {
     const item = document.createElement("div");
     item.className = "post-card";
+    item.dataset.postId = String(post.id);
+
     const title = document.createElement("strong");
     title.textContent = post.title || "Untitled";
+    if (isOwner && post.published === false) {
+      const badge = document.createElement("span");
+      badge.className = "post-badge draft";
+      badge.textContent = "Draft";
+      title.appendChild(badge);
+    }
+
     const date = document.createElement("p");
     date.className = "post-date";
-    date.textContent = post.created_at ? new Date(post.created_at).toLocaleString() : "";
+    const created = post.created_at ? new Date(post.created_at).toLocaleString() : "";
+    const updated = post.updated_at && post.updated_at !== post.created_at
+      ? " · Updated " + new Date(post.updated_at).toLocaleString()
+      : "";
+    date.textContent = created + updated;
+
     const content = document.createElement("p");
     content.className = "post-body";
     content.textContent = post.content || "";
+
     item.append(title, date, content);
+
+    // Edit / Delete only for the Rhymo owner session
+    if (isOwner && post.id) {
+      const actions = document.createElement("div");
+      actions.className = "post-card-actions";
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => openPostEditor(item, post));
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", () => handleDeletePost(post));
+
+      actions.append(editBtn, deleteBtn);
+      item.appendChild(actions);
+    }
+
     target.appendChild(item);
   });
 }
 
+function openPostEditor(card, post) {
+  if (!isOwner || !card || !post?.id) return;
+
+  // Close any other open editors
+  document.querySelectorAll(".post-card.editing").forEach(el => {
+    if (el !== card) {
+      const cancel = el.querySelector("[data-cancel-edit]");
+      if (cancel) cancel.click();
+    }
+  });
+
+  if (card.classList.contains("editing")) return;
+  card.classList.add("editing");
+
+  const body = card.querySelector(".post-body");
+  const actions = card.querySelector(".post-card-actions");
+  if (body) body.hidden = true;
+  if (actions) actions.hidden = true;
+
+  const form = document.createElement("div");
+  form.className = "post-edit-form";
+
+  const titleInput = document.createElement("input");
+  titleInput.type = "text";
+  titleInput.maxLength = 200;
+  titleInput.value = post.title || "";
+  titleInput.setAttribute("aria-label", "Edit title");
+
+  const contentInput = document.createElement("textarea");
+  contentInput.value = post.content || "";
+  contentInput.setAttribute("aria-label", "Edit content");
+
+  const publishedLabel = document.createElement("label");
+  publishedLabel.style.display = "flex";
+  publishedLabel.style.alignItems = "center";
+  publishedLabel.style.gap = "8px";
+  publishedLabel.style.fontSize = "13px";
+  publishedLabel.style.color = "var(--muted)";
+  const publishedCheck = document.createElement("input");
+  publishedCheck.type = "checkbox";
+  publishedCheck.checked = post.published !== false;
+  publishedLabel.append(publishedCheck, document.createTextNode("Published"));
+
+  const formActions = document.createElement("div");
+  formActions.className = "post-card-actions";
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "primary";
+  saveBtn.textContent = "Save changes";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.dataset.cancelEdit = "1";
+
+  const status = document.createElement("p");
+  status.className = "muted";
+  status.style.margin = "0";
+
+  cancelBtn.addEventListener("click", () => {
+    form.remove();
+    card.classList.remove("editing");
+    if (body) body.hidden = false;
+    if (actions) actions.hidden = false;
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    if (!title || !content) {
+      status.textContent = "Title and content are required.";
+      return;
+    }
+    saveBtn.disabled = true;
+    cancelBtn.disabled = true;
+    status.textContent = "Saving...";
+    try {
+      await updateSitePost(post.id, {
+        title,
+        content,
+        published: publishedCheck.checked
+      });
+      toast("Post updated.");
+      await loadSitePosts();
+    } catch (error) {
+      console.error("Update post failed:", error);
+      status.textContent = error.message || "Could not update post.";
+      toast(error.message || "Could not update post.");
+      saveBtn.disabled = false;
+      cancelBtn.disabled = false;
+    }
+  });
+
+  formActions.append(saveBtn, cancelBtn);
+  form.append(titleInput, contentInput, publishedLabel, formActions, status);
+  card.appendChild(form);
+  titleInput.focus();
+}
+
+async function handleDeletePost(post) {
+  if (!isOwner || !post?.id) return;
+  const label = post.title ? `"${post.title}"` : "this post";
+  const ok = window.confirm(
+    `Delete ${label}?\n\nThis cannot be undone.`
+  );
+  if (!ok) return;
+  try {
+    await deleteSitePost(post.id);
+    toast("Post deleted.");
+    await loadSitePosts();
+  } catch (error) {
+    console.error("Delete post failed:", error);
+    toast(error.message || "Could not delete post.");
+  }
+}
+
 async function loadSitePosts() {
   try {
-    const response = await request("/api/site-posts");
+    // Owner sees drafts too; everyone else only published posts
+    const path = isOwner ? "/api/admin/posts" : "/api/site-posts";
+    const response = await request(path);
+    if (response.status === 401 || response.status === 403) {
+      // Session may not be owner anymore — fall back to public list
+      if (isOwner) {
+        isOwner = false;
+        if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
+        if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
+      }
+      const publicRes = await request("/api/site-posts");
+      if (!publicRes.ok) throw new Error("Failed to load posts");
+      const publicData = await publicRes.json();
+      const posts = Array.isArray(publicData.posts) ? publicData.posts : [];
+      renderPostList("notificationList", posts.filter(p => p.type === "announcement"), "No announcements have been published.");
+      renderPostList("changelogList", posts.filter(p => p.type === "changelog"), "No changelog entries published yet.");
+      return;
+    }
     if (!response.ok) throw new Error("Failed to load posts");
     const data = await response.json();
     const posts = Array.isArray(data.posts) ? data.posts : [];
     const announcements = posts.filter(p => p.type === "announcement");
     const changelog = posts.filter(p => p.type === "changelog");
-    renderPostList("notificationList", announcements, "No announcements have been published.");
-    renderPostList("changelogList", changelog, "No changelog entries published yet.");
+    renderPostList(
+      "notificationList",
+      announcements,
+      isOwner ? "No announcements yet. Publish one above." : "No announcements have been published."
+    );
+    renderPostList(
+      "changelogList",
+      changelog,
+      isOwner ? "No changelog entries yet. Publish one above." : "No changelog entries published yet."
+    );
   } catch (error) {
     console.error("Loading site posts failed:", error);
     renderPostList("notificationList", [], "Announcements are temporarily unavailable.");
@@ -4299,6 +4517,25 @@ async function createSitePost(type, title, content, published) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Could not create post");
   return data.post;
+}
+
+async function updateSitePost(id, fields) {
+  const response = await request("/api/admin/posts/" + encodeURIComponent(id), {
+    method: "PATCH",
+    body: JSON.stringify(fields)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Could not update post");
+  return data.post;
+}
+
+async function deleteSitePost(id) {
+  const response = await request("/api/admin/posts/" + encodeURIComponent(id), {
+    method: "DELETE"
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Could not delete post");
+  return true;
 }
 
 async function handleCreatePost(type, titleId, contentId, msgId, published) {
