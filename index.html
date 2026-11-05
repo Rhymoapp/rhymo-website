@@ -1109,6 +1109,13 @@ body.drawer-open {
   gap: 12px;
   margin-bottom: 14px;
 }
+.home-servers-header > div {
+  min-width: 0;
+}
+#homeServersCount {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 .server-marquee {
   position: relative;
   overflow: hidden;
@@ -1922,8 +1929,8 @@ body.session-checking > :not(#sessionBoot):not(script) {
     <article class="panel full home-servers-panel">
       <div class="home-servers-header">
         <div>
-          <h2 style="margin:0 0 4px;">Servers running Rhymo</h2>
-          <p class="muted" style="margin:0;" id="homeServersSubtitle">Live communities where Rhymo is online.</p>
+          <h2 style="margin:0 0 4px;">Top 5 servers running Rhymo</h2>
+          <p class="muted" style="margin:0;" id="homeServersSubtitle">Up to 5 communities, ranked by member count.</p>
         </div>
         <span class="pill" id="homeServersCount">—</span>
       </div>
@@ -4926,6 +4933,8 @@ try {
 }
 
 /* ===== BOT METRICS ===== */
+const HOME_SERVER_SHOWCASE_LIMIT = 5;
+
 function formatMemberCount(n) {
   const value = Number(n) || 0;
   return value.toLocaleString() + (value === 1 ? " member" : " members");
@@ -4987,10 +4996,19 @@ async function refreshHomeServers() {
     if (!response.ok) throw new Error(data.error || "Failed to load servers");
 
     const servers = Array.isArray(data.servers) ? data.servers : [];
+    const topServers = servers
+      .slice()
+      .sort((a, b) => {
+        const aCount = Number(a?.memberCount);
+        const bCount = Number(b?.memberCount);
+        return (Number.isFinite(bCount) ? bCount : 0) -
+          (Number.isFinite(aCount) ? aCount : 0);
+      })
+      .slice(0, HOME_SERVER_SHOWCASE_LIMIT);
     track.replaceChildren();
     track.classList.remove("scrolling");
 
-    if (!data.online || !servers.length) {
+    if (!data.online || !topServers.length) {
       const empty = document.createElement("div");
       empty.className = "empty";
       empty.textContent = data.online
@@ -5002,17 +5020,18 @@ async function refreshHomeServers() {
       return;
     }
 
-    // Duplicate list for seamless infinite scroll when enough servers
-    const renderList = servers.length >= 3 ? servers.concat(servers) : servers;
+    // Duplicate the top-five list for seamless scrolling.
+    const renderList = topServers.length >= 3
+      ? topServers.concat(topServers)
+      : topServers;
     renderList.forEach(server => track.appendChild(buildServerChip(server)));
-    if (servers.length >= 3) track.classList.add("scrolling");
+    if (topServers.length >= 3) track.classList.add("scrolling");
 
     if (countPill) {
-      const total = Number(data.serverCount) || servers.length;
-      countPill.textContent = total + (total === 1 ? " server" : " servers");
+      countPill.textContent = "Top " + topServers.length;
     }
     if (subtitle) {
-      subtitle.textContent = "Live from Rhymo’s current server list · largest communities first";
+      subtitle.textContent = "Up to 5 communities, ranked by member count.";
     }
   } catch (error) {
     console.error("Home servers failed:", error);
