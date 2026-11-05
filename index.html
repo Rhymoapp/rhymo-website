@@ -2923,34 +2923,47 @@ const AI_TOPIC_PATTERNS = {
   }
 };
 
-let aiActiveTopics = new Set();
-
 function detectAiTopics(text) {
-  const found = [];
+  const found = new Set();
   const source = String(text || "");
   if (!source.trim()) return found;
   Object.entries(AI_TOPIC_PATTERNS).forEach(([key, config]) => {
-    if (config.patterns.some(pattern => pattern.test(source))) found.push(key);
+    if (config.patterns.some(pattern => pattern.test(source))) found.add(key);
   });
   return found;
 }
 
-function updateAiTopicDisclaimers(text) {
-  detectAiTopics(text).forEach(topic => aiActiveTopics.add(topic));
-  renderAiTopicDisclaimers();
+function getRecentAiTopicSource() {
+  // Only the latest exchange keeps a disclaimer visible.
+  // Once the chat moves on from finance/medical/legal, disclaimers go away.
+  const recent = aiConversation.slice(-2);
+  return recent.map(message => {
+    if (typeof message.content === "string") return message.content;
+    if (Array.isArray(message.content)) {
+      return message.content
+        .filter(part => part?.type === "text")
+        .map(part => part.text || "")
+        .join("\n");
+    }
+    return "";
+  }).join("\n");
 }
 
-function renderAiTopicDisclaimers() {
+function refreshAiTopicDisclaimers() {
+  renderAiTopicDisclaimers(detectAiTopics(getRecentAiTopicSource()));
+}
+
+function renderAiTopicDisclaimers(topics = new Set()) {
   const host = $("aiTopicDisclaimers");
   if (!host) return;
   host.replaceChildren();
-  if (!aiActiveTopics.size) {
+  if (!topics.size) {
     host.hidden = true;
     return;
   }
   host.hidden = false;
   ["financial", "medical", "legal"].forEach(key => {
-    if (!aiActiveTopics.has(key)) return;
+    if (!topics.has(key)) return;
     const config = AI_TOPIC_PATTERNS[key];
     if (!config) return;
     const box = document.createElement("div");
@@ -2966,8 +2979,7 @@ function renderAiTopicDisclaimers() {
 }
 
 function clearAiTopicDisclaimers() {
-  aiActiveTopics = new Set();
-  renderAiTopicDisclaimers();
+  renderAiTopicDisclaimers(new Set());
 }
 
 function appendAiMessage(role, content, options = {}) {
@@ -3148,7 +3160,7 @@ async function sendAiMessage(event) {
       dataUrl: item.dataUrl || null
     }))
   });
-  updateAiTopicDisclaimers(historyContent);
+  refreshAiTopicDisclaimers();
   prompt.value = "";
   clearAiAttachments();
 
@@ -3205,7 +3217,7 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
-    updateAiTopicDisclaimers(data.reply);
+    refreshAiTopicDisclaimers();
     // Server is source of truth for quota; keep local UI in sync
     applyServerAiUsage(data);
     if (data.cooldown || isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
