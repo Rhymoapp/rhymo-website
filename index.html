@@ -1923,7 +1923,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="home-servers-header">
         <div>
           <h2 style="margin:0 0 4px;">Servers running Rhymo</h2>
-          <p class="muted" style="margin:0;" id="homeServersSubtitle">Live communities where Rhymo is online.</p>
+          <p class="muted" style="margin:0;" id="homeServersSubtitle">Top 5 servers by member count.</p>
         </div>
         <span class="pill" id="homeServersCount">—</span>
       </div>
@@ -5055,7 +5055,11 @@ async function refreshHomeServers() {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || "Failed to load servers");
 
-    const servers = Array.isArray(data.servers) ? data.servers : [];
+    const allServers = Array.isArray(data.servers) ? data.servers : [];
+    const servers = allServers
+      .slice()
+      .sort((a, b) => (Number(b.memberCount) || 0) - (Number(a.memberCount) || 0))
+      .slice(0, 5);
     track.replaceChildren();
     track.classList.remove("scrolling");
 
@@ -5077,11 +5081,11 @@ async function refreshHomeServers() {
     if (servers.length >= 3) track.classList.add("scrolling");
 
     if (countPill) {
-      const total = Number(data.serverCount) || servers.length;
-      countPill.textContent = total + (total === 1 ? " server" : " servers");
+      const total = Number(data.serverCount) || allServers.length;
+      countPill.textContent = `Top ${servers.length} of ${total}`;
     }
     if (subtitle) {
-      subtitle.textContent = "Live from Rhymo’s current server list · largest communities first";
+      subtitle.textContent = `Top ${servers.length} servers by member count · largest first`;
     }
   } catch (error) {
     console.error("Home servers failed:", error);
