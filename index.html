@@ -1109,13 +1109,6 @@ body.drawer-open {
   gap: 12px;
   margin-bottom: 14px;
 }
-.home-servers-header > div {
-  min-width: 0;
-}
-#homeServersCount {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
 .server-marquee {
   position: relative;
   overflow: hidden;
@@ -1929,8 +1922,8 @@ body.session-checking > :not(#sessionBoot):not(script) {
     <article class="panel full home-servers-panel">
       <div class="home-servers-header">
         <div>
-          <h2 style="margin:0 0 4px;">Top 5 servers running Rhymo</h2>
-          <p class="muted" style="margin:0;" id="homeServersSubtitle">Up to 5 communities, ranked by member count.</p>
+          <h2 style="margin:0 0 4px;">Servers running Rhymo</h2>
+          <p class="muted" style="margin:0;" id="homeServersSubtitle">Live communities where Rhymo is online.</p>
         </div>
         <span class="pill" id="homeServersCount">—</span>
       </div>
@@ -2151,6 +2144,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="pill" id="commandLogsLivePill">Idle</span>
           <button id="loadCommandLogsBtn" disabled>Refresh</button>
+          <button id="clearServerLogsBtn" disabled title="Server administrators only">Delete logs</button>
         </div>
       </div>
       <div id="commandLogs" aria-live="polite"><div class="empty">Select a server you manage to see recent commands.</div></div>
@@ -2160,11 +2154,12 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Activity logs</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Server admins only · 12-hour retention</p>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Server admins only · 12-hour retention · auto-delete after 12 hours</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="pill" id="logsLivePill">Idle</span>
           <button id="loadServerLogsBtn" disabled>Refresh logs</button>
+          <button id="clearServerLogsBtnSecondary" disabled title="Server administrators only">Delete logs</button>
         </div>
       </div>
       <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view live activity.</div></div>
@@ -3880,6 +3875,8 @@ function resetServerDetails() {
   $("loadServerDetailsBtn").disabled = true;
   if ($("loadServerLogsBtn")) $("loadServerLogsBtn").disabled = true;
   if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
+  if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = true;
+  if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = true;
   if ($("copyServerIdBtn")) $("copyServerIdBtn").disabled = true;
   $("serverInviteBtn")?.classList.add("hidden");
   $("serverLogs").replaceChildren();
@@ -4230,6 +4227,8 @@ async function loadServerDetails(options = {}) {
     $("loadServerDetailsBtn").disabled = false;
     $("loadServerLogsBtn").disabled = false;
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
+    if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = false;
+    if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = false;
     $("copyServerIdBtn").disabled = false;
 
     if (details.botInstalled === false) {
@@ -4265,6 +4264,8 @@ async function loadServerDetails(options = {}) {
       $("loadServerDetailsBtn").disabled = false;
       $("loadServerLogsBtn").disabled = false;
       if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
+      if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = false;
+      if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = false;
       $("copyServerIdBtn").disabled = false;
     }
   }
@@ -4367,6 +4368,67 @@ $("serverSelect")?.addEventListener("change", loadServerDetails);
 $("loadServerDetailsBtn")?.addEventListener("click", loadServerDetails);
 $("loadServerLogsBtn")?.addEventListener("click", () => loadServerLogs({ silent: false }));
 $("loadCommandLogsBtn")?.addEventListener("click", () => loadCommandLogs({ silent: false }));
+
+async function clearServerLogs() {
+  const guildId = $("serverSelect")?.value || selectedGuildId;
+  if (!guildId) {
+    toast("Choose a server first.");
+    return;
+  }
+  if (!currentUser) {
+    toast("Sign in with Discord first.");
+    return;
+  }
+  const ok = window.confirm(
+    "Delete all activity logs and recent commands for this server?\n\n" +
+    "This cannot be undone. Only server administrators can do this."
+  );
+  if (!ok) return;
+
+  const buttons = ["clearServerLogsBtn", "clearServerLogsBtnSecondary"]
+    .map(id => $(id))
+    .filter(Boolean);
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.textContent = "Deleting…";
+  });
+
+  try {
+    const response = await request(
+      "/api/servers/" + encodeURIComponent(guildId) + "/logs",
+      { method: "DELETE" }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 403) {
+      throw new Error(data.error || "Only server administrators can delete logs.");
+    }
+    if (!response.ok) {
+      throw new Error(data.error || "Could not delete logs.");
+    }
+    const deleted = Number(data.deleted) || 0;
+    toast(deleted ? `Deleted ${deleted} log entr${deleted === 1 ? "y" : "ies"}.` : "Logs cleared.");
+    serverMessage(
+      deleted
+        ? `Cleared ${deleted} log entr${deleted === 1 ? "y" : "ies"} for this server.`
+        : "No logs were stored for this server."
+    );
+    if ($("selectedLogCount")) $("selectedLogCount").textContent = "0";
+    await loadServerLogs({ silent: true });
+    await loadCommandLogs({ silent: true });
+  } catch (error) {
+    console.error("Clear logs failed:", error);
+    toast(error.message || "Could not delete logs.");
+    serverMessage(error.message || "Could not delete logs.");
+  } finally {
+    buttons.forEach(btn => {
+      btn.disabled = !selectedGuildId;
+      btn.textContent = "Delete logs";
+    });
+  }
+}
+
+$("clearServerLogsBtn")?.addEventListener("click", clearServerLogs);
+$("clearServerLogsBtnSecondary")?.addEventListener("click", clearServerLogs);
 $("copyServerIdBtn")?.addEventListener("click", async () => {
   if (!selectedGuildId) return;
   try {
@@ -4933,8 +4995,6 @@ try {
 }
 
 /* ===== BOT METRICS ===== */
-const HOME_SERVER_SHOWCASE_LIMIT = 5;
-
 function formatMemberCount(n) {
   const value = Number(n) || 0;
   return value.toLocaleString() + (value === 1 ? " member" : " members");
@@ -4996,19 +5056,10 @@ async function refreshHomeServers() {
     if (!response.ok) throw new Error(data.error || "Failed to load servers");
 
     const servers = Array.isArray(data.servers) ? data.servers : [];
-    const topServers = servers
-      .slice()
-      .sort((a, b) => {
-        const aCount = Number(a?.memberCount);
-        const bCount = Number(b?.memberCount);
-        return (Number.isFinite(bCount) ? bCount : 0) -
-          (Number.isFinite(aCount) ? aCount : 0);
-      })
-      .slice(0, HOME_SERVER_SHOWCASE_LIMIT);
     track.replaceChildren();
     track.classList.remove("scrolling");
 
-    if (!data.online || !topServers.length) {
+    if (!data.online || !servers.length) {
       const empty = document.createElement("div");
       empty.className = "empty";
       empty.textContent = data.online
@@ -5020,18 +5071,17 @@ async function refreshHomeServers() {
       return;
     }
 
-    // Duplicate the top-five list for seamless scrolling.
-    const renderList = topServers.length >= 3
-      ? topServers.concat(topServers)
-      : topServers;
+    // Duplicate list for seamless infinite scroll when enough servers
+    const renderList = servers.length >= 3 ? servers.concat(servers) : servers;
     renderList.forEach(server => track.appendChild(buildServerChip(server)));
-    if (topServers.length >= 3) track.classList.add("scrolling");
+    if (servers.length >= 3) track.classList.add("scrolling");
 
     if (countPill) {
-      countPill.textContent = "Top " + topServers.length;
+      const total = Number(data.serverCount) || servers.length;
+      countPill.textContent = total + (total === 1 ? " server" : " servers");
     }
     if (subtitle) {
-      subtitle.textContent = "Up to 5 communities, ranked by member count.";
+      subtitle.textContent = "Live from Rhymo’s current server list · largest communities first";
     }
   } catch (error) {
     console.error("Home servers failed:", error);
