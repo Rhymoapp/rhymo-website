@@ -5081,8 +5081,7 @@ async function refreshHomeServers() {
     if (servers.length >= 3) track.classList.add("scrolling");
 
     if (countPill) {
-      const total = Number(data.serverCount) || allServers.length;
-      countPill.textContent = `Top ${servers.length} of ${total}`;
+      countPill.textContent = "Top 5";
     }
     if (subtitle) {
       subtitle.textContent = `Top ${servers.length} servers by member count · largest first`;
