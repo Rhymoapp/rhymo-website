@@ -779,38 +779,51 @@ body.drawer-open {
   gap: 10px;
   width: 100%;
 }
-.ai-threads-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
-  gap: 12px;
-  align-items: stretch;
+.ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-@media (max-width: 720px) {
-  .ai-threads-layout {
-    grid-template-columns: 1fr;
-  }
-  .ai-thread-sidebar {
-    max-height: 160px;
-  }
+.ai-threads-wrap {
+  position: relative;
 }
-.ai-thread-sidebar {
+.ai-threads-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ai-threads-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.ai-threads-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(320px, 86vw);
+  max-height: min(420px, 60vh);
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(18, 18, 22, 0.98);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   padding: 10px;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 8px;
-  min-height: 220px;
-  max-height: 520px;
+  z-index: 40;
 }
-.ai-thread-sidebar-head {
+.ai-threads-panel.open {
+  display: flex;
+}
+.ai-threads-panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.ai-thread-sidebar-head h3 {
+.ai-threads-panel-head h3 {
   margin: 0;
   font-size: 13px;
   font-weight: 700;
@@ -2141,22 +2154,29 @@ body.session-checking > :not(#sessionBoot):not(script) {
         </div>
         <div class="ai-header-actions">
           <span class="pill" id="aiMessageCount">0 / 200</span>
+          <div class="ai-threads-wrap">
+            <button type="button" id="aiThreadsBtn" class="ai-threads-btn" title="Your chat threads" aria-expanded="false" aria-controls="aiThreadsPanel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M7 7h10v4H7zM7 13h7v4H7z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14l-4-3H7a2 2 0 0 1-2-2V5z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Threads</span>
+            </button>
+            <div class="ai-threads-panel" id="aiThreadsPanel" hidden>
+              <div class="ai-threads-panel-head">
+                <h3>Your threads</h3>
+                <button type="button" id="aiNewChatBtnSide" title="Start a new thread">New</button>
+              </div>
+              <div class="ai-thread-list" id="aiThreadList">
+                <div class="empty" style="padding:8px;font-size:12px;">Sign in to save threads.</div>
+              </div>
+            </div>
+          </div>
           <button type="button" id="aiNewChatBtn">New chat</button>
         </div>
       </div>
 
-      <div class="ai-threads-layout">
-        <aside class="ai-thread-sidebar" aria-label="AI chat threads">
-          <div class="ai-thread-sidebar-head">
-            <h3>Threads</h3>
-            <button type="button" id="aiNewChatBtnSide" title="Start a new thread">New</button>
-          </div>
-          <div class="ai-thread-list" id="aiThreadList">
-            <div class="empty" style="padding:8px;font-size:12px;">Sign in to save threads.</div>
-          </div>
-        </aside>
-
-        <div class="ai-thread-main">
+      <div class="ai-thread-main">
           <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
             <div class="ai-message ai-message-assistant">
               <span class="ai-message-label">Rhymo AI</span>
@@ -2186,7 +2206,6 @@ body.session-checking > :not(#sessionBoot):not(script) {
               <button type="submit" class="primary" id="aiSendBtn" disabled>Send</button>
             </div>
           </form>
-        </div>
       </div>
     </article>
   </div>
@@ -4003,7 +4022,10 @@ function renderAiThreadList() {
       ? when.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
       : "Saved thread";
     btn.append(title, meta);
-    btn.addEventListener("click", () => switchAiThread(thread.id));
+    btn.addEventListener("click", () => {
+      switchAiThread(thread.id);
+      setAiThreadsPanelOpen(false);
+    });
 
     const del = document.createElement("button");
     del.type = "button";
@@ -4292,8 +4314,40 @@ async function sendAiMessage(event) {
 }
 
 $("aiChatForm")?.addEventListener("submit", sendAiMessage);
-$("aiNewChatBtn")?.addEventListener("click", () => resetAIChat());
-$("aiNewChatBtnSide")?.addEventListener("click", () => resetAIChat());
+function setAiThreadsPanelOpen(open) {
+  const panel = $("aiThreadsPanel");
+  const btn = $("aiThreadsBtn");
+  if (!panel || !btn) return;
+  panel.classList.toggle("open", !!open);
+  if (open) {
+    panel.hidden = false;
+    renderAiThreadList();
+  } else {
+    panel.hidden = true;
+  }
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+$("aiThreadsBtn")?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  const panel = $("aiThreadsPanel");
+  const isOpen = panel?.classList.contains("open");
+  setAiThreadsPanelOpen(!isOpen);
+});
+
+document.addEventListener("click", (event) => {
+  const wrap = event.target.closest?.(".ai-threads-wrap");
+  if (!wrap) setAiThreadsPanelOpen(false);
+});
+
+$("aiNewChatBtn")?.addEventListener("click", () => {
+  setAiThreadsPanelOpen(false);
+  resetAIChat();
+});
+$("aiNewChatBtnSide")?.addEventListener("click", () => {
+  setAiThreadsPanelOpen(false);
+  resetAIChat();
+});
 $("aiAttachBtn")?.addEventListener("click", () => $("aiFileInput")?.click());
 $("aiFileInput")?.addEventListener("change", async event => {
   try {
