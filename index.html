@@ -3599,29 +3599,38 @@ function appendAiMessage(role, content, options = {}) {
   const body = document.createElement("div");
   body.className = "ai-message-body";
 
-  // Render markdown for assistant replies; keep user text plain for safety
-  if (role === "assistant" && !options.thinking) {
-    body.classList.add("rich");
-    body.innerHTML = renderAiMarkdown(content);
+  const hasAttachments = Array.isArray(options.attachments) && options.attachments.length > 0;
+  const hasText = String(content || "").trim().length > 0;
+
+  // Render markdown for assistant replies; keep user text plain for safety.
+  // For user messages with only attachments, skip the text body so we show files/photos only.
+  if (hasText) {
+    if (role === "assistant" && !options.thinking) {
+      body.classList.add("rich");
+      body.innerHTML = renderAiMarkdown(content);
+    } else {
+      body.textContent = content;
+    }
+    message.append(label, body);
   } else {
-    body.textContent = content;
+    message.append(label);
   }
 
-  message.append(label, body);
-
-  if (Array.isArray(options.attachments) && options.attachments.length) {
+  if (hasAttachments) {
     const row = document.createElement("div");
     row.className = "ai-message-attachments";
     options.attachments.forEach(item => {
-      if (item.kind === "image" && item.dataUrl) {
+      if (item.kind === "image" && (item.dataUrl || item.previewUrl)) {
         const img = document.createElement("img");
-        img.src = item.dataUrl;
+        img.src = item.dataUrl || item.previewUrl;
         img.alt = item.name || "Attached image";
+        img.title = item.name || "Attached image";
         row.appendChild(img);
       } else {
         const pill = document.createElement("span");
         pill.className = "ai-file-pill";
         pill.textContent = "📄 " + (item.name || "file");
+        pill.title = item.name || "file";
         row.appendChild(pill);
       }
     });
@@ -3726,7 +3735,9 @@ async function sendAiMessage(event) {
   const attachments = aiPendingAttachments.slice();
   if (!text && !attachments.length) return;
 
-  // Build API content: plain string or multimodal parts
+  // Build API content: plain string or multimodal parts.
+  // File text is sent to the model, but NOT shown in the chat bubble.
+  const AI_ATTACHMENT_TEXT_BUDGET = 20000;
   let apiContent;
   if (!attachments.length) {
     apiContent = text;
@@ -3734,11 +3745,15 @@ async function sendAiMessage(event) {
     const parts = [];
     let combinedText = text || "Please review the attached file(s).";
     attachments.forEach(item => {
-      if (item.kind === "text") {
+      if (item.kind === "text" && item.text) {
         combinedText += `\n\n[Attached file: ${item.name}]\n${item.text}`;
       }
     });
-    parts.push({ type: "text", text: combinedText.slice(0, AI_MAX_INPUT_CHARS) });
+    // Keep enough room for file contents so the AI can actually read them
+    parts.push({
+      type: "text",
+      text: combinedText.slice(0, AI_ATTACHMENT_TEXT_BUDGET)
+    });
     attachments.forEach(item => {
       if (item.kind === "image" && item.dataUrl) {
         parts.push({
@@ -3750,12 +3765,11 @@ async function sendAiMessage(event) {
     apiContent = parts;
   }
 
-  const historyContent = typeof apiContent === "string"
-    ? apiContent
-    : (apiContent.find(part => part.type === "text")?.text || text || "Attachment");
+  // Chat UI shows only the user's typed caption (if any) + visual attachments
+  const displayText = text;
 
   aiConversation.push({ role: "user", content: apiContent });
-  appendAiMessage("user", historyContent, {
+  appendAiMessage("user", displayText, {
     attachments: attachments.map(item => ({
       kind: item.kind,
       name: item.name,
