@@ -1028,6 +1028,11 @@ body.drawer-open {
   padding: 0;
   color: #e4e4e7;
 }
+.ai-websearch-note {
+  margin: 4px 8px 10px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
 .ai-message-thinking .ai-message-body {
   color: var(--muted);
 }
@@ -3111,7 +3116,7 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi — I\u2019m Rhymo AI.\n\nI can help with code, debugging, Discord bots, web/backend work, and more.\n\n**Tips**\n- Paste code or attach a file/photo\n- Ask for a full fix, not just a hint\n- Code blocks here support **Copy** and **Download**";
+const AI_GREETING = "Hi — I\u2019m Rhymo AI, a general assistant.\n\nAsk about anything — school, tech, Discord, Rhymo, coding, or the web.\n\n**Tips**\n- Paste code or attach a file/photo\n- Ask website questions about Rhymo features\n- For live facts I may search the web\n- Code blocks support **Copy** and **Download**";
 const AI_MAX_CHAT_MESSAGES = 200; // per Discord user — NOT reset by New chat
 const AI_API_HISTORY_LIMIT = 10;  // only recent turns are sent to the API (saves usage)
 const AI_MAX_INPUT_CHARS = 2000;
@@ -4118,6 +4123,14 @@ function resetAIChat(options = {}) {
   updateAiAssistantControls();
 }
 
+
+function messageLooksLikeWebSearch(text) {
+  const value = String(text || "").trim();
+  if (!value || value.length < 4) return false;
+  if ((value.match(/```/g) || []).length >= 2 && value.length > 400) return false;
+  return /\b(who is|who was|what is|what are|when did|when is|where is|why is|how many|latest|news|today|current|currently|search|look up|google|find online|price of|weather|https?:\/\/|www\.)\b/i.test(value);
+}
+
 async function sendAiMessage(event) {
   event.preventDefault();
   if (!currentUser || aiSending) return;
@@ -4182,7 +4195,17 @@ async function sendAiMessage(event) {
   aiSending = true;
   updateAiAssistantControls();
   const requestVersion = ++aiRequestVersion;
-  const thinkingMessage = appendAiMessage("assistant", "Thinking…", { thinking: true });
+  const willSearch = messageLooksLikeWebSearch(text);
+  if ($("aiStatus")) {
+    $("aiStatus").textContent = willSearch
+      ? "Searching through web…"
+      : "Rhymo AI is thinking…";
+  }
+  const thinkingMessage = appendAiMessage(
+    "assistant",
+    willSearch ? "Searching through web…" : "Thinking…",
+    { thinking: true }
+  );
 
   try {
     // Only send recent turns; truncate long assistant history so the API never rejects it
@@ -4240,6 +4263,12 @@ async function sendAiMessage(event) {
     thinkingMessage?.remove();
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
+    if (data.webSearch) {
+      const note = document.createElement("div");
+      note.className = "ai-websearch-note";
+      note.textContent = "Used web research for this answer.";
+      $("aiMessages")?.appendChild(note);
+    }
     refreshAiTopicDisclaimers();
     ensureActiveAiThread();
     persistActiveAiThread();
