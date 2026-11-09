@@ -1265,7 +1265,6 @@ body.drawer-open {
 .server-marquee-track {
   display: flex;
   align-items: center;
-  gap: 28px;
   width: max-content;
   padding: 8px 0 4px;
 }
@@ -1274,6 +1273,13 @@ body.drawer-open {
 }
 .home-server-marquee:hover .server-marquee-track.scrolling {
   animation-play-state: paused;
+}
+.server-marquee-group {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: max-content;
+  padding: 0 28px 0 0;
 }
 @keyframes serverMarquee {
   from { transform: translateX(0); }
@@ -5694,7 +5700,12 @@ async function refreshHomeServers() {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || "Failed to load servers");
 
-    const servers = Array.isArray(data.servers) ? data.servers : [];
+    const allServers = Array.isArray(data.servers) ? data.servers : [];
+    // Top 5 servers with the most members (same as before)
+    const servers = allServers
+      .slice()
+      .sort((a, b) => (Number(b.memberCount) || 0) - (Number(a.memberCount) || 0))
+      .slice(0, 5);
     track.replaceChildren();
     track.classList.remove("scrolling");
 
@@ -5706,21 +5717,29 @@ async function refreshHomeServers() {
         : "Rhymo is offline — server list will appear when the bot is back.";
       track.appendChild(empty);
       if (countPill) countPill.textContent = "0 servers";
-      if (subtitle) subtitle.textContent = "Live communities where Rhymo is online.";
+      if (subtitle) subtitle.textContent = "Top 5 communities by member count.";
       return;
     }
 
-    // Duplicate list for seamless infinite scroll when enough servers
-    const renderList = servers.length >= 3 ? servers.concat(servers) : servers;
-    renderList.forEach(server => track.appendChild(buildServerChip(server)));
-    if (servers.length >= 3) track.classList.add("scrolling");
+    const renderGroup = (hidden = false) => {
+      const group = document.createElement("div");
+      group.className = "server-marquee-group";
+      if (hidden) group.setAttribute("aria-hidden", "true");
+      servers.forEach(server => group.appendChild(buildServerChip(server)));
+      track.appendChild(group);
+    };
+
+    renderGroup();
+    if (servers.length > 1) {
+      renderGroup(true);
+      track.classList.add("scrolling");
+    }
 
     if (countPill) {
-      const total = Number(data.serverCount) || servers.length;
-      countPill.textContent = total + (total === 1 ? " server" : " servers");
+      countPill.textContent = servers.length + (servers.length === 1 ? " server" : " servers");
     }
     if (subtitle) {
-      subtitle.textContent = "Live from Rhymo’s current server list · largest communities first";
+      subtitle.textContent = "Top 5 by member count · live from Rhymo";
     }
   } catch (error) {
     console.error("Home servers failed:", error);
