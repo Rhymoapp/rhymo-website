@@ -2038,16 +2038,9 @@ body.session-checking > :not(#sessionBoot):not(script) {
 <main><div class="content">
 
 <section class="page active" id="page-home">
-  <div class="home-server-marquee" id="homeServerMarquee" aria-label="Top Rhymo servers">
-    <div class="home-servers-header home-servers-header-top">
-      <div>
-        <h2 style="margin:0 0 4px;">Servers running Rhymo</h2>
-        <p class="muted" style="margin:0;" id="homeServersSubtitle">Live communities where Rhymo is online.</p>
-      </div>
-      <span class="pill" id="homeServersCount">—</span>
-    </div>
+  <div class="home-server-marquee" id="homeServerMarquee" aria-label="Top 5 Rhymo servers by members">
     <div class="server-marquee-track" id="homeServerTrack">
-      <div class="empty" id="homeServersEmpty">Loading top servers…</div>
+      <div class="empty" id="homeServersEmpty">Loading…</div>
     </div>
   </div>
 
@@ -5691,8 +5684,6 @@ function buildServerChip(server) {
 
 async function refreshHomeServers() {
   const track = $("homeServerTrack");
-  const countPill = $("homeServersCount");
-  const subtitle = $("homeServersSubtitle");
   if (!track) return;
 
   try {
@@ -5701,11 +5692,16 @@ async function refreshHomeServers() {
     if (!response.ok) throw new Error(data.error || "Failed to load servers");
 
     const allServers = Array.isArray(data.servers) ? data.servers : [];
-    // Top 5 servers with the most members (same as before)
+    // Strict top 5 by member count only
     const servers = allServers
       .slice()
-      .sort((a, b) => (Number(b.memberCount) || 0) - (Number(a.memberCount) || 0))
+      .map(server => ({
+        ...server,
+        memberCount: Number(server.memberCount ?? server.member_count ?? 0) || 0
+      }))
+      .sort((a, b) => b.memberCount - a.memberCount)
       .slice(0, 5);
+
     track.replaceChildren();
     track.classList.remove("scrolling");
 
@@ -5713,14 +5709,13 @@ async function refreshHomeServers() {
       const empty = document.createElement("div");
       empty.className = "empty";
       empty.textContent = data.online
-        ? "Rhymo is online, but no server details are available yet."
-        : "Rhymo is offline — server list will appear when the bot is back.";
+        ? "No server details yet."
+        : "Rhymo is offline.";
       track.appendChild(empty);
-      if (countPill) countPill.textContent = "0 servers";
-      if (subtitle) subtitle.textContent = "Top 5 communities by member count.";
       return;
     }
 
+    // One group of max 5; duplicate only for seamless scroll (same 5, not more servers)
     const renderGroup = (hidden = false) => {
       const group = document.createElement("div");
       group.className = "server-marquee-group";
@@ -5734,22 +5729,14 @@ async function refreshHomeServers() {
       renderGroup(true);
       track.classList.add("scrolling");
     }
-
-    if (countPill) {
-      countPill.textContent = servers.length + (servers.length === 1 ? " server" : " servers");
-    }
-    if (subtitle) {
-      subtitle.textContent = "Top 5 by member count · live from Rhymo";
-    }
   } catch (error) {
     console.error("Home servers failed:", error);
     track.replaceChildren();
     track.classList.remove("scrolling");
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "Could not load live servers right now.";
+    empty.textContent = "Could not load servers.";
     track.appendChild(empty);
-    if (countPill) countPill.textContent = "—";
   }
 }
 
