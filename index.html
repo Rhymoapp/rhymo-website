@@ -779,6 +779,91 @@ body.drawer-open {
   gap: 10px;
   width: 100%;
 }
+.ai-threads-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+@media (max-width: 720px) {
+  .ai-threads-layout {
+    grid-template-columns: 1fr;
+  }
+  .ai-thread-sidebar {
+    max-height: 160px;
+  }
+}
+.ai-thread-sidebar {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 220px;
+  max-height: 520px;
+}
+.ai-thread-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ai-thread-sidebar-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ai-thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.ai-thread-item {
+  text-align: left;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: var(--text);
+  width: 100%;
+}
+.ai-thread-item.active {
+  border-color: var(--accent, #60a5fa);
+  background: rgba(96, 165, 250, 0.12);
+}
+.ai-thread-item strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-thread-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.ai-thread-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ai-thread-item-row .ai-thread-item {
+  flex: 1;
+}
+.ai-thread-delete {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  font-size: 11px;
+}
 .ai-panel-header {
   display: flex;
   align-items: flex-start;
@@ -2047,7 +2132,7 @@ body.session-checking > :not(#sessionBoot):not(script) {
       <div class="ai-panel-header">
         <div>
           <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · 200 messages, then a 2-hour cooldown</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · threads saved on this device · 200 messages, then a 2-hour cooldown</p>
         </div>
         <div class="ai-header-actions">
           <span class="pill" id="aiMessageCount">0 / 200</span>
@@ -2055,35 +2140,49 @@ body.session-checking > :not(#sessionBoot):not(script) {
         </div>
       </div>
 
-      <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
-        <div class="ai-message ai-message-assistant">
-          <span class="ai-message-label">Rhymo AI</span>
-          <div class="ai-message-body">Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.</div>
+      <div class="ai-threads-layout">
+        <aside class="ai-thread-sidebar" aria-label="AI chat threads">
+          <div class="ai-thread-sidebar-head">
+            <h3>Threads</h3>
+            <button type="button" id="aiNewChatBtnSide" title="Start a new thread">New</button>
+          </div>
+          <div class="ai-thread-list" id="aiThreadList">
+            <div class="empty" style="padding:8px;font-size:12px;">Sign in to save threads.</div>
+          </div>
+        </aside>
+
+        <div class="ai-thread-main">
+          <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
+            <div class="ai-message ai-message-assistant">
+              <span class="ai-message-label">Rhymo AI</span>
+              <div class="ai-message-body">Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.</div>
+            </div>
+          </div>
+
+          <p class="ai-privacy-note">AI may include mistakes; so double check answers.</p>
+          <div id="aiTopicDisclaimers" class="ai-topic-disclaimers" hidden></div>
+
+          <form id="aiChatForm" class="ai-composer-form">
+            <label class="field" for="aiPrompt">
+              <span class="ai-label-row">
+                <span>Message</span>
+                <span class="muted" id="aiCharCount">0 / 2000</span>
+              </span>
+              <textarea id="aiPrompt" rows="3" maxlength="2000" placeholder="Ask anything… Shift+Enter for a new line" disabled></textarea>
+            </label>
+            <div id="aiAttachmentPreview" class="ai-attachment-preview" hidden></div>
+            <div class="ai-compose-footer">
+              <div class="ai-attach-row">
+                <input type="file" id="aiFileInput" accept="image/*,.txt,.md,.json,.js,.ts,.py,.html,.css,.csv" multiple hidden>
+                <button type="button" id="aiAttachBtn" disabled title="Images or text files">+ Attach</button>
+                <button type="button" class="btn-discord" id="aiLoginBtn">Sign in to chat</button>
+              </div>
+              <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
+              <button type="submit" class="primary" id="aiSendBtn" disabled>Send</button>
+            </div>
+          </form>
         </div>
       </div>
-
-      <p class="ai-privacy-note">AI may include mistakes; so double check answers.</p>
-      <div id="aiTopicDisclaimers" class="ai-topic-disclaimers" hidden></div>
-
-      <form id="aiChatForm" class="ai-composer-form">
-        <label class="field" for="aiPrompt">
-          <span class="ai-label-row">
-            <span>Message</span>
-            <span class="muted" id="aiCharCount">0 / 2000</span>
-          </span>
-          <textarea id="aiPrompt" rows="3" maxlength="2000" placeholder="Ask anything… Shift+Enter for a new line" disabled></textarea>
-        </label>
-        <div id="aiAttachmentPreview" class="ai-attachment-preview" hidden></div>
-        <div class="ai-compose-footer">
-          <div class="ai-attach-row">
-            <input type="file" id="aiFileInput" accept="image/*,.txt,.md,.json,.js,.ts,.py,.html,.css,.csv" multiple hidden>
-            <button type="button" id="aiAttachBtn" disabled title="Images or text files">+ Attach</button>
-            <button type="button" class="btn-discord" id="aiLoginBtn">Sign in to chat</button>
-          </div>
-          <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
-          <button type="submit" class="primary" id="aiSendBtn" disabled>Send</button>
-        </div>
-      </form>
     </article>
   </div>
 </section>
@@ -2896,7 +2995,10 @@ function setUser(user) {
     isOwner = false;
     if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
     if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
-    resetAIChat();
+    resetAIChat({ skipPersist: true, createThread: false });
+    aiThreads = [];
+    aiActiveThreadId = null;
+    renderAiThreadList();
     if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
     return;
   }
@@ -2919,6 +3021,16 @@ function setUser(user) {
   $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
   $("homeLoginBtn")?.classList.add("hidden");
   updateAiAssistantControls();
+  // Restore this user's AI threads on this device
+  loadAiThreadsFromStorage();
+  if (aiActiveThreadId && aiThreads.some(t => t.id === aiActiveThreadId)) {
+    switchAiThread(aiActiveThreadId, { skipPersist: true });
+  } else if (aiThreads.length) {
+    switchAiThread(aiThreads[0].id, { skipPersist: true });
+  } else {
+    resetAIChat({ skipPersist: true, createThread: true });
+  }
+  renderAiThreadList();
   if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
   if (typeof syncAiUsageFromServer === "function") syncAiUsageFromServer();
   checkOwner();
@@ -3697,12 +3809,297 @@ $("aiMessages")?.addEventListener("click", async event => {
   }
 });
 
-function resetAIChat() {
+
+
+// ── AI threads (per Discord user, stored on this device) ──
+const AI_THREADS_KEY_PREFIX = "rhymo_ai_threads_v1_";
+let aiThreads = [];
+let aiActiveThreadId = null;
+
+function aiThreadsStorageKey() {
+  const id = currentUser?.id;
+  return id ? AI_THREADS_KEY_PREFIX + id : null;
+}
+
+function loadAiThreadsFromStorage() {
+  const key = aiThreadsStorageKey();
+  if (!key) {
+    aiThreads = [];
+    aiActiveThreadId = null;
+    return;
+  }
+  try {
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : null;
+    aiThreads = Array.isArray(parsed?.threads) ? parsed.threads : [];
+    aiActiveThreadId = parsed?.activeThreadId || (aiThreads[0]?.id || null);
+  } catch {
+    aiThreads = [];
+    aiActiveThreadId = null;
+  }
+}
+
+function saveAiThreadsToStorage() {
+  const key = aiThreadsStorageKey();
+  if (!key) return;
+  try {
+    // Cap stored threads to protect localStorage
+    const trimmed = aiThreads
+      .slice()
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+      .slice(0, 30)
+      .map(thread => ({
+        ...thread,
+        messages: Array.isArray(thread.messages) ? thread.messages.slice(-40) : []
+      }));
+    aiThreads = trimmed;
+    localStorage.setItem(
+      key,
+      JSON.stringify({ threads: aiThreads, activeThreadId: aiActiveThreadId })
+    );
+  } catch (err) {
+    console.warn("Could not save AI threads:", err);
+  }
+}
+
+function createAiThreadId() {
+  return "t_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+}
+
+function serializeAiConversation(conversation) {
+  return (conversation || []).map(message => {
+    if (!message || typeof message !== "object") return null;
+    if (message.role === "assistant") {
+      return {
+        role: "assistant",
+        content: String(message.content || "").slice(0, 20000)
+      };
+    }
+    if (typeof message.content === "string") {
+      return {
+        role: "user",
+        content: message.content.slice(0, 20000)
+      };
+    }
+    if (Array.isArray(message.content)) {
+      const text = message.content.find(part => part?.type === "text")?.text || "";
+      const attachments = message.content
+        .filter(part => part?.type === "image_url")
+        .map((part, i) => ({
+          kind: "image",
+          name: "image-" + (i + 1),
+          dataUrl: null
+        }));
+      // Keep text for the model; attachments are display-only markers (images not rehydrated)
+      return {
+        role: "user",
+        content: text.slice(0, 20000),
+        _displayAttachments: attachments
+      };
+    }
+    return { role: "user", content: "" };
+  }).filter(Boolean);
+}
+
+function getActiveAiThread() {
+  return aiThreads.find(thread => thread.id === aiActiveThreadId) || null;
+}
+
+function ensureActiveAiThread() {
+  if (!currentUser) return null;
+  loadAiThreadsFromStorage();
+  let thread = getActiveAiThread();
+  if (!thread) {
+    thread = {
+      id: createAiThreadId(),
+      title: "New chat",
+      updatedAt: Date.now(),
+      messages: []
+    };
+    aiThreads.unshift(thread);
+    aiActiveThreadId = thread.id;
+    saveAiThreadsToStorage();
+  }
+  return thread;
+}
+
+function titleFromConversation(conversation) {
+  const firstUser = (conversation || []).find(m => m.role === "user");
+  if (!firstUser) return "New chat";
+  let text = "";
+  if (typeof firstUser.content === "string") text = firstUser.content;
+  else if (Array.isArray(firstUser.content)) {
+    text = firstUser.content.find(p => p?.type === "text")?.text || "";
+  }
+  text = String(text || "").replace(/\s+/g, " ").trim();
+  if (!text) return "Chat with attachment";
+  return text.length > 42 ? text.slice(0, 42) + "…" : text;
+}
+
+function persistActiveAiThread() {
+  if (!currentUser || !aiActiveThreadId) return;
+  const thread = getActiveAiThread();
+  if (!thread) return;
+  thread.messages = serializeAiConversation(aiConversation);
+  thread.updatedAt = Date.now();
+  if (!thread.title || thread.title === "New chat") {
+    thread.title = titleFromConversation(aiConversation);
+  } else {
+    // Refresh title from first user message when still default-like
+    const derived = titleFromConversation(aiConversation);
+    if (thread.title === "New chat") thread.title = derived;
+  }
+  // Move active thread to top
+  aiThreads = [thread, ...aiThreads.filter(t => t.id !== thread.id)];
+  saveAiThreadsToStorage();
+  renderAiThreadList();
+}
+
+function renderAiThreadList() {
+  const host = $("aiThreadList");
+  if (!host) return;
+  host.replaceChildren();
+
+  if (!currentUser) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.style.cssText = "padding:8px;font-size:12px;";
+    empty.textContent = "Sign in to save threads.";
+    host.appendChild(empty);
+    return;
+  }
+
+  loadAiThreadsFromStorage();
+  if (!aiThreads.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.style.cssText = "padding:8px;font-size:12px;";
+    empty.textContent = "No threads yet. Send a message to start one.";
+    host.appendChild(empty);
+    return;
+  }
+
+  const ordered = aiThreads
+    .slice()
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+  ordered.forEach(thread => {
+    const row = document.createElement("div");
+    row.className = "ai-thread-item-row";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ai-thread-item" + (thread.id === aiActiveThreadId ? " active" : "");
+    const title = document.createElement("strong");
+    title.textContent = thread.title || "New chat";
+    const meta = document.createElement("span");
+    const when = thread.updatedAt ? new Date(thread.updatedAt) : null;
+    meta.textContent = when
+      ? when.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+      : "Saved thread";
+    btn.append(title, meta);
+    btn.addEventListener("click", () => switchAiThread(thread.id));
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "ai-thread-delete";
+    del.textContent = "✕";
+    del.title = "Delete thread";
+    del.addEventListener("click", event => {
+      event.stopPropagation();
+      deleteAiThread(thread.id);
+    });
+
+    row.append(btn, del);
+    host.appendChild(row);
+  });
+}
+
+function renderConversationToUi(conversation) {
+  const target = $("aiMessages");
+  if (!target) return;
+  target.replaceChildren();
+  if (!conversation || !conversation.length) {
+    appendAiMessage("assistant", AI_GREETING);
+    return;
+  }
+  conversation.forEach(message => {
+    if (message.role === "assistant") {
+      appendAiMessage("assistant", String(message.content || ""));
+      return;
+    }
+    let text = "";
+    let attachments = [];
+    if (typeof message.content === "string") {
+      text = message.content;
+    } else if (Array.isArray(message.content)) {
+      text = message.content.find(p => p?.type === "text")?.text || "";
+    }
+    if (Array.isArray(message._displayAttachments)) {
+      attachments = message._displayAttachments;
+    }
+    appendAiMessage("user", text, { attachments });
+  });
+}
+
+function switchAiThread(threadId, options = {}) {
+  if (!currentUser) return;
+  if (!options.skipPersist) persistActiveAiThread();
+  const thread = aiThreads.find(t => t.id === threadId);
+  if (!thread) return;
+  aiActiveThreadId = thread.id;
   aiRequestVersion += 1;
   aiSending = false;
+  clearAiAttachments();
+  clearAiTopicDisclaimers();
+  aiConversation = Array.isArray(thread.messages)
+    ? thread.messages.map(m => ({ ...m }))
+    : [];
+  renderConversationToUi(aiConversation);
+  saveAiThreadsToStorage();
+  renderAiThreadList();
+  updateAiAssistantControls();
+  const status = $("aiStatus");
+  if (status && !isAiCooldownActive() && getAiUsageCount() < AI_MAX_CHAT_MESSAGES) {
+    status.textContent = "Loaded thread — continue anytime.";
+  }
+}
+
+function deleteAiThread(threadId) {
+  if (!currentUser) return;
+  aiThreads = aiThreads.filter(t => t.id !== threadId);
+  if (aiActiveThreadId === threadId) {
+    aiActiveThreadId = aiThreads[0]?.id || null;
+    if (aiActiveThreadId) {
+      switchAiThread(aiActiveThreadId);
+    } else {
+      aiConversation = [];
+      resetAIChat({ skipPersist: true, createThread: true });
+    }
+  }
+  saveAiThreadsToStorage();
+  renderAiThreadList();
+}
+
+function resetAIChat(options = {}) {
+  aiRequestVersion += 1;
+  aiSending = false;
+  if (!options.skipPersist) persistActiveAiThread();
   aiConversation = [];
   clearAiAttachments();
   clearAiTopicDisclaimers();
+
+  if (currentUser && options.createThread !== false) {
+    const thread = {
+      id: createAiThreadId(),
+      title: "New chat",
+      updatedAt: Date.now(),
+      messages: []
+    };
+    aiThreads.unshift(thread);
+    aiActiveThreadId = thread.id;
+    saveAiThreadsToStorage();
+  }
 
   const target = $("aiMessages");
   if (target) {
@@ -3710,10 +4107,12 @@ function resetAIChat() {
     appendAiMessage("assistant", AI_GREETING);
   }
 
+  renderAiThreadList();
+
   const status = $("aiStatus");
   if (status) {
     status.textContent = currentUser
-      ? "Ready — press Send or Enter."
+      ? "New thread ready — press Send or Enter."
       : "Sign in with Discord to chat.";
   }
   updateAiAssistantControls();
@@ -3842,6 +4241,8 @@ async function sendAiMessage(event) {
     aiConversation.push({ role: "assistant", content: data.reply });
     appendAiMessage("assistant", data.reply);
     refreshAiTopicDisclaimers();
+    ensureActiveAiThread();
+    persistActiveAiThread();
     // Server is source of truth for quota; keep local UI in sync
     applyServerAiUsage(data);
     if (data.cooldown || isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
@@ -3862,7 +4263,8 @@ async function sendAiMessage(event) {
 }
 
 $("aiChatForm")?.addEventListener("submit", sendAiMessage);
-$("aiNewChatBtn")?.addEventListener("click", resetAIChat);
+$("aiNewChatBtn")?.addEventListener("click", () => resetAIChat());
+$("aiNewChatBtnSide")?.addEventListener("click", () => resetAIChat());
 $("aiAttachBtn")?.addEventListener("click", () => $("aiFileInput")?.click());
 $("aiFileInput")?.addEventListener("change", async event => {
   try {
