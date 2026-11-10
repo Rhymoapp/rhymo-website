@@ -1186,8 +1186,32 @@ body.drawer-open {
 }
 .server-stat-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+}
+@media (max-width: 960px) {
+  .server-stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.mod-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 800px) {
+  .mod-tools-grid { grid-template-columns: 1fr; }
+}
+.mod-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.mod-actions button#modBanBtn {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+}
+.mod-actions button#modKickBtn {
+  border-color: rgba(251, 146, 60, 0.35);
 }
 .server-stat-card {
   background: rgba(0, 0, 0, 0.22);
@@ -2432,7 +2456,50 @@ input:focus, select:focus, textarea:focus {
           <div class="server-stat-value" id="selectedLogCount">—</div>
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Included in the 12-hour log history</p>
         </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Members</div>
+          <div class="server-stat-value" id="selectedMemberCount">—</div>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Approx. members (live)</p>
+        </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Online</div>
+          <div class="server-stat-value" id="selectedPresenceCount">—</div>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Approx. online (live)</p>
+        </div>
       </div>
+      <p class="muted" id="selectedServerLiveMeta" style="margin:12px 0 0;font-size:12.5px;"></p>
+    </article>
+
+    <article class="panel full" id="serverModerationCard">
+      <div class="panel-head">
+        <div>
+          <h2 style="margin:0;">Live moderation</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;">Administrators only · actions run through Rhymo in Discord</p>
+        </div>
+        <span class="pill" id="moderationStatusPill">Idle</span>
+      </div>
+      <p class="muted" id="moderationHint" style="margin:0 0 12px;font-size:13px;">Select a server where you are an admin and Rhymo is online.</p>
+      <div class="mod-tools-grid">
+        <label class="field">
+          <span>Discord user ID</span>
+          <input id="modUserId" type="text" inputmode="numeric" maxlength="22" placeholder="e.g. 123456789012345678" disabled>
+        </label>
+        <label class="field">
+          <span>Reason (optional)</span>
+          <input id="modReason" type="text" maxlength="400" placeholder="Reason shown in audit log" disabled>
+        </label>
+        <label class="field">
+          <span>Timeout minutes</span>
+          <input id="modTimeoutMinutes" type="number" min="1" max="40320" value="10" disabled>
+        </label>
+      </div>
+      <div class="mod-actions">
+        <button type="button" id="modTimeoutBtn" disabled>Timeout</button>
+        <button type="button" id="modKickBtn" disabled>Kick</button>
+        <button type="button" id="modBanBtn" disabled>Ban</button>
+        <button type="button" id="modUnbanBtn" disabled>Unban</button>
+      </div>
+      <p class="muted" id="moderationMessage" style="margin:10px 0 0;font-size:13px;" role="status"></p>
     </article>
 
     <article class="panel full">
@@ -4638,6 +4705,23 @@ function friendlyServerError(error, fallback) {
   return raw;
 }
 
+function setModerationEnabled(enabled, hint) {
+  ["modUserId", "modReason", "modTimeoutMinutes", "modTimeoutBtn", "modKickBtn", "modBanBtn", "modUnbanBtn"]
+    .forEach(id => {
+      if ($(id)) $(id).disabled = !enabled;
+    });
+  if ($("moderationHint")) {
+    $("moderationHint").textContent = hint || (
+      enabled
+        ? "Enter a user ID, then choose an action. Uses Rhymo’s bot permissions in Discord."
+        : "Select a server where you are an admin and Rhymo is online."
+    );
+  }
+  if ($("moderationStatusPill")) {
+    $("moderationStatusPill").textContent = enabled ? "Ready" : "Locked";
+  }
+}
+
 function resetServerDetails() {
   stopServerDetailsPolling();
   stopLogsPolling();
@@ -4646,6 +4730,9 @@ function resetServerDetails() {
   setServerDetailsLiveState("Idle", "Choose a server to start live updates.");
   $("selectedBotStatus").textContent = "—";
   $("selectedLogCount").textContent = "—";
+  if ($("selectedMemberCount")) $("selectedMemberCount").textContent = "—";
+  if ($("selectedPresenceCount")) $("selectedPresenceCount").textContent = "—";
+  if ($("selectedServerLiveMeta")) $("selectedServerLiveMeta").textContent = "";
   $("loadServerDetailsBtn").disabled = true;
   if ($("loadServerLogsBtn")) $("loadServerLogsBtn").disabled = true;
   if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
@@ -4666,6 +4753,8 @@ function resetServerDetails() {
     $("commandLogs").appendChild(cmdEmpty);
   }
   setCommandLogsLiveState("Idle");
+  setModerationEnabled(false);
+  if ($("moderationMessage")) $("moderationMessage").textContent = "";
 }
 
 async function loadServers(options = {}) {
@@ -4998,6 +5087,40 @@ async function loadServerDetails(options = {}) {
     }
 
     $("selectedLogCount").textContent = String(data.activityLogCount ?? 0);
+
+    const live = details.live || null;
+    if ($("selectedMemberCount")) {
+      $("selectedMemberCount").textContent =
+        live?.memberCount != null ? Number(live.memberCount).toLocaleString() : "—";
+    }
+    if ($("selectedPresenceCount")) {
+      $("selectedPresenceCount").textContent =
+        live?.presenceCount != null ? Number(live.presenceCount).toLocaleString() : "—";
+    }
+    if ($("selectedServerLiveMeta")) {
+      const bits = [];
+      if (live?.premiumTiers) bits.push("Boost tier " + live.premiumTiers);
+      if (live?.premiumSubscriptionCount) bits.push(live.premiumSubscriptionCount + " boosts");
+      if (live?.preferredLocale) bits.push(live.preferredLocale);
+      if (live?.description) bits.push(live.description);
+      $("selectedServerLiveMeta").textContent = bits.join(" · ");
+    }
+
+    const canModerate =
+      data.moderationEnabled === true &&
+      details.botInstalled === true &&
+      details.botOnline !== false;
+    setModerationEnabled(
+      canModerate,
+      canModerate
+        ? "Enter a Discord user ID, then Timeout / Kick / Ban / Unban. Admin only."
+        : data.moderationEnabled === false
+          ? "Moderation tools need DISCORD_BOT_TOKEN set on the backend."
+          : details.botInstalled === false
+            ? "Add Rhymo to this server to enable live moderation."
+            : "Rhymo must be online in this server for moderation tools."
+    );
+
     $("loadServerDetailsBtn").disabled = false;
     $("loadServerLogsBtn").disabled = false;
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
@@ -5136,6 +5259,82 @@ async function loadServerLogs(options = {}) {
     $("loadServerLogsBtn").disabled = !selectedGuildId;
   }
 }
+
+async function runServerModeration(action) {
+  const guildId = $("serverSelect")?.value || selectedGuildId;
+  const userId = ($("modUserId")?.value || "").trim();
+  const reason = ($("modReason")?.value || "").trim();
+  const durationMinutes = Number($("modTimeoutMinutes")?.value) || 10;
+  if (!guildId) {
+    toast("Choose a server first.");
+    return;
+  }
+  if (!/^\d{5,22}$/.test(userId)) {
+    toast("Enter a valid Discord user ID.");
+    $("modUserId")?.focus();
+    return;
+  }
+  const labels = {
+    timeout: `Timeout user ${userId} for ${durationMinutes} minute(s)?`,
+    kick: `Kick user ${userId} from this server?`,
+    ban: `Ban user ${userId} from this server?`,
+    unban: `Unban user ${userId}?`
+  };
+  if (!window.confirm((labels[action] || "Run this action?") + "\n\nThis runs through Rhymo in Discord.")) {
+    return;
+  }
+
+  const buttons = ["modTimeoutBtn", "modKickBtn", "modBanBtn", "modUnbanBtn"]
+    .map(id => $(id))
+    .filter(Boolean);
+  buttons.forEach(btn => { btn.disabled = true; });
+  if ($("moderationStatusPill")) $("moderationStatusPill").textContent = "Working…";
+  if ($("moderationMessage")) $("moderationMessage").textContent = "Sending action to Discord…";
+
+  try {
+    const response = await request(
+      "/api/servers/" + encodeURIComponent(guildId) + "/moderation/" + encodeURIComponent(action),
+      {
+        method: "POST",
+        body: JSON.stringify({
+          userId,
+          reason,
+          durationMinutes,
+          deleteMessageSeconds: action === "ban" ? 0 : undefined
+        })
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Moderation action failed.");
+    const msg =
+      action === "timeout"
+        ? `Timed out ${userId} until ${data.until ? new Date(data.until).toLocaleString() : "scheduled time"}.`
+        : action === "kick"
+          ? `Kicked ${userId}.`
+          : action === "ban"
+            ? `Banned ${userId}.`
+            : `Unbanned ${userId}.`;
+    if ($("moderationMessage")) $("moderationMessage").textContent = msg;
+    if ($("moderationStatusPill")) $("moderationStatusPill").textContent = "Done";
+    toast(msg);
+    // Refresh logs so the action can show up if the bot records it
+    loadServerLogs({ silent: true }).catch(() => {});
+  } catch (error) {
+    console.error("Moderation failed:", error);
+    if ($("moderationMessage")) $("moderationMessage").textContent = error.message || "Action failed.";
+    if ($("moderationStatusPill")) $("moderationStatusPill").textContent = "Error";
+    toast(error.message || "Moderation action failed.");
+  } finally {
+    const enabled = $("modTimeoutBtn") && !$("modTimeoutBtn").disabled;
+    // Re-enable if tools were ready before
+    setModerationEnabled(true);
+  }
+}
+
+$("modTimeoutBtn")?.addEventListener("click", () => runServerModeration("timeout"));
+$("modKickBtn")?.addEventListener("click", () => runServerModeration("kick"));
+$("modBanBtn")?.addEventListener("click", () => runServerModeration("ban"));
+$("modUnbanBtn")?.addEventListener("click", () => runServerModeration("unban"));
 
 $("loadServersBtn")?.addEventListener("click", loadServers);
 $("serverSelect")?.addEventListener("change", loadServerDetails);
