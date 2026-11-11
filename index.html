@@ -604,21 +604,31 @@ textarea {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .profile-pic {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  max-width: 56px !important;
+  max-height: 56px;
   border-radius: 14px;
   object-fit: cover;
+  object-position: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
+  flex-shrink: 0;
+  display: block;
 }
 
 .profile-name {
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.3px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .notice {
@@ -1756,6 +1766,11 @@ img, video, canvas, svg {
   .profile-pic {
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    max-width: 48px !important;
+    max-height: 48px;
+    border-radius: 12px;
   }
 
   /* Drawer / scrim align under topbar + notch */
@@ -2180,11 +2195,8 @@ input:focus, select:focus, textarea:focus {
   outline: none;
 }
 
-.brand img.avatar,
-#headerAvatar,
-#profileAvatar,
-#settingsAvatar {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+.brand img.avatar {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 @media (max-width: 720px) {
@@ -2308,39 +2320,51 @@ input:focus, select:focus, textarea:focus {
 }
 
 
-/* Visual bugfixes */
+/* Visual bugfixes — profile + layout */
 html, body {
   overflow-x: hidden;
 }
-.profile-pic {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  object-fit: cover;
-  flex-shrink: 0;
-  display: block;
-}
-.row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
 .row > div {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
 #authBadge {
   display: inline-flex;
+  align-items: center;
   margin-top: 8px;
+  max-width: 100%;
 }
 .panel, .hero, .content, main {
   max-width: 100%;
 }
-img, svg, video {
+img:not(.avatar):not(.profile-pic):not(.server-chip-icon),
+svg,
+video {
   max-width: 100%;
+}
+.avatar,
+.profile-pic,
+.server-chip-icon {
+  max-width: none;
 }
 select, input, textarea {
   max-width: 100%;
+}
+#accountBtn img.avatar,
+#headerAvatar {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 10px;
+}
+#profileAvatar,
+#settingsAvatar {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 </style>
@@ -3238,7 +3262,7 @@ const pages = [
   ["privacy", "Privacy Policy"]
 ];
 
-const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%2318181b' width='64' height='64' rx='14'/%3E%3C/svg%3E";
+const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect fill='%2327272a' width='128' height='128' rx='28'/%3E%3Ccircle cx='64' cy='48' r='22' fill='%2352525b'/%3E%3Cellipse cx='64' cy='98' rx='36' ry='28' fill='%2352525b'/%3E%3C/svg%3E";
 
 function toast(message) {
   let el = $("toast");
@@ -3472,13 +3496,22 @@ function setUser(user) {
     return;
   }
 
-  const avatar = user.avatarUrl || (user.avatar && user.id
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : fallbackAvatar);
+  const avatar = user.avatarUrl
+    || (user.avatar && user.id
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+      : fallbackAvatar);
   const displayName = user.global_name || user.globalName || user.username || "Discord user";
-  $("headerAvatar").src = avatar;
-  $("profileAvatar").src = avatar;
-  if ($("settingsAvatar")) $("settingsAvatar").src = avatar;
+  const applyAvatar = (el) => {
+    if (!el) return;
+    el.onerror = () => {
+      el.onerror = null;
+      el.src = fallbackAvatar;
+    };
+    el.src = avatar;
+  };
+  applyAvatar($("headerAvatar"));
+  applyAvatar($("profileAvatar"));
+  applyAvatar($("settingsAvatar"));
 
   if ($("settingsName")) $("settingsName").textContent = displayName;
   if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
