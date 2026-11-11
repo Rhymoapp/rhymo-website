@@ -255,7 +255,7 @@ button:disabled {
   height: 36px;
   border-radius: 11px;
   padding: 0;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 #accountBtn .avatar,
@@ -267,52 +267,6 @@ button:disabled {
   object-fit: cover;
   display: block;
 }
-.owner-avatar-wrap,
-.profile-avatar-wrap {
-  position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-}
-.owner-badge {
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  line-height: 1;
-  color: #1a1400;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: 2px solid var(--bg);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
-  pointer-events: none;
-  z-index: 2;
-}
-#accountBtn .owner-badge {
-  width: 15px;
-  height: 15px;
-  font-size: 9px;
-  right: -3px;
-  bottom: -3px;
-}
-.owner-pill {
-  background: color-mix(in srgb, #fbbf24 18%, rgba(0,0,0,0.25)) !important;
-  border-color: color-mix(in srgb, #fbbf24 45%, var(--border)) !important;
-  color: #fde68a !important;
-  font-weight: 700 !important;
-}
-.owner-pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-  margin-top: 6px;
-}
-.owner-pill-row .pill { margin: 0; }
-
 .hamb {
   display: flex;
   flex-direction: column;
@@ -2353,6 +2307,42 @@ input:focus, select:focus, textarea:focus {
   font-size: 12.5px;
 }
 
+
+/* Visual bugfixes */
+html, body {
+  overflow-x: hidden;
+}
+.profile-pic {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.row > div {
+  min-width: 0;
+}
+#authBadge {
+  display: inline-flex;
+  margin-top: 8px;
+}
+.panel, .hero, .content, main {
+  max-width: 100%;
+}
+img, svg, video {
+  max-width: 100%;
+}
+select, input, textarea {
+  max-width: 100%;
+}
+
 </style>
 </head>
 <body class="session-checking">
@@ -2380,7 +2370,7 @@ input:focus, select:focus, textarea:focus {
   <label class="top-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo"></label>
   <div class="top-actions">
     <button class="btn-discord" id="loginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
-    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"><span class="owner-badge" id="headerOwnerBadge" hidden title="Rhymo owner">★</span></button>
+    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
   </div>
 </header>
 
@@ -2485,17 +2475,11 @@ input:focus, select:focus, textarea:focus {
   <div class="grid">
     <article class="panel full">
       <div class="row">
-        <div class="owner-avatar-wrap profile-avatar-wrap">
-          <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
-          <span class="owner-badge" id="profileOwnerBadge" hidden title="Rhymo owner">★</span>
-        </div>
+        <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
         <div>
           <div class="profile-name" id="profileName">Checking session...</div>
           <div class="muted" id="profileId"></div>
-          <div class="owner-pill-row">
-            <span class="pill" id="authBadge">Checking session</span>
-            <span class="pill owner-pill" id="ownerStatusPill" hidden>Owner</span>
-          </div>
+          <span class="pill" id="authBadge">Checking session</span>
         </div>
       </div>
       <hr><p id="accountMessage" class="muted">Checking your login session...</p>
@@ -2879,14 +2863,10 @@ input:focus, select:focus, textarea:focus {
   <div class="grid">
     <article class="panel full" id="settingsProfile" hidden>
       <div class="row">
-        <div class="owner-avatar-wrap profile-avatar-wrap">
-          <img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar">
-          <span class="owner-badge" id="settingsOwnerBadge" hidden title="Rhymo owner">★</span>
-        </div>
+        <img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar">
         <div>
           <div class="profile-name" id="settingsName">—</div>
           <div class="muted" id="settingsId"></div>
-          <span class="pill owner-pill" id="settingsOwnerPill" hidden style="margin-top:8px;display:inline-flex;">Owner</span>
         </div>
       </div>
       <hr>
@@ -3484,7 +3464,6 @@ function setUser(user) {
     isOwner = false;
     if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
     if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
-    if (typeof updateOwnerBadges === "function") updateOwnerBadges();
     resetAIChat({ skipPersist: true, createThread: false });
     aiThreads = [];
     aiActiveThreadId = null;
@@ -3500,7 +3479,6 @@ function setUser(user) {
   $("headerAvatar").src = avatar;
   $("profileAvatar").src = avatar;
   if ($("settingsAvatar")) $("settingsAvatar").src = avatar;
-  if (typeof updateOwnerBadges === "function") updateOwnerBadges();
 
   if ($("settingsName")) $("settingsName").textContent = displayName;
   if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
@@ -5688,31 +5666,11 @@ $("moderationBtn")?.addEventListener("click", () => {
 
 /* ===== NOTIFICATIONS ===== */
 /* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
-const RHYMO_OWNER_USER_ID = "1481780053682688001";
 let isOwner = false;
-
-function updateOwnerBadges() {
-  // Strict client-side check: only this Discord user ID ever sees owner marks
-  const uid = currentUser?.id != null ? String(currentUser.id) : "";
-  const show = Boolean(uid && uid === RHYMO_OWNER_USER_ID);
-  ["headerOwnerBadge", "profileOwnerBadge", "settingsOwnerBadge", "ownerStatusPill", "settingsOwnerPill"]
-    .forEach(id => {
-      const el = $(id);
-      if (!el) return;
-      el.hidden = !show;
-    });
-  const accountBtn = $("accountBtn");
-  if (accountBtn) {
-    accountBtn.title = show
-      ? "Rhymo owner account"
-      : "Your Discord account";
-  }
-}
 
 async function checkOwner() {
   if (!currentUser) {
     isOwner = false;
-    updateOwnerBadges();
     const announcePanel = $("announceAdminPanel");
     const changelogPanel = $("changelogAdminPanel");
     if (announcePanel) announcePanel.style.display = "none";
@@ -5724,18 +5682,15 @@ async function checkOwner() {
     if (!response.ok) { isOwner = false; }
     else {
       const data = await response.json();
-      const uid = currentUser?.id != null ? String(currentUser.id) : "";
-      isOwner = data.owner === true && uid === RHYMO_OWNER_USER_ID;
+      isOwner = data.owner === true;
     }
   } catch {
     isOwner = false;
   }
-  // Show/hide owner panels
   const announcePanel = $("announceAdminPanel");
   const changelogPanel = $("changelogAdminPanel");
   if (announcePanel) announcePanel.style.display = isOwner ? "block" : "none";
   if (changelogPanel) changelogPanel.style.display = isOwner ? "block" : "none";
-  updateOwnerBadges();
 }
 
 function renderPostList(targetId, posts, emptyText) {
@@ -5928,8 +5883,7 @@ async function loadSitePosts() {
         isOwner = false;
         if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
         if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
-        if (typeof updateOwnerBadges === "function") updateOwnerBadges();
-      }
+          }
       const publicRes = await request("/api/site-posts");
       if (!publicRes.ok) throw new Error("Failed to load posts");
       const publicData = await publicRes.json();
