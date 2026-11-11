@@ -777,6 +777,121 @@ body.drawer-open {
 .server-picker-card .panel-head {
   align-items: flex-start;
 }
+.managed-server-list {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 12px;
+}
+.managed-server-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  color: var(--text);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.managed-server-row:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  transform: translateY(-1px);
+}
+.managed-server-row[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.managed-server-avatar,
+.managed-server-avatar-fallback {
+  display: grid;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 17%, #242b35);
+  color: var(--text);
+  font-size: 21px;
+  font-weight: 700;
+}
+.managed-server-avatar {
+  object-fit: cover;
+}
+.managed-server-avatar-fallback[hidden] {
+  display: none;
+}
+.managed-server-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+.managed-server-name,
+.managed-server-subtitle {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.managed-server-name {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.managed-server-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+}
+.managed-server-status {
+  flex: 0 0 auto;
+  max-width: 38%;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+.managed-server-status.installed {
+  color: var(--accent);
+}
+.managed-server-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 28px;
+  line-height: 1;
+}
+.server-list-empty {
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 520px) {
+  .managed-server-row {
+    gap: 11px;
+    padding: 10px;
+  }
+  .managed-server-avatar,
+  .managed-server-avatar-fallback {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
+  }
+  .managed-server-name {
+    font-size: 15px;
+  }
+  .managed-server-status {
+    display: none;
+  }
+}
 .server-details-header {
   display: flex;
   justify-content: space-between;
@@ -2846,16 +2961,17 @@ body.layout-original .server-chip:hover {
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Your servers</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers you manage are listed.</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers you own or have permission to manage are listed.</p>
         </div>
         <button id="loadServersBtn">Refresh</button>
       </div>
-      <label class="field">
-        <span>Choose a server</span>
-        <select id="serverSelect">
-          <option value="">Servers appear here after you sign in</option>
-        </select>
-      </label>
+      <div>
+        <span class="muted" style="display:block;font-size:13px;margin-top:18px;">Choose a server</span>
+        <div id="serverList" class="managed-server-list" role="list" aria-label="Servers you can manage">
+          <div class="server-list-empty">Sign in with Discord to load servers you manage.</div>
+        </div>
+        <input type="hidden" id="serverSelect" value="">
+      </div>
       <div id="serverMessage" class="notice" role="status">Sign in with Discord and your servers will show up here automatically.</div>
     </article>
 
@@ -3748,7 +3864,8 @@ function setUser(user) {
     $("homeAccountMessage").textContent = "Sign in with Discord to see your profile here.";
     managedServers = [];
     selectedGuildId = "";
-    $("serverSelect").replaceChildren(new Option("Log in to load servers", ""));
+    $("serverSelect").value = "";
+    renderManagedServerList("Sign in with Discord to load servers you manage.");
     resetServerDetails();
     serverMessage("Please log in with Discord before loading servers.");
     isOwner = false;
@@ -5238,6 +5355,86 @@ function serverMessage(message) {
   $("serverMessage").textContent = message;
 }
 
+function renderManagedServerList(emptyMessage) {
+  const list = $("serverList");
+  if (!list) return;
+  list.replaceChildren();
+
+  if (!managedServers.length) {
+    const empty = document.createElement("div");
+    empty.className = "server-list-empty";
+    empty.textContent = emptyMessage || (
+      currentUser
+        ? "No servers with management access were found."
+        : "Sign in with Discord to load servers you manage."
+    );
+    list.appendChild(empty);
+    return;
+  }
+
+  managedServers.forEach(server => {
+    const item = document.createElement("div");
+    item.setAttribute("role", "listitem");
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "managed-server-row";
+    button.dataset.guildId = server.id;
+    button.setAttribute("aria-pressed", String(server.id === selectedGuildId));
+    button.setAttribute("aria-label", `Select ${server.name || "unnamed Discord server"}`);
+
+    const fallback = document.createElement("span");
+    fallback.className = "managed-server-avatar-fallback";
+    fallback.setAttribute("aria-hidden", "true");
+    fallback.textContent = String(server.name || "?").trim().charAt(0).toUpperCase() || "?";
+
+    if (server.icon) {
+      const image = document.createElement("img");
+      image.className = "managed-server-avatar";
+      image.src = server.icon;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      fallback.hidden = true;
+      image.addEventListener("error", () => {
+        image.hidden = true;
+        fallback.hidden = false;
+      }, { once: true });
+      button.appendChild(image);
+    }
+    button.appendChild(fallback);
+
+    const copy = document.createElement("span");
+    copy.className = "managed-server-copy";
+    const name = document.createElement("span");
+    name.className = "managed-server-name";
+    name.textContent = server.name || "Unnamed Discord server";
+    const subtitle = document.createElement("span");
+    subtitle.className = "managed-server-subtitle";
+    subtitle.textContent = server.owner ? "You own this server" : "You can manage this server";
+    copy.append(name, subtitle);
+    button.appendChild(copy);
+
+    const status = document.createElement("span");
+    status.className = "managed-server-status";
+    status.textContent = server.botInstalled === true
+      ? "Rhymo installed"
+      : server.botInstalled === false
+        ? "Rhymo not installed"
+        : "Status unavailable";
+    if (server.botInstalled === true) status.classList.add("installed");
+    button.appendChild(status);
+
+    const chevron = document.createElement("span");
+    chevron.className = "managed-server-chevron";
+    chevron.setAttribute("aria-hidden", "true");
+    chevron.textContent = "›";
+    button.appendChild(chevron);
+    item.appendChild(button);
+    list.appendChild(item);
+  });
+}
+
 function friendlyServerError(error, fallback) {
   const raw = String(error?.message || error || "").trim();
   if (!raw) return fallback;
@@ -5318,12 +5515,18 @@ async function loadServers(options = {}) {
     button.textContent = "Loading...";
     serverMessage("Loading your manageable Discord servers...");
   }
+  if (!silent && !managedServers.length) {
+    renderManagedServerList("Loading your servers...");
+  }
 
   try {
     const response = await request("/api/servers");
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) {
       // Keep the local signed-in profile; only server APIs need the session cookie
+      if (!managedServers.length) {
+        renderManagedServerList("Your Discord session expired. Sign in again to load your servers.");
+      }
       serverMessage("Server list needs a full Discord session. Try signing in again in Chrome, or use Refresh after login.");
       return;
     }
@@ -5332,38 +5535,42 @@ async function loadServers(options = {}) {
     managedServers = Array.isArray(data.servers) ? data.servers : [];
     const select = $("serverSelect");
     const previousSelection = selectedGuildId;
-    select.replaceChildren();
 
     if (!managedServers.length) {
-      select.add(new Option("No manageable servers found", ""));
       selectedGuildId = "";
+      select.value = "";
+      renderManagedServerList("No servers with the required management permissions were found.");
       resetServerDetails();
       serverMessage("No servers with the required management permissions were found.");
       return;
     }
 
-    select.add(new Option("Choose a server...", ""));
-    managedServers.forEach(server => {
-      const status = server.botInstalled === true ? " — Rhymo installed"
-        : server.botInstalled === false ? " — Rhymo not installed" : "";
-      select.add(new Option(server.name + status, server.id));
-    });
-
-    if (!silent) serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue. The list refreshes every minute.`);
     if (selectedGuildId && managedServers.some(s => s.id === selectedGuildId)) {
       select.value = selectedGuildId;
+      renderManagedServerList();
+      if (!silent) serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue. The list refreshes every minute.`);
       if (!silent) await loadServerDetails();
     } else {
       selectedGuildId = "";
+      select.value = "";
+      renderManagedServerList();
       if (previousSelection) {
         resetServerDetails();
         serverMessage("The selected server is no longer available to your account.");
-      } else if (!silent) {
-        resetServerDetails();
+      } else {
+        if (!silent) serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue. The list refreshes every minute.`);
+        if (!silent) resetServerDetails();
       }
     }
   } catch (error) {
     console.error("Loading servers failed:", error);
+    if (!managedServers.length) {
+      renderManagedServerList(
+        silent
+          ? "Could not refresh your server list. Try again shortly."
+          : "Could not load your servers. Check your connection and try Refresh."
+      );
+    }
     serverMessage(silent
       ? "Could not refresh the server list. Showing the last loaded list."
       : friendlyServerError(error, "Could not load servers."));
@@ -5590,6 +5797,7 @@ async function loadServerDetails(options = {}) {
   if (serverDetailsRequestsInFlight.has(guildId)) return;
   serverDetailsRequestsInFlight.add(guildId);
   selectedGuildId = guildId;
+  renderManagedServerList();
   const selected = managedServers.find(item => item.id === guildId);
   $("selectedServerName").textContent = selected?.name || "Selected server";
   if (!silent) {
@@ -5882,7 +6090,16 @@ $("modBanBtn")?.addEventListener("click", () => runServerModeration("ban"));
 $("modUnbanBtn")?.addEventListener("click", () => runServerModeration("unban"));
 
 $("loadServersBtn")?.addEventListener("click", loadServers);
-$("serverSelect")?.addEventListener("change", loadServerDetails);
+$("serverList")?.addEventListener("click", event => {
+  const button = event.target.closest?.("button[data-guild-id]");
+  if (!button) return;
+  const guildId = button.dataset.guildId;
+  if (!managedServers.some(server => server.id === guildId)) return;
+  $("serverSelect").value = guildId;
+  selectedGuildId = guildId;
+  renderManagedServerList();
+  loadServerDetails();
+});
 $("loadServerDetailsBtn")?.addEventListener("click", loadServerDetails);
 $("loadServerLogsBtn")?.addEventListener("click", () => loadServerLogs({ silent: false }));
 $("loadCommandLogsBtn")?.addEventListener("click", () => loadCommandLogs({ silent: false }));
