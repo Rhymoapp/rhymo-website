@@ -3137,7 +3137,7 @@ body.layout-original .server-chip:hover {
     </article>
     <article class="panel">
       <h2>Note</h2>
-      <p class="muted" style="margin:0;">Layout preference is stored in this browser only. You can switch back anytime.</p>
+      <p class="muted" style="margin:0;">Layout is saved per Discord account on this device (and as guest when logged out). You can switch anytime.</p>
     </article>
   </div>
 </section>
@@ -3759,6 +3759,7 @@ function setUser(user) {
     aiActiveThreadId = null;
     renderAiThreadList();
     if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
+    if (typeof loadLegacyLayout === "function") loadLegacyLayout();
     return;
   }
 
@@ -3800,6 +3801,7 @@ function setUser(user) {
   }
   renderAiThreadList();
   if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
+    if (typeof loadLegacyLayout === "function") loadLegacyLayout();
   if (typeof syncAiUsageFromServer === "function") syncAiUsageFromServer();
   checkOwner();
   // Auto-load manageable servers after login
@@ -6671,6 +6673,13 @@ try {
 
 
 /* ===== LEGACY LAYOUT ===== */
+function getLayoutStorageKey() {
+  // Per Discord user when signed in; guest key when logged out
+  return currentUser?.id
+    ? "rhymo-layout:" + String(currentUser.id)
+    : "rhymo-layout:guest";
+}
+
 function applyLegacyLayout(mode, options = {}) {
   const allowed = ["modern", "classic", "original"];
   if (!allowed.includes(mode)) mode = "modern";
@@ -6696,7 +6705,7 @@ function applyLegacyLayout(mode, options = {}) {
     card.classList.toggle("active", card.dataset.layout === mode);
   });
 
-  // Original forces the early blue accent unless user changes it later in modern
+  // Original forces the early blue accent for this session look
   if (mode === "original" && options.applyOriginalAccent !== false) {
     document.documentElement.style.setProperty("--accent", "#6d8cff");
     document.documentElement.style.setProperty("--accent-2", "#5b7cfa");
@@ -6704,15 +6713,25 @@ function applyLegacyLayout(mode, options = {}) {
   }
 
   if (options.persist !== false) {
-    try { localStorage.setItem("rhymo-layout", mode); } catch {}
+    try {
+      localStorage.setItem(getLayoutStorageKey(), mode);
+      // migrate away from old shared key when possible
+      if (currentUser?.id) localStorage.removeItem("rhymo-layout");
+    } catch {}
   }
 }
 
 function loadLegacyLayout() {
   let mode = "modern";
   try {
-    const stored = localStorage.getItem("rhymo-layout");
-    if (stored === "classic" || stored === "modern" || stored === "original") mode = stored;
+    const keyed = localStorage.getItem(getLayoutStorageKey());
+    if (keyed === "classic" || keyed === "modern" || keyed === "original") {
+      mode = keyed;
+    } else {
+      // one-time migration from old device-wide key
+      const legacy = localStorage.getItem("rhymo-layout");
+      if (legacy === "classic" || legacy === "modern" || legacy === "original") mode = legacy;
+    }
   } catch {}
   applyLegacyLayout(mode, { persist: false });
 }
@@ -6720,6 +6739,7 @@ function loadLegacyLayout() {
 $("legacyModernBtn")?.addEventListener("click", () => {
   applyLegacyLayout("modern");
   if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
+    if (typeof loadLegacyLayout === "function") loadLegacyLayout();
 });
 $("legacyClassicBtn")?.addEventListener("click", () => applyLegacyLayout("classic"));
 $("legacyOriginalBtn")?.addEventListener("click", () => applyLegacyLayout("original"));
