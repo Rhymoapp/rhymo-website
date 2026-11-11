@@ -5690,7 +5690,8 @@ $("moderationBtn")?.addEventListener("click", () => {
 let isOwner = false;
 
 function updateOwnerBadges() {
-  const show = isOwner === true;
+  // Owner marks only when signed in AND verified as owner
+  const show = Boolean(currentUser && isOwner === true);
   ["headerOwnerBadge", "profileOwnerBadge", "settingsOwnerBadge", "ownerStatusPill", "settingsOwnerPill"]
     .forEach(id => {
       const el = $(id);
@@ -5706,12 +5707,21 @@ function updateOwnerBadges() {
 }
 
 async function checkOwner() {
+  if (!currentUser) {
+    isOwner = false;
+    updateOwnerBadges();
+    const announcePanel = $("announceAdminPanel");
+    const changelogPanel = $("changelogAdminPanel");
+    if (announcePanel) announcePanel.style.display = "none";
+    if (changelogPanel) changelogPanel.style.display = "none";
+    return;
+  }
   try {
     const response = await request("/api/admin/me");
     if (!response.ok) { isOwner = false; }
     else {
       const data = await response.json();
-      isOwner = data.owner === true;
+      isOwner = data.owner === true && data.authenticated !== false;
     }
   } catch {
     isOwner = false;
