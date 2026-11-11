@@ -131,7 +131,8 @@ button, .btn {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 18px;
+  padding: 11px 16px;
+  min-height: 42px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface-2);
@@ -139,6 +140,9 @@ button, .btn {
   font-weight: 700;
   font-size: 14px;
   letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  max-width: 100%;
   transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 button:hover, .btn:hover {
@@ -1302,6 +1306,10 @@ body.drawer-open {
   margin: 0 0 18px;
   mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  /* Keep scrolling even if tapped/clicked */
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-y;
 }
 .server-marquee-track {
   display: flex;
@@ -1311,9 +1319,13 @@ body.drawer-open {
 }
 .server-marquee-track.scrolling {
   animation: serverMarquee 42s linear infinite;
+  animation-play-state: running !important;
 }
-.home-server-marquee:hover .server-marquee-track.scrolling {
-  animation-play-state: paused;
+/* Never pause the server strip on hover/focus/active */
+.home-server-marquee:hover .server-marquee-track.scrolling,
+.home-server-marquee:active .server-marquee-track.scrolling,
+.home-server-marquee:focus-within .server-marquee-track.scrolling {
+  animation-play-state: running !important;
 }
 .server-marquee-group {
   display: flex;
@@ -1321,6 +1333,7 @@ body.drawer-open {
   gap: 28px;
   width: max-content;
   padding: 0 28px 0 0;
+  pointer-events: none;
 }
 @keyframes serverMarquee {
   from { transform: translateX(0); }
@@ -1588,19 +1601,40 @@ img, video, canvas, svg {
   .panel-head {
     flex-wrap: wrap;
     gap: 10px;
+    align-items: stretch;
   }
-  .actions {
+  .actions,
+  .mod-actions,
+  .server-details-actions,
+  .ai-header-actions,
+  .ai-compose-footer,
+  .panel-head > div:last-child {
+    display: flex;
     flex-wrap: wrap;
+    gap: 8px;
   }
-  .actions > * {
+  .actions > *,
+  .mod-actions > *,
+  .server-details-actions > *,
+  .ai-header-actions > * {
     flex: 1 1 auto;
-    min-width: min(100%, 140px);
+    min-width: min(100%, 132px);
+    max-width: 100%;
   }
   .invite-banner-inner {
-    align-items: flex-start;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .invite-banner-inner .btn,
+  .invite-banner-inner a.btn {
+    width: 100%;
   }
   #drawer {
     width: min(300px, 86vw);
+  }
+  .lang-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   }
 }
 
@@ -2158,6 +2192,63 @@ input:focus, select:focus, textarea:focus {
   .hero { padding: 24px 18px; border-radius: 18px; }
   .panel { padding: 16px; }
   .grid { gap: 12px; }
+  .panel.full,
+  .panel.third,
+  .panel {
+    grid-column: span 12;
+  }
+  button, .btn {
+    padding: 11px 14px;
+    min-height: 44px;
+    font-size: 13.5px;
+  }
+  .actions > *,
+  .mod-actions > *,
+  .server-details-actions > * {
+    flex: 1 1 calc(50% - 8px);
+    min-width: calc(50% - 8px);
+  }
+  .hero .actions > * {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .server-stat-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mod-tools-grid {
+    grid-template-columns: 1fr;
+  }
+  .ai-threads-panel {
+    right: auto;
+    left: 0;
+    width: min(320px, 92vw);
+  }
+  .home-server-marquee {
+    margin-bottom: 14px;
+  }
+  .server-marquee-group {
+    gap: 18px;
+    padding-right: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .actions > *,
+  .mod-actions > *,
+  .server-details-actions > *,
+  .ai-header-actions > * {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  .server-stat-row {
+    grid-template-columns: 1fr;
+  }
+  .lang-card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  h1 {
+    font-size: clamp(26px, 8vw, 34px);
+  }
 }
 
 /* Language page */
