@@ -2159,6 +2159,64 @@ input:focus, select:focus, textarea:focus {
   .panel { padding: 16px; }
   .grid { gap: 12px; }
 }
+
+/* Language page */
+.lang-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.lang-card {
+  text-align: left;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.lang-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.lang-card.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, rgba(0,0,0,0.2));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.lang-card .lang-flag {
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.lang-card strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 750;
+}
+.lang-card span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lang-feature-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.lang-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lang-preview .pill {
+  font-size: 12.5px;
+}
+
 </style>
 </head>
 <body class="session-checking">
@@ -2607,15 +2665,63 @@ input:focus, select:focus, textarea:focus {
 </section>
 
 <section class="page" id="page-language">
-  <div class="eyebrow">Preferences</div><h1>Language Settings</h1><p class="sub">Pick the language you’re most comfortable with for the navigation labels.</p>
-  <div class="panel full">
-    <label class="field"><span>Language</span>
-      <select id="languageSelect">
-        <option value="en">English</option>
-        <option value="so">Somali</option>
-      </select>
-    </label>
-    <p id="languageMessage" class="muted">English is selected.</p>
+  <div class="eyebrow">Preferences</div>
+  <h1>Language Settings</h1>
+  <p class="sub">Choose a language for navigation labels. Your choice is saved on this device.</p>
+
+  <div class="grid">
+    <article class="panel full">
+      <div class="panel-head">
+        <div>
+          <h2 style="margin:0;">Choose your language</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Tap a card or use the dropdown — both stay in sync.</p>
+        </div>
+        <span class="pill" id="languageActivePill">English</span>
+      </div>
+
+      <div class="lang-card-grid" id="languageCardGrid" role="listbox" aria-label="Available languages">
+        <!-- filled by JS -->
+      </div>
+
+      <label class="field" style="margin-top:16px;">
+        <span>Or pick from the list</span>
+        <select id="languageSelect">
+          <option value="en">English</option>
+          <option value="so">Somali — Soomaali</option>
+          <option value="es">Spanish — Español</option>
+          <option value="fr">French — Français</option>
+          <option value="de">German — Deutsch</option>
+          <option value="pt">Portuguese — Português</option>
+          <option value="ar">Arabic — العربية</option>
+        </select>
+      </label>
+      <p id="languageMessage" class="muted">English is selected. Navigation labels will update right away.</p>
+    </article>
+
+    <article class="panel">
+      <h2>What changes</h2>
+      <ul class="lang-feature-list">
+        <li>Sidebar and menu page names</li>
+        <li>Language name shown on this page</li>
+        <li>Saved preference on this browser/device</li>
+      </ul>
+    </article>
+
+    <article class="panel">
+      <h2>What stays English for now</h2>
+      <ul class="lang-feature-list">
+        <li>AI Assistant replies</li>
+        <li>Terms of Service &amp; Privacy Policy</li>
+        <li>Most panel body text and help articles</li>
+        <li>Bot command names in Discord</li>
+      </ul>
+    </article>
+
+    <article class="panel full">
+      <h2>Preview</h2>
+      <p class="muted" style="margin-bottom:10px;">Sample of how navigation labels look in the selected language:</p>
+      <div class="lang-preview" id="languagePreview"></div>
+    </article>
   </div>
 </section>
 
@@ -2686,7 +2792,12 @@ input:focus, select:focus, textarea:focus {
       <label class="field"><span>Interface language</span>
         <select id="settingsLanguage">
           <option value="en">English</option>
-          <option value="so">Somali</option>
+          <option value="so">Somali — Soomaali</option>
+          <option value="es">Spanish — Español</option>
+          <option value="fr">French — Français</option>
+          <option value="de">German — Deutsch</option>
+          <option value="pt">Portuguese — Português</option>
+          <option value="ar">Arabic — العربية</option>
         </select>
       </label>
     </article>
@@ -5864,24 +5975,162 @@ async function refreshNotifications() {
 }
 
 /* ===== LANGUAGE & ACCENT ===== */
-const translations = {
-  en: { Home: "Home", Features: "Features", Dashboard: "Dashboard", "System Status": "System Status", "Global Search": "Global Search", "Notification Center": "Notification Center", "Activity Logs": "Activity Logs", "Server Management": "Server Management", "Command Explorer": "Command Explorer", "Help Center": "Help Center", Changelog: "Changelog", "Language Settings": "Language Settings", Settings: "Settings", "Terms of Service": "Terms of Service", "Privacy Policy": "Privacy Policy" },
-  so: { Home: "Bogga Hore", Features: "Astaamaha", Dashboard: "Xarunta Maamulka", "System Status": "Xaaladda Nidaamka", "Global Search": "Raadin Guud", "Notification Center": "Ogeysiisyada", "Activity Logs": "Diiwaanka Hawlaha", "Server Management": "Maamulka Server-ka", "Command Explorer": "Baadh Amarada", "Help Center": "Xarunta Caawinta", Changelog: "Isbeddellada", "Language Settings": "Dejinta Luqadda", Settings: "Dejinta", "Terms of Service": "Shuruudaha Adeegga", "Privacy Policy": "Siyaasadda Asturnaanta" }
+const LANGUAGE_META = {
+  en: { label: "English", native: "English", flag: "🇺🇸", message: "English is selected. Navigation labels will update right away." },
+  so: { label: "Somali", native: "Soomaali", flag: "🇸🇴", message: "Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi." },
+  es: { label: "Spanish", native: "Español", flag: "🇪🇸", message: "Español seleccionado. Las etiquetas de navegación se actualizan al instante." },
+  fr: { label: "French", native: "Français", flag: "🇫🇷", message: "Français sélectionné. Les libellés de navigation se mettent à jour tout de suite." },
+  de: { label: "German", native: "Deutsch", flag: "🇩🇪", message: "Deutsch ausgewählt. Navigationsbezeichnungen werden sofort aktualisiert." },
+  pt: { label: "Portuguese", native: "Português", flag: "🇧🇷", message: "Português selecionado. Os rótulos de navegação atualizam na hora." },
+  ar: { label: "Arabic", native: "العربية", flag: "🇸🇦", message: "تم اختيار العربية. يتم تحديث تسميات التنقل فورًا. باقي النصوص قد تبقى بالإنجليزية." }
 };
 
-function setLanguage(lang) {
+const translations = {
+  en: {
+    Home: "Home", Features: "Features", Dashboard: "Dashboard", "System Status": "System Status",
+    "Global Search": "Global Search", "Notification Center": "Notification Center",
+    "Activity Logs": "Activity Logs", "Server Management": "Server Management",
+    "Command Explorer": "Command Explorer", "Help Center": "Help Center", Changelog: "Changelog",
+    "Language Settings": "Language Settings", Settings: "Settings",
+    "Terms of Service": "Terms of Service", "Privacy Policy": "Privacy Policy",
+    "AI Assistant": "AI Assistant"
+  },
+  so: {
+    Home: "Bogga Hore", Features: "Astaamaha", Dashboard: "Xarunta Maamulka",
+    "System Status": "Xaaladda Nidaamka", "Global Search": "Raadin Guud",
+    "Notification Center": "Ogeysiisyada", "Activity Logs": "Diiwaanka Hawlaha",
+    "Server Management": "Maamulka Server-ka", "Command Explorer": "Baadh Amarada",
+    "Help Center": "Xarunta Caawinta", Changelog: "Isbeddellada",
+    "Language Settings": "Dejinta Luqadda", Settings: "Dejinta",
+    "Terms of Service": "Shuruudaha Adeegga", "Privacy Policy": "Siyaasadda Asturnaanta",
+    "AI Assistant": "Kaaliyaha AI"
+  },
+  es: {
+    Home: "Inicio", Features: "Funciones", Dashboard: "Panel",
+    "System Status": "Estado del sistema", "Global Search": "Búsqueda global",
+    "Notification Center": "Notificaciones", "Activity Logs": "Registros de actividad",
+    "Server Management": "Gestión del servidor", "Command Explorer": "Explorador de comandos",
+    "Help Center": "Centro de ayuda", Changelog: "Registro de cambios",
+    "Language Settings": "Idioma", Settings: "Ajustes",
+    "Terms of Service": "Términos de servicio", "Privacy Policy": "Política de privacidad",
+    "AI Assistant": "Asistente de IA"
+  },
+  fr: {
+    Home: "Accueil", Features: "Fonctionnalités", Dashboard: "Tableau de bord",
+    "System Status": "État du système", "Global Search": "Recherche globale",
+    "Notification Center": "Notifications", "Activity Logs": "Journaux d’activité",
+    "Server Management": "Gestion du serveur", "Command Explorer": "Explorateur de commandes",
+    "Help Center": "Centre d’aide", Changelog: "Journal des changements",
+    "Language Settings": "Langue", Settings: "Paramètres",
+    "Terms of Service": "Conditions d’utilisation", "Privacy Policy": "Politique de confidentialité",
+    "AI Assistant": "Assistant IA"
+  },
+  de: {
+    Home: "Start", Features: "Funktionen", Dashboard: "Dashboard",
+    "System Status": "Systemstatus", "Global Search": "Globale Suche",
+    "Notification Center": "Benachrichtigungen", "Activity Logs": "Aktivitätsprotokolle",
+    "Server Management": "Serververwaltung", "Command Explorer": "Befehls-Explorer",
+    "Help Center": "Hilfecenter", Changelog: "Änderungsprotokoll",
+    "Language Settings": "Sprache", Settings: "Einstellungen",
+    "Terms of Service": "Nutzungsbedingungen", "Privacy Policy": "Datenschutz",
+    "AI Assistant": "KI-Assistent"
+  },
+  pt: {
+    Home: "Início", Features: "Recursos", Dashboard: "Painel",
+    "System Status": "Status do sistema", "Global Search": "Busca global",
+    "Notification Center": "Notificações", "Activity Logs": "Registros de atividade",
+    "Server Management": "Gerenciamento do servidor", "Command Explorer": "Explorador de comandos",
+    "Help Center": "Central de ajuda", Changelog: "Registro de alterações",
+    "Language Settings": "Idioma", Settings: "Configurações",
+    "Terms of Service": "Termos de serviço", "Privacy Policy": "Política de privacidade",
+    "AI Assistant": "Assistente de IA"
+  },
+  ar: {
+    Home: "الرئيسية", Features: "الميزات", Dashboard: "لوحة التحكم",
+    "System Status": "حالة النظام", "Global Search": "بحث عام",
+    "Notification Center": "الإشعارات", "Activity Logs": "سجلات النشاط",
+    "Server Management": "إدارة السيرفر", "Command Explorer": "مستكشف الأوامر",
+    "Help Center": "مركز المساعدة", Changelog: "سجل التغييرات",
+    "Language Settings": "اللغة", Settings: "الإعدادات",
+    "Terms of Service": "شروط الخدمة", "Privacy Policy": "سياسة الخصوصية",
+    "AI Assistant": "مساعد الذكاء الاصطناعي"
+  }
+};
+
+function renderLanguageCards(activeLang) {
+  const host = $("languageCardGrid");
+  if (!host) return;
+  host.replaceChildren();
+  Object.keys(LANGUAGE_META).forEach(code => {
+    const meta = LANGUAGE_META[code];
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "lang-card" + (code === activeLang ? " active" : "");
+    btn.setAttribute("role", "option");
+    btn.setAttribute("aria-selected", code === activeLang ? "true" : "false");
+    btn.dataset.lang = code;
+
+    const flag = document.createElement("div");
+    flag.className = "lang-flag";
+    flag.textContent = meta.flag;
+    const name = document.createElement("strong");
+    name.textContent = meta.label;
+    const native = document.createElement("span");
+    native.textContent = meta.native;
+    btn.append(flag, name, native);
+    btn.addEventListener("click", () => setLanguage(code));
+    host.appendChild(btn);
+  });
+}
+
+function renderLanguagePreview(lang) {
+  const host = $("languagePreview");
+  if (!host) return;
   const dict = translations[lang] || translations.en;
+  const keys = ["Home", "Dashboard", "Server Management", "Command Explorer", "AI Assistant", "Settings"];
+  host.replaceChildren();
+  keys.forEach(key => {
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    pill.textContent = dict[key] || key;
+    host.appendChild(pill);
+  });
+}
+
+function setLanguage(lang) {
+  if (!translations[lang]) lang = "en";
+  const dict = translations[lang] || translations.en;
+  const meta = LANGUAGE_META[lang] || LANGUAGE_META.en;
+
+  document.documentElement.lang = lang === "ar" ? "ar" : lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+
   document.querySelectorAll(".navbtn[data-go]").forEach(b => {
     const entry = pages.find(p => p[0] === b.dataset.go);
-    if (entry) b.querySelector("span:last-child").textContent = dict[entry[1]] || entry[1];
+    if (!entry) return;
+    const label = dict[entry[1]] || entry[1];
+    const span = b.querySelector("span:last-child");
+    if (span) span.textContent = label;
   });
-  if ($("languageMessage")) {
-    $("languageMessage").textContent = lang === "so"
-      ? "Luqadda Soomaaliga ayaa la doortay. Qoraallada kale wali waxay ku jiraan Ingiriisi."
-      : "English is selected.";
-  }
+
+  if ($("languageMessage")) $("languageMessage").textContent = meta.message;
+  if ($("languageActivePill")) $("languageActivePill").textContent = meta.native || meta.label;
   if ($("languageSelect")) $("languageSelect").value = lang;
-  if ($("settingsLanguage")) $("settingsLanguage").value = lang;
+  if ($("settingsLanguage")) {
+    // keep settings dropdown options in sync if present
+    const sel = $("settingsLanguage");
+    if (![...sel.options].some(o => o.value === lang)) {
+      const opt = document.createElement("option");
+      opt.value = lang;
+      opt.textContent = meta.label + " — " + meta.native;
+      sel.appendChild(opt);
+    }
+    sel.value = lang;
+  }
+
+  renderLanguageCards(lang);
+  renderLanguagePreview(lang);
+
   try { localStorage.setItem("rhymo-language", lang); } catch {}
 }
 
