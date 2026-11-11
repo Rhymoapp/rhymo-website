@@ -2997,9 +2997,9 @@ body.layout-original .server-chip:hover {
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Whether the bot is in this server</p>
         </div>
         <div class="server-stat-card">
-          <div class="server-stat-label">Activity events</div>
-          <div class="server-stat-value" id="selectedLogCount">—</div>
-          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Included in the 12-hour log history</p>
+          <div class="server-stat-label">Recent commands</div>
+          <div class="server-stat-value" id="selectedCommandCount">—</div>
+          <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Shown in the command history</p>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Members</div>
@@ -3012,7 +3012,6 @@ body.layout-original .server-chip:hover {
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Approx. online (live)</p>
         </div>
       </div>
-      <p class="muted" id="selectedServerLiveMeta" style="margin:12px 0 0;font-size:12.5px;"></p>
     </article>
 
     <article class="panel full" id="serverModerationCard">
@@ -3062,19 +3061,33 @@ body.layout-original .server-chip:hover {
       <div id="commandLogs" aria-live="polite"><div class="empty">Select a server you manage to see recent commands.</div></div>
     </article>
 
-    <article class="panel full">
+    <article class="panel full" id="serverPulseCard">
       <div class="panel-head">
         <div>
-          <h2 style="margin:0;">Activity logs</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="logsLiveLabel">Server admins only · 12-hour retention · auto-delete after 12 hours</p>
+          <h2 style="margin:0;">Live server snapshot</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:12.5px;">Server-specific details refresh automatically while selected.</p>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span class="pill" id="logsLivePill">Idle</span>
-          <button id="loadServerLogsBtn" disabled>Refresh logs</button>
-          <button id="clearServerLogsBtnSecondary" disabled title="Server administrators only">Delete logs</button>
+        <span class="pill" id="serverPulsePill">Waiting</span>
+      </div>
+      <div class="server-stat-row">
+        <div class="server-stat-card">
+          <div class="server-stat-label">Boost tier</div>
+          <div class="server-stat-value" id="selectedPremiumTier">—</div>
+        </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Server boosts</div>
+          <div class="server-stat-value" id="selectedBoostCount">—</div>
+        </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Approx. online share</div>
+          <div class="server-stat-value" id="selectedOnlineShare">—</div>
+        </div>
+        <div class="server-stat-card">
+          <div class="server-stat-label">Preferred locale</div>
+          <div class="server-stat-value" id="selectedServerLocale">—</div>
         </div>
       </div>
-      <div id="serverLogs" aria-live="polite"><div class="empty">Select a server to view live activity.</div></div>
+      <p class="muted" id="selectedServerLiveMeta" style="margin:12px 0 0;font-size:13px;">Choose a server to load its live details.</p>
     </article>
 
     <article class="panel full server-info-card">
@@ -3082,7 +3095,7 @@ body.layout-original .server-chip:hover {
       <div class="server-info-grid">
         <div class="server-info-item">
           <h3>Log retention</h3>
-          <p>Activity and command logs cover the last 12 hours. Older entries are removed during cleanup.</p>
+          <p>Operational and command records are kept for 12 hours. Older entries are removed during cleanup.</p>
         </div>
         <div class="server-info-item">
           <h3>Access</h3>
@@ -3093,7 +3106,6 @@ body.layout-original .server-chip:hover {
 
     <!-- kept for existing JS hooks -->
     <button id="configBtn" class="hidden" aria-hidden="true">View server details</button>
-    <button id="moderationBtn" class="hidden" aria-hidden="true">View activity logs</button>
   </div>
 </section>
 
@@ -3677,8 +3689,7 @@ function showPage(id, push = true) {
     else if (id === "servers") {
       loadServers({ silent: true });
       if (selectedGuildId) {
-        loadServerDetails({ silent: true, skipLogs: true });
-        loadServerLogs({ silent: true });
+        loadServerDetails({ silent: true });
       }
     }
   }
@@ -5471,22 +5482,21 @@ function resetServerDetails() {
   $("selectedServerDescription").textContent = "Choose a server above to see its details.";
   setServerDetailsLiveState("Idle", "Choose a server to start live updates.");
   $("selectedBotStatus").textContent = "—";
-  $("selectedLogCount").textContent = "—";
+  $("selectedCommandCount").textContent = "—";
   if ($("selectedMemberCount")) $("selectedMemberCount").textContent = "—";
   if ($("selectedPresenceCount")) $("selectedPresenceCount").textContent = "—";
-  if ($("selectedServerLiveMeta")) $("selectedServerLiveMeta").textContent = "";
+  $("selectedPremiumTier").textContent = "—";
+  $("selectedBoostCount").textContent = "—";
+  $("selectedOnlineShare").textContent = "—";
+  $("selectedServerLocale").textContent = "—";
+  $("selectedServerLiveMeta").textContent = "Choose a server to load its live details.";
+  $("serverPulsePill").textContent = "Waiting";
+  $("serverPulsePill").classList.remove("pill-live");
   $("loadServerDetailsBtn").disabled = true;
-  if ($("loadServerLogsBtn")) $("loadServerLogsBtn").disabled = true;
   if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
   if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = true;
-  if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = true;
   if ($("copyServerIdBtn")) $("copyServerIdBtn").disabled = true;
   $("serverInviteBtn")?.classList.add("hidden");
-  $("serverLogs").replaceChildren();
-  const empty = document.createElement("div");
-  empty.className = "empty";
-  empty.textContent = "Select a server to view live activity.";
-  $("serverLogs").appendChild(empty);
   if ($("commandLogs")) {
     $("commandLogs").replaceChildren();
     const cmdEmpty = document.createElement("div");
@@ -5585,22 +5595,6 @@ async function loadServers(options = {}) {
 
 let logsPollTimer = null;
 
-function setLogsLiveState(state, extra = "") {
-  const pill = $("logsLivePill");
-  const label = $("logsLiveLabel");
-  if (pill) {
-    pill.textContent = state;
-    pill.classList.toggle("pill-live", state === "Live");
-  }
-  if (label) {
-    label.textContent = extra || (
-      state === "Live"
-        ? `Server admins only · auto-refresh every ${SERVER_LOG_REFRESH_MS / 1000}s · ${SERVER_LOG_RETENTION_HOURS}h retention`
-        : `Server admins only · ${SERVER_LOG_RETENTION_HOURS}h retention`
-    );
-  }
-}
-
 function setCommandLogsLiveState(state, extra = "") {
   const pill = $("commandLogsLivePill");
   const label = $("commandLogsLiveLabel");
@@ -5622,18 +5616,15 @@ function stopLogsPolling() {
     clearInterval(logsPollTimer);
     logsPollTimer = null;
   }
-  setLogsLiveState("Idle");
   setCommandLogsLiveState("Idle");
 }
 
 function startLogsPolling() {
   stopLogsPolling();
   if (!selectedGuildId) return;
-  setLogsLiveState("Live");
   setCommandLogsLiveState("Live");
   logsPollTimer = setInterval(() => {
     if (selectedGuildId && isServerManagementVisible()) {
-      loadServerLogs({ silent: true });
       loadCommandLogs({ silent: true });
     }
   }, SERVER_LOG_REFRESH_MS);
@@ -5643,8 +5634,7 @@ document.addEventListener("visibilitychange", () => {
   if (!currentUser || !isServerManagementVisible()) return;
   loadServers({ silent: true });
   if (selectedGuildId) {
-    loadServerDetails({ silent: true, skipLogs: true });
-    loadServerLogs({ silent: true });
+    loadServerDetails({ silent: true });
     loadCommandLogs({ silent: true });
   }
 });
@@ -5661,6 +5651,7 @@ async function loadCommandLogs(options = {}) {
     empty.className = "empty";
     empty.textContent = "Select a server you manage to see recent commands.";
     target.appendChild(empty);
+    $("selectedCommandCount").textContent = "—";
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
     setCommandLogsLiveState("Idle");
     return;
@@ -5685,6 +5676,7 @@ async function loadCommandLogs(options = {}) {
     if (selectedGuildId !== guildId) return;
 
     const rows = Array.isArray(data.commands) ? data.commands : [];
+    $("selectedCommandCount").textContent = String(data.count ?? rows.length);
     const retentionHours = Number.isInteger(data.retentionHours) && data.retentionHours > 0
       ? data.retentionHours
       : SERVER_LOG_RETENTION_HOURS;
@@ -5750,43 +5742,8 @@ async function loadCommandLogs(options = {}) {
   }
 }
 
-function humanizeLogLabel(value) {
-  return String(value || "Activity")
-    .replace(/[._-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b[a-z]/g, character => character.toUpperCase());
-}
-
-function formatLogValue(value) {
-  if (value == null) return "";
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) {
-    return value.map(formatLogValue).filter(Boolean).join(", ");
-  }
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-}
-
-function formatActivityDetails(details) {
-  if (details == null) return "";
-  if (typeof details !== "object") return String(details);
-  if (Array.isArray(details)) return details.map(formatLogValue).filter(Boolean).join(" · ");
-
-  return Object.entries(details)
-    .map(([key, value]) => {
-      const readableValue = formatLogValue(value);
-      return readableValue
-        ? `${humanizeLogLabel(key)}: ${readableValue}`
-        : "";
-    })
-    .filter(Boolean)
-    .join(" · ");
-}
-
 async function loadServerDetails(options = {}) {
   const silent = options.silent === true;
-  const skipLogs = options.skipLogs === true;
   const guildId = $("serverSelect").value;
   if (!guildId) {
     selectedGuildId = "";
@@ -5803,9 +5760,11 @@ async function loadServerDetails(options = {}) {
   if (!silent) {
     $("selectedServerDescription").textContent = "Loading server details...";
     $("selectedBotStatus").textContent = "Checking...";
-    $("selectedLogCount").textContent = "—";
+    $("selectedCommandCount").textContent = "—";
+    $("serverPulsePill").textContent = "Loading";
+    $("serverPulsePill").classList.remove("pill-live");
+    $("selectedServerLiveMeta").textContent = "Fetching live server details...";
     $("loadServerDetailsBtn").disabled = true;
-    $("loadServerLogsBtn").disabled = true;
     $("copyServerIdBtn").disabled = true;
     setServerDetailsLiveState("Updating", "Fetching current server and bot status...");
     $("serverInviteBtn")?.classList.add("hidden");
@@ -5839,9 +5798,17 @@ async function loadServerDetails(options = {}) {
       $("selectedBotStatus").textContent = "Status unavailable";
     }
 
-    $("selectedLogCount").textContent = String(data.activityLogCount ?? 0);
-
     const live = details.live || null;
+    $("serverPulsePill").textContent = live ? "Live" : "Unavailable";
+    $("serverPulsePill").classList.toggle("pill-live", Boolean(live));
+    $("selectedPremiumTier").textContent =
+      live && Number.isFinite(Number(live.premiumTier))
+        ? "Tier " + Number(live.premiumTier)
+        : "—";
+    $("selectedBoostCount").textContent =
+      live && Number.isFinite(Number(live.premiumSubscriptionCount))
+        ? Number(live.premiumSubscriptionCount).toLocaleString()
+        : "—";
     if ($("selectedMemberCount")) {
       $("selectedMemberCount").textContent =
         live?.memberCount != null ? Number(live.memberCount).toLocaleString() : "—";
@@ -5850,14 +5817,18 @@ async function loadServerDetails(options = {}) {
       $("selectedPresenceCount").textContent =
         live?.presenceCount != null ? Number(live.presenceCount).toLocaleString() : "—";
     }
-    if ($("selectedServerLiveMeta")) {
-      const bits = [];
-      if (live?.premiumTiers) bits.push("Boost tier " + live.premiumTiers);
-      if (live?.premiumSubscriptionCount) bits.push(live.premiumSubscriptionCount + " boosts");
-      if (live?.preferredLocale) bits.push(live.preferredLocale);
-      if (live?.description) bits.push(live.description);
-      $("selectedServerLiveMeta").textContent = bits.join(" · ");
-    }
+    const memberCount = live?.memberCount == null ? NaN : Number(live.memberCount);
+    const presenceCount = live?.presenceCount == null ? NaN : Number(live.presenceCount);
+    $("selectedOnlineShare").textContent =
+      Number.isFinite(memberCount) && memberCount > 0 && Number.isFinite(presenceCount)
+        ? Math.min(100, Math.round((presenceCount / memberCount) * 100)) + "%"
+        : "—";
+    $("selectedServerLocale").textContent = live?.preferredLocale || "—";
+    $("selectedServerLiveMeta").textContent = live
+      ? live.description || "This server has no description set."
+      : details.botInstalled === false
+        ? "Add Rhymo to this server to see live server details."
+        : "Live server details are unavailable right now.";
 
     const canModerate =
       data.moderationEnabled === true &&
@@ -5875,10 +5846,8 @@ async function loadServerDetails(options = {}) {
     );
 
     $("loadServerDetailsBtn").disabled = false;
-    $("loadServerLogsBtn").disabled = false;
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
     if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = false;
-    if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = false;
     $("copyServerIdBtn").disabled = false;
 
     if (details.botInstalled === false) {
@@ -5897,8 +5866,7 @@ async function loadServerDetails(options = {}) {
         : "Waiting for the bot to send its first heartbeat.";
     setServerDetailsLiveState("Live", `Dashboard updated ${updatedAt} · auto-refresh every 15 seconds · ${heartbeatMessage}`);
 
-    if (!skipLogs && !silent) {
-      await loadServerLogs({ silent: false });
+    if (!silent) {
       await loadCommandLogs({ silent: false });
       startLogsPolling();
     }
@@ -5906,110 +5874,19 @@ async function loadServerDetails(options = {}) {
   } catch (error) {
     console.error("Loading server details failed:", error);
     $("selectedServerDescription").textContent = error.message || "Could not load server details.";
+    $("serverPulsePill").textContent = "Error";
+    $("serverPulsePill").classList.remove("pill-live");
+    $("selectedServerLiveMeta").textContent = error.message || "Could not load live server details.";
     serverMessage(friendlyServerError(error, "Could not load server details."));
     setServerDetailsLiveState("Error", "Live server details could not be refreshed.");
   } finally {
     serverDetailsRequestsInFlight.delete(guildId);
     if (selectedGuildId === guildId) {
       $("loadServerDetailsBtn").disabled = false;
-      $("loadServerLogsBtn").disabled = false;
       if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = false;
       if ($("clearServerLogsBtn")) $("clearServerLogsBtn").disabled = false;
-      if ($("clearServerLogsBtnSecondary")) $("clearServerLogsBtnSecondary").disabled = false;
       $("copyServerIdBtn").disabled = false;
     }
-  }
-}
-
-async function loadServerLogs(options = {}) {
-  const silent = options.silent === true;
-  const guildId = selectedGuildId;
-  if (!guildId) {
-    if (!silent) serverMessage("Choose a server first.");
-    return;
-  }
-  const target = $("serverLogs");
-  if (!silent) {
-    target.replaceChildren();
-    const loading = document.createElement("div");
-    loading.className = "empty";
-    loading.textContent = "Loading activity logs...";
-    target.appendChild(loading);
-  }
-  $("loadServerLogsBtn").disabled = true;
-
-  try {
-    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/logs");
-    const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error("Activity logs need a full Discord session. Try signing in again.");
-    }
-    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
-    if (selectedGuildId !== guildId) return;
-
-    const logs = Array.isArray(data.logs) ? data.logs : [];
-    const retentionHours = Number.isInteger(data.retentionHours) && data.retentionHours > 0
-      ? data.retentionHours
-      : SERVER_LOG_RETENTION_HOURS;
-    $("selectedLogCount").textContent = String(data.totalCount ?? logs.length);
-    target.replaceChildren();
-
-    if (!logs.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = `No activity recorded in the last ${retentionHours} hours.`;
-      target.appendChild(empty);
-    } else {
-      logs.forEach(log => {
-        const item = document.createElement("div");
-        item.className = "log-card";
-
-        const top = document.createElement("div");
-        top.className = "log-card-top";
-        const event = document.createElement("div");
-        event.className = "log-event";
-        event.textContent = humanizeLogLabel(log.event_type);
-        const time = document.createElement("div");
-        time.className = "log-time";
-        time.textContent = log.created_at
-          ? new Date(log.created_at).toLocaleString()
-          : "Unknown time";
-        top.append(event, time);
-
-        if (log.actor_id) {
-          const meta = document.createElement("p");
-          meta.className = "log-meta";
-          meta.textContent = "Actor: " + log.actor_id;
-          item.append(top, meta);
-        } else {
-          item.appendChild(top);
-        }
-
-        const details = document.createElement("p");
-        details.className = "log-details";
-        const safeDetails = formatActivityDetails(log.details);
-        details.textContent = safeDetails
-          ? (safeDetails.length > 400 ? safeDetails.slice(0, 400) + "…" : safeDetails)
-          : "No extra details";
-        item.appendChild(details);
-        target.appendChild(item);
-      });
-    }
-
-    const now = new Date().toLocaleTimeString();
-    setLogsLiveState("Live", `Last updated ${now} · admins only · ${retentionHours}h retention`);
-  } catch (error) {
-    console.error("Loading activity logs failed:", error);
-    if (!silent) {
-      target.replaceChildren();
-      const message = document.createElement("div");
-      message.className = "empty";
-      message.textContent = error.message || "Could not load activity logs.";
-      target.appendChild(message);
-    }
-    setLogsLiveState("Error", error.message || "Could not refresh logs");
-  } finally {
-    $("loadServerLogsBtn").disabled = !selectedGuildId;
   }
 }
 
@@ -6070,8 +5947,6 @@ async function runServerModeration(action) {
     if ($("moderationMessage")) $("moderationMessage").textContent = msg;
     if ($("moderationStatusPill")) $("moderationStatusPill").textContent = "Done";
     toast(msg);
-    // Refresh logs so the action can show up if the bot records it
-    loadServerLogs({ silent: true }).catch(() => {});
   } catch (error) {
     console.error("Moderation failed:", error);
     if ($("moderationMessage")) $("moderationMessage").textContent = error.message || "Action failed.";
@@ -6101,7 +5976,6 @@ $("serverList")?.addEventListener("click", event => {
   loadServerDetails();
 });
 $("loadServerDetailsBtn")?.addEventListener("click", loadServerDetails);
-$("loadServerLogsBtn")?.addEventListener("click", () => loadServerLogs({ silent: false }));
 $("loadCommandLogsBtn")?.addEventListener("click", () => loadCommandLogs({ silent: false }));
 
 async function clearServerLogs() {
@@ -6115,12 +5989,12 @@ async function clearServerLogs() {
     return;
   }
   const ok = window.confirm(
-    "Delete all activity logs and recent commands for this server?\n\n" +
+    "Delete all stored logs and recent commands for this server?\n\n" +
     "This cannot be undone. Only server administrators can do this."
   );
   if (!ok) return;
 
-  const buttons = ["clearServerLogsBtn", "clearServerLogsBtnSecondary"]
+  const buttons = ["clearServerLogsBtn"]
     .map(id => $(id))
     .filter(Boolean);
   buttons.forEach(btn => {
@@ -6147,8 +6021,7 @@ async function clearServerLogs() {
         ? `Cleared ${deleted} log entr${deleted === 1 ? "y" : "ies"} for this server.`
         : "No logs were stored for this server."
     );
-    if ($("selectedLogCount")) $("selectedLogCount").textContent = "0";
-    await loadServerLogs({ silent: true });
+    if ($("selectedCommandCount")) $("selectedCommandCount").textContent = "0";
     await loadCommandLogs({ silent: true });
   } catch (error) {
     console.error("Clear logs failed:", error);
@@ -6163,7 +6036,6 @@ async function clearServerLogs() {
 }
 
 $("clearServerLogsBtn")?.addEventListener("click", clearServerLogs);
-$("clearServerLogsBtnSecondary")?.addEventListener("click", clearServerLogs);
 $("copyServerIdBtn")?.addEventListener("click", async () => {
   if (!selectedGuildId) return;
   try {
@@ -6176,10 +6048,6 @@ $("copyServerIdBtn")?.addEventListener("click", async () => {
 $("configBtn")?.addEventListener("click", () => {
   if (!selectedGuildId) { toast("Select a server first."); return; }
   loadServerDetails();
-});
-$("moderationBtn")?.addEventListener("click", () => {
-  if (!selectedGuildId) { toast("Select a server first."); return; }
-  loadServerLogs({ silent: false });
 });
 
 /* ===== NOTIFICATIONS ===== */
