@@ -3500,6 +3500,7 @@ function setUser(user) {
   $("headerAvatar").src = avatar;
   $("profileAvatar").src = avatar;
   if ($("settingsAvatar")) $("settingsAvatar").src = avatar;
+  if (typeof updateOwnerBadges === "function") updateOwnerBadges();
 
   if ($("settingsName")) $("settingsName").textContent = displayName;
   if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
@@ -5687,11 +5688,13 @@ $("moderationBtn")?.addEventListener("click", () => {
 
 /* ===== NOTIFICATIONS ===== */
 /* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
+const RHYMO_OWNER_USER_ID = "1481780053682688001";
 let isOwner = false;
 
 function updateOwnerBadges() {
-  // Owner marks only when signed in AND verified as owner
-  const show = Boolean(currentUser && isOwner === true);
+  // Strict client-side check: only this Discord user ID ever sees owner marks
+  const uid = currentUser?.id != null ? String(currentUser.id) : "";
+  const show = Boolean(uid && uid === RHYMO_OWNER_USER_ID);
   ["headerOwnerBadge", "profileOwnerBadge", "settingsOwnerBadge", "ownerStatusPill", "settingsOwnerPill"]
     .forEach(id => {
       const el = $(id);
@@ -5721,7 +5724,8 @@ async function checkOwner() {
     if (!response.ok) { isOwner = false; }
     else {
       const data = await response.json();
-      isOwner = data.owner === true && data.authenticated !== false;
+      const uid = currentUser?.id != null ? String(currentUser.id) : "";
+      isOwner = data.owner === true && uid === RHYMO_OWNER_USER_ID;
     }
   } catch {
     isOwner = false;
