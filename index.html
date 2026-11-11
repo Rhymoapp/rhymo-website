@@ -145,6 +145,16 @@ button, .btn {
   max-width: 100%;
   transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* Icon / avatar buttons must stay square — never inherit min-height stretch */
+button.iconbtn,
+#accountBtn,
+#menuToggle {
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  aspect-ratio: 1 / 1;
+  white-space: normal;
+}
 button:hover, .btn:hover {
   background: #27272a;
   border-color: rgba(255,255,255,0.16);
@@ -251,20 +261,29 @@ button:disabled {
 
 /* Keep profile photo centered inside the header button */
 #accountBtn {
-  width: 36px;
-  height: 36px;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
   border-radius: 11px;
-  padding: 0;
+  padding: 0 !important;
   overflow: hidden;
   position: relative;
+  flex: 0 0 36px;
+  aspect-ratio: 1 / 1;
 }
 #accountBtn .avatar,
 #accountBtn img {
-  width: 100%;
-  height: 100%;
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
   border-radius: 10px;
   border: none;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 .hamb {
@@ -1680,8 +1699,20 @@ img, video, canvas, svg {
     height: 40px;
   }
   #accountBtn {
-    width: 34px;
-    height: 34px;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    flex-basis: 34px;
+  }
+  #accountBtn .avatar,
+  #accountBtn img {
+    width: 34px !important;
+    height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
   }
   /* Hide top search on phones unless signed in (fills space near account avatar) */
   .top-search {
@@ -1693,12 +1724,15 @@ img, video, canvas, svg {
     width: auto;
     min-width: 0;
     max-width: none;
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 6px;
+    margin-right: 6px;
+    overflow: hidden;
   }
   body.user-logged-in .top-search input {
     height: 34px;
     font-size: 16px;
+    min-width: 0;
+    width: 100%;
   }
   .top-actions {
     margin-left: auto;
@@ -2212,6 +2246,12 @@ input:focus, select:focus, textarea:focus {
     padding: 11px 14px;
     min-height: 44px;
     font-size: 13.5px;
+  }
+  button.iconbtn,
+  #accountBtn,
+  #menuToggle {
+    min-height: 0 !important;
+    padding: 0 !important;
   }
   .actions > *,
   .mod-actions > *,
