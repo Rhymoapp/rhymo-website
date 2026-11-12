@@ -263,6 +263,53 @@ button:disabled {
 }
 
 /* Keep profile photo centered inside the header button */
+/* Owner star — only shown for hardcoded owner Discord ID */
+.owner-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.owner-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: none;
+  place-items: center;
+  font-size: 11px;
+  line-height: 1;
+  color: #1a1400;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+.owner-badge.show {
+  display: grid;
+}
+#accountBtn .owner-badge {
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+  right: -2px;
+  bottom: -2px;
+}
+.owner-pill {
+  display: none !important;
+  background: color-mix(in srgb, #fbbf24 18%, rgba(0,0,0,0.25)) !important;
+  border-color: color-mix(in srgb, #fbbf24 45%, var(--border)) !important;
+  color: #fde68a !important;
+  font-weight: 700 !important;
+  margin-top: 6px;
+}
+.owner-pill.show {
+  display: inline-flex !important;
+}
+
 #accountBtn {
   width: 36px !important;
   height: 36px !important;
@@ -272,10 +319,20 @@ button:disabled {
   max-height: 36px !important;
   border-radius: 11px;
   padding: 0 !important;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   flex: 0 0 36px;
   aspect-ratio: 1 / 1;
+}
+#accountBtn .owner-avatar-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  overflow: visible;
+}
+#accountBtn .avatar {
+  border-radius: 11px;
+  overflow: hidden;
 }
 #accountBtn .avatar,
 #accountBtn img {
@@ -2723,7 +2780,7 @@ body.layout-original .server-chip:hover {
   <label class="top-search"><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search Rhymo..." aria-label="Search Rhymo"></label>
   <div class="top-actions">
     <button class="btn-discord" id="loginBtn"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>Continue with Discord</button>
-    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"></button>
+    <button class="iconbtn hidden" id="accountBtn" aria-label="Open account" title="Your Discord account"><span class="owner-avatar-wrap"><img id="headerAvatar" class="avatar" alt="Your Discord avatar"><span class="owner-badge" id="headerOwnerBadge" title="Rhymo owner">★</span></span></button>
   </div>
 </header>
 
@@ -2828,11 +2885,15 @@ body.layout-original .server-chip:hover {
   <div class="grid">
     <article class="panel full">
       <div class="row">
-        <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
+        <span class="owner-avatar-wrap">
+          <img class="profile-pic" id="profileAvatar" alt="Your Discord avatar">
+          <span class="owner-badge" id="profileOwnerBadge" title="Rhymo owner">★</span>
+        </span>
         <div>
           <div class="profile-name" id="profileName">Checking session...</div>
           <div class="muted" id="profileId"></div>
           <span class="pill" id="authBadge">Checking session</span>
+          <span class="pill owner-pill" id="ownerStatusPill">Owner</span>
         </div>
       </div>
       <hr><p id="accountMessage" class="muted">Checking your login session...</p>
@@ -3275,10 +3336,14 @@ body.layout-original .server-chip:hover {
   <div class="grid">
     <article class="panel full" id="settingsProfile" hidden>
       <div class="row">
-        <img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar">
+        <span class="owner-avatar-wrap">
+          <img class="profile-pic" id="settingsAvatar" alt="Your Discord avatar">
+          <span class="owner-badge" id="settingsOwnerBadge" title="Rhymo owner">★</span>
+        </span>
         <div>
           <div class="profile-name" id="settingsName">—</div>
           <div class="muted" id="settingsId"></div>
+          <span class="pill owner-pill" id="settingsOwnerPill">Owner</span>
         </div>
       </div>
       <hr>
@@ -3880,6 +3945,7 @@ function setUser(user) {
     resetServerDetails();
     serverMessage("Please log in with Discord before loading servers.");
     isOwner = false;
+    if (typeof updateOwnerBadges === "function") updateOwnerBadges();
     if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
     if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
     resetAIChat({ skipPersist: true, createThread: false });
@@ -6052,11 +6118,39 @@ $("configBtn")?.addEventListener("click", () => {
 
 /* ===== NOTIFICATIONS ===== */
 /* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
+// Hardcoded — badge and panels only for this Discord user ID
+const RHYMO_OWNER_USER_ID = "1481780053682688001";
 let isOwner = false;
+
+function updateOwnerBadges() {
+  const uid = currentUser?.id != null ? String(currentUser.id) : "";
+  // Must match hardcoded ID AND server-confirmed owner flag
+  const show = Boolean(uid && uid === RHYMO_OWNER_USER_ID && isOwner === true);
+  ["headerOwnerBadge", "profileOwnerBadge", "settingsOwnerBadge"].forEach(id => {
+    const el = $(id);
+    if (el) el.classList.toggle("show", show);
+  });
+  ["ownerStatusPill", "settingsOwnerPill"].forEach(id => {
+    const el = $(id);
+    if (el) el.classList.toggle("show", show);
+  });
+}
 
 async function checkOwner() {
   if (!currentUser) {
     isOwner = false;
+    updateOwnerBadges();
+    const announcePanel = $("announceAdminPanel");
+    const changelogPanel = $("changelogAdminPanel");
+    if (announcePanel) announcePanel.style.display = "none";
+    if (changelogPanel) changelogPanel.style.display = "none";
+    return;
+  }
+  const uid = currentUser?.id != null ? String(currentUser.id) : "";
+  // Fast reject: never show owner UI if Discord ID is not the hardcoded owner
+  if (uid !== RHYMO_OWNER_USER_ID) {
+    isOwner = false;
+    updateOwnerBadges();
     const announcePanel = $("announceAdminPanel");
     const changelogPanel = $("changelogAdminPanel");
     if (announcePanel) announcePanel.style.display = "none";
@@ -6068,7 +6162,8 @@ async function checkOwner() {
     if (!response.ok) { isOwner = false; }
     else {
       const data = await response.json();
-      isOwner = data.owner === true;
+      // Both backend owner flag AND hardcoded ID
+      isOwner = data.owner === true && uid === RHYMO_OWNER_USER_ID;
     }
   } catch {
     isOwner = false;
@@ -6077,6 +6172,7 @@ async function checkOwner() {
   const changelogPanel = $("changelogAdminPanel");
   if (announcePanel) announcePanel.style.display = isOwner ? "block" : "none";
   if (changelogPanel) changelogPanel.style.display = isOwner ? "block" : "none";
+  updateOwnerBadges();
 }
 
 function renderPostList(targetId, posts, emptyText) {
