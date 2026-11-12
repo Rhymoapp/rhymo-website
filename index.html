@@ -3076,68 +3076,13 @@ select, input, textarea {
 <section class="page" id="page-ai-assistant">
   <div class="eyebrow">Assistant</div>
   <h1>AI Assistant</h1>
-  <p class="sub">Quick help from Rhymo AI. Sign in, type a question, and optionally attach a photo or text file.</p>
+  <p class="sub">This feature is temporarily unavailable.</p>
   <div class="grid">
-    <article class="panel full ai-panel">
-      <div class="ai-panel-header">
-        <div>
-          <h2 style="margin:0;">Chat with Rhymo AI</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Meta Llama via Groq · threads saved on this device · 200 messages, then a 2-hour cooldown</p>
-        </div>
-        <div class="ai-header-actions">
-          <span class="pill" id="aiMessageCount">0 / 200</span>
-          <div class="ai-threads-wrap">
-            <button type="button" id="aiThreadsBtn" class="ai-threads-btn" title="Your chat threads" aria-expanded="false" aria-controls="aiThreadsPanel">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M7 7h10v4H7zM7 13h7v4H7z" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14l-4-3H7a2 2 0 0 1-2-2V5z" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Threads</span>
-            </button>
-            <div class="ai-threads-panel" id="aiThreadsPanel" hidden>
-              <div class="ai-threads-panel-head">
-                <h3>Your threads</h3>
-                <button type="button" id="aiNewChatBtnSide" title="Start a new thread">New</button>
-              </div>
-              <div class="ai-thread-list" id="aiThreadList">
-                <div class="empty" style="padding:8px;font-size:12px;">Sign in to save threads.</div>
-              </div>
-            </div>
-          </div>
-          <button type="button" id="aiNewChatBtn">New chat</button>
-        </div>
-      </div>
-
-      <div class="ai-thread-main">
-          <div class="ai-chat-window" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
-            <div class="ai-message ai-message-assistant">
-              <span class="ai-message-label">Rhymo AI</span>
-              <div class="ai-message-body">Hi! I’m Rhymo AI. Ask a question, paste code, or attach a file/photo. Code replies can be copied or downloaded.</div>
-            </div>
-          </div>
-
-          <p class="ai-privacy-note">AI may include mistakes; so double check answers.</p>
-          <div id="aiTopicDisclaimers" class="ai-topic-disclaimers" hidden></div>
-
-          <form id="aiChatForm" class="ai-composer-form">
-            <label class="field" for="aiPrompt">
-              <span class="ai-label-row">
-                <span>Message</span>
-                <span class="muted" id="aiCharCount">0 / 2000</span>
-              </span>
-              <textarea id="aiPrompt" rows="3" maxlength="2000" placeholder="Ask anything… Shift+Enter for a new line" disabled></textarea>
-            </label>
-            <div id="aiAttachmentPreview" class="ai-attachment-preview" hidden></div>
-            <div class="ai-compose-footer">
-              <div class="ai-attach-row">
-                <input type="file" id="aiFileInput" accept="image/*,.txt,.md,.json,.js,.ts,.py,.html,.css,.csv" multiple hidden>
-                <button type="button" id="aiAttachBtn" disabled title="Images or text files">+ Attach</button>
-                <button type="button" class="btn-discord" id="aiLoginBtn">Sign in to chat</button>
-              </div>
-              <span id="aiStatus" class="muted" role="status" aria-live="polite">Sign in with Discord to send a message.</span>
-              <button type="submit" class="primary" id="aiSendBtn" disabled>Send</button>
-            </div>
-          </form>
+    <article class="panel full">
+      <div class="empty">The AI Assistant has been removed for now. Check back later.</div>
+      <div class="actions" style="margin-top:14px;">
+        <button class="primary" data-go="home">Back to Home</button>
+        <button data-go="help">Help Center</button>
       </div>
     </article>
   </div>
@@ -3439,7 +3384,6 @@ select, input, textarea {
     <article class="panel">
       <h2>What stays English for now</h2>
       <ul class="lang-feature-list">
-        <li>AI Assistant replies</li>
         <li>Terms of Service &amp; Privacy Policy</li>
         <li>Most panel body text and help articles</li>
         <li>Bot command names in Discord</li>
@@ -3875,7 +3819,6 @@ const pages = [
   ["home", "Home"],
   ["features", "Features"],
   ["dashboard", "Dashboard"],
-  ["ai-assistant", "AI Assistant"],
   ["status", "System Status"],
   ["search", "Global Search"],
   ["notifications", "Notification Center"],
@@ -3932,7 +3875,7 @@ function showPage(id, push = true) {
 function buildNav(container) {
   container.innerHTML = "";
   const groups = [
-    { label: "Main", items: ["home", "features", "dashboard", "ai-assistant", "status"] },
+    { label: "Main", items: ["home", "features", "dashboard", "status"] },
     { label: "Tools", items: ["servers", "commands", "search"] },
     { label: "Info", items: ["notifications", "help", "changelog"] },
     { label: "Account", items: ["settings", "language", "legacy", "terms", "privacy"] }
@@ -3988,7 +3931,7 @@ document.querySelectorAll("[data-go]").forEach(el => {
 function login() {
   window.location.href = api("/auth/discord");
 }
-["loginBtn", "homeLoginBtn", "dashboardLoginBtn", "settingsLoginBtn", "aiLoginBtn"].forEach(id => {
+["loginBtn", "homeLoginBtn", "dashboardLoginBtn", "settingsLoginBtn"].forEach(id => {
   const el = $(id);
   if (el) el.addEventListener("click", login);
 });
@@ -5491,7 +5434,6 @@ const searchIndex = [
   { title: "Moderation activity", description: "Review activity and recent commands for a server", page: "servers" },
   { title: "Server permissions", description: "Server selection and permissions", page: "servers" },
   { title: "Bot uptime", description: "System health monitoring", page: "status" },
-  { title: "AI assistant", description: "Chat with Meta Llama via Groq", page: "ai-assistant" },
   { title: "Announcements", description: "Maintenance and release notifications", page: "notifications" }
 ];
 
@@ -6887,7 +6829,7 @@ function renderLanguagePreview(lang) {
   const host = $("languagePreview");
   if (!host) return;
   const dict = translations[lang] || translations.en;
-  const keys = ["Home", "Dashboard", "Server Management", "Command Explorer", "AI Assistant", "Settings"];
+  const keys = ["Home", "Dashboard", "Server Management", "Command Explorer", "Settings"];
   host.replaceChildren();
   keys.forEach(key => {
     const pill = document.createElement("span");
