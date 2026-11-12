@@ -239,8 +239,23 @@ button:disabled {
   font-weight: 800;
   font-size: 18px;
   letter-spacing: -0.4px;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
 }
-
+.brand img.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  object-fit: cover;
+  object-position: center;
+  background: #12141a;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.14);
+  display: block;
+  flex-shrink: 0;
+  image-rendering: auto;
+}
 .avatar {
   width: 34px;
   height: 34px;
@@ -2480,9 +2495,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .brand img.avatar {
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent),
-    0 0 18px color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.14);
 }
 
 @media (max-width: 720px) {
@@ -3008,6 +3021,21 @@ select, input, textarea {
   .btn-discord span,
   .top-actions .btn-discord {
     font-size: 13px;
+  }
+}
+
+/* hide hamburger desktop */
+@media (min-width: 901px) {
+  #menuToggle {
+    display: none !important;
+  }
+  .sidebar {
+    display: block;
+  }
+}
+@media (max-width: 900px) {
+  #menuToggle {
+    display: grid !important;
   }
 }
 </style>
