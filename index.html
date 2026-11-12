@@ -3038,6 +3038,22 @@ select, input, textarea {
     display: grid !important;
   }
 }
+
+/* bugfix batch */
+.topbar { z-index: 50; }
+.top-search-results { z-index: 70; }
+.shell, .shell-body, main, .content { min-width: 0; }
+@media (max-width: 900px) {
+  .top-actions .btn-discord {
+    max-width: 100%;
+  }
+}
+@media (min-width: 901px) {
+  body.drawer-open #drawer,
+  body.drawer-open #scrim {
+    /* avoid stuck drawer overlay on desktop */
+  }
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4184,27 +4200,29 @@ function setUser(user) {
 
   if ($("settingsName")) $("settingsName").textContent = displayName;
   if ($("settingsId")) $("settingsId").textContent = "Discord ID: " + (user.id || "");
-  $("profileName").textContent = displayName;
-  $("profileId").textContent = "Discord ID: " + (user.id || "");
-  $("authBadge").textContent = "Signed in";
-  $("accountMessage").textContent = "Your Discord session is active.";
+  if ($("profileName")) $("profileName").textContent = displayName;
+  if ($("profileId")) $("profileId").textContent = "Discord ID: " + (user.id || "");
+  if ($("authBadge")) $("authBadge").textContent = "Signed in";
+  if ($("accountMessage")) $("accountMessage").textContent = "Your Discord session is active.";
   if ($("settingsAccountText")) $("settingsAccountText").textContent = "Signed in as " + displayName + ".";
-  $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
+  if ($("homeAccountMessage")) $("homeAccountMessage").textContent = "Signed in as " + displayName + ".";
   $("homeLoginBtn")?.classList.add("hidden");
-  updateAiAssistantControls();
-  // Restore this user's AI threads on this device
-  loadAiThreadsFromStorage();
-  if (aiActiveThreadId && aiThreads.some(t => t.id === aiActiveThreadId)) {
-    switchAiThread(aiActiveThreadId, { skipPersist: true });
-  } else if (aiThreads.length) {
-    switchAiThread(aiThreads[0].id, { skipPersist: true });
-  } else {
-    resetAIChat({ skipPersist: true, createThread: true });
+  // AI UI removed for now - only run if elements still exist
+  if ($("aiPrompt") || $("aiMessages")) {
+    updateAiAssistantControls();
+    loadAiThreadsFromStorage();
+    if (aiActiveThreadId && aiThreads.some(t => t.id === aiActiveThreadId)) {
+      switchAiThread(aiActiveThreadId, { skipPersist: true });
+    } else if (aiThreads.length) {
+      switchAiThread(aiThreads[0].id, { skipPersist: true });
+    } else {
+      resetAIChat({ skipPersist: true, createThread: true });
+    }
+    renderAiThreadList();
+    if (typeof syncAiUsageFromServer === "function") syncAiUsageFromServer();
   }
-  renderAiThreadList();
   if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
-    if (typeof loadLegacyLayout === "function") loadLegacyLayout();
-  if (typeof syncAiUsageFromServer === "function") syncAiUsageFromServer();
+  if (typeof loadLegacyLayout === "function") loadLegacyLayout();
   checkOwner();
   // Auto-load manageable servers after login
   if (typeof loadServers === "function") {
@@ -7200,31 +7218,33 @@ async function refreshHomeServers() {
 }
 
 async function refreshBotMetrics() {
+  const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+  const setHtml = (id, value) => { const el = $(id); if (el) el.innerHTML = value; };
   try {
     const response = await fetch(`${API_BASE_URL}/api/bot/metrics`, { cache: "no-store" });
     if (!response.ok) throw new Error("Request failed");
     const metrics = await response.json();
-    $("botOnline").innerHTML = metrics.online
+    setHtml("botOnline", metrics.online
       ? '<span class="status-dot online"></span>Online'
-      : '<span class="status-dot offline"></span>Offline';
-    $("botHeartbeat").textContent = metrics.online ? "Heartbeat active" : "Heartbeat stale";
-    $("botUptime").textContent = Number.isFinite(Number(metrics.uptimeSeconds))
-      ? Math.floor(Number(metrics.uptimeSeconds)) + " seconds" : "--";
-    $("botLatency").textContent = Number.isFinite(Number(metrics.latencyMs))
-      ? Number(metrics.latencyMs).toFixed(2) + " ms" : "--";
-    $("botServers").textContent = Number.isFinite(Number(metrics.serverCount))
-      ? String(metrics.serverCount) : "--";
-    $("botLastHeartbeat").textContent = metrics.lastHeartbeat
+      : '<span class="status-dot offline"></span>Offline');
+    setText("botHeartbeat", metrics.online ? "Heartbeat active" : "Heartbeat stale");
+    setText("botUptime", Number.isFinite(Number(metrics.uptimeSeconds))
+      ? Math.floor(Number(metrics.uptimeSeconds)) + " seconds" : "--");
+    setText("botLatency", Number.isFinite(Number(metrics.latencyMs))
+      ? Number(metrics.latencyMs).toFixed(2) + " ms" : "--");
+    setText("botServers", Number.isFinite(Number(metrics.serverCount))
+      ? String(metrics.serverCount) : "--");
+    setText("botLastHeartbeat", metrics.lastHeartbeat
       ? "Last heartbeat: " + new Date(metrics.lastHeartbeat).toLocaleString()
-      : "No heartbeat received.";
+      : "No heartbeat received.");
   } catch (error) {
     console.error("Bot metrics failed:", error);
-    $("botOnline").innerHTML = '<span class="status-dot unknown"></span>Unavailable';
-    $("botHeartbeat").textContent = "Connection failed";
-    $("botUptime").textContent = "--";
-    $("botLatency").textContent = "--";
-    $("botServers").textContent = "--";
-    $("botLastHeartbeat").textContent = "Could not load bot metrics.";
+    setHtml("botOnline", '<span class="status-dot unknown"></span>Unavailable');
+    setText("botHeartbeat", "Connection failed");
+    setText("botUptime", "--");
+    setText("botLatency", "--");
+    setText("botServers", "--");
+    setText("botLastHeartbeat", "Could not load bot metrics.");
   }
 }
 
