@@ -10,7 +10,7 @@
 <style>
 /* ========== DESIGN SYSTEM ========== */
 :root {
-  /* Rhymo theme — matched to profile art (mint creature + orange cat + silver spikes) */
+  /* Rhymo theme - matched to profile art (mint creature + orange cat + silver spikes) */
   --bg: #0c1016;
   --surface: rgba(22, 28, 36, 0.88);
   --surface-2: #141a22;
@@ -148,7 +148,7 @@ button, .btn {
   max-width: 100%;
   transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* Icon / avatar buttons must stay square — never inherit min-height stretch */
+/* Icon / avatar buttons must stay square - never inherit min-height stretch */
 button.iconbtn,
 #accountBtn,
 #menuToggle {
@@ -263,7 +263,7 @@ button:disabled {
 }
 
 /* Keep profile photo centered inside the header button */
-/* Owner star — only shown for hardcoded owner Discord ID */
+/* Owner star - only shown for hardcoded owner Discord ID */
 .owner-avatar-wrap {
   position: relative;
   display: inline-flex;
@@ -1493,7 +1493,7 @@ body.drawer-open {
   .ai-compose-footer #aiStatus { flex-basis: 100%; }
 }
 
-/* Home server showcase (live guilds) — top of home */
+/* Home server showcase (live guilds) - top of home */
 .home-servers-header {
   display: flex;
   align-items: flex-start;
@@ -2556,7 +2556,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 
-/* Visual bugfixes — profile + layout */
+/* Visual bugfixes - profile + layout */
 html, body {
   overflow-x: hidden;
 }
@@ -2922,9 +2922,10 @@ select, input, textarea {
   }
 }
 
+
 </style>
 </head>
-<body class="session-checking">
+<body class="session-checking layout-legacy">
 <div id="sessionBoot" class="session-boot" role="status" aria-live="polite">
   <span class="session-boot-spinner" aria-hidden="true"></span>
   <span>Checking your Rhymo session…</span>
@@ -2933,7 +2934,7 @@ select, input, textarea {
   <div class="welcome-content">
     <p class="welcome-eyebrow">RHYMO · DISCORD COMPANION</p>
     <h1 id="welcomeTitle" class="welcome-title">Welcome to<br><span>Rhymo.</span></h1>
-    <p class="welcome-copy">Keep an eye on your servers, bot status, and activity—all in one place.</p>
+    <p class="welcome-copy">Keep an eye on your servers, bot status, and activity-all in one place.</p>
     <button id="welcomeLoginBtn" class="btn-discord welcome-login" disabled>
       <svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
       Continue with Discord
@@ -3006,7 +3007,7 @@ select, input, textarea {
 <section class="page" id="page-features">
   <div class="eyebrow">Product</div>
   <h1>Features</h1>
-  <p class="sub">Here’s what you can do with Rhymo — both in Discord and on this site.</p>
+  <p class="sub">Here’s what you can do with Rhymo - both in Discord and on this site.</p>
   <div class="grid">
     <article class="panel">
       <div class="feature-icon">⚡</div>
@@ -3021,7 +3022,7 @@ select, input, textarea {
     <article class="panel">
       <div class="feature-icon">📝</div>
       <h2>Changelog</h2>
-      <p>A simple running list of what changed — new stuff, fixes, and little improvements along the way.</p>
+      <p>A simple running list of what changed - new stuff, fixes, and little improvements along the way.</p>
     </article>
     <article class="panel">
       <div class="feature-icon">🔐</div>
@@ -3132,7 +3133,7 @@ select, input, textarea {
   <p class="sub">Choose a server to check Rhymo status and review its recent activity.</p>
 
   <div class="grid">
-    <article class="panel full server-picker-card">
+    <article class="panel full server-picker-card" id="servers-pick">
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Your servers</h2>
@@ -3150,7 +3151,7 @@ select, input, textarea {
       <div id="serverMessage" class="notice" role="status">Sign in with Discord and your servers will show up here automatically.</div>
     </article>
 
-    <article class="panel full" id="serverDetailsCard">
+    <article class="panel full" id="serverDetailsCard" data-section="details">
       <div class="server-details-header">
         <div>
           <h2 id="selectedServerName" style="margin:0;">No server selected</h2>
@@ -3168,22 +3169,22 @@ select, input, textarea {
       <div class="server-stat-row">
         <div class="server-stat-card">
           <div class="server-stat-label">Rhymo status</div>
-          <div class="server-stat-value" id="selectedBotStatus">—</div>
+          <div class="server-stat-value" id="selectedBotStatus">-</div>
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Whether the bot is in this server</p>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Recent commands</div>
-          <div class="server-stat-value" id="selectedCommandCount">—</div>
+          <div class="server-stat-value" id="selectedCommandCount">-</div>
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Shown in the command history</p>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Members</div>
-          <div class="server-stat-value" id="selectedMemberCount">—</div>
+          <div class="server-stat-value" id="selectedMemberCount">-</div>
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Approx. members (live)</p>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Online</div>
-          <div class="server-stat-value" id="selectedPresenceCount">—</div>
+          <div class="server-stat-value" id="selectedPresenceCount">-</div>
           <p class="muted" style="margin:6px 0 0;font-size:12.5px;">Approx. online (live)</p>
         </div>
       </div>
@@ -3221,7 +3222,7 @@ select, input, textarea {
       <p class="muted" id="moderationMessage" style="margin:10px 0 0;font-size:13px;" role="status"></p>
     </article>
 
-    <article class="panel full">
+    <article class="panel full" id="servers-commands">
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Recent commands</h2>
@@ -3236,7 +3237,7 @@ select, input, textarea {
       <div id="commandLogs" aria-live="polite"><div class="empty">Select a server you manage to see recent commands.</div></div>
     </article>
 
-    <article class="panel full" id="serverPulseCard">
+    <article class="panel full" id="serverPulseCard" data-section="snapshot">
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Live server snapshot</h2>
@@ -3247,19 +3248,19 @@ select, input, textarea {
       <div class="server-stat-row">
         <div class="server-stat-card">
           <div class="server-stat-label">Boost tier</div>
-          <div class="server-stat-value" id="selectedPremiumTier">—</div>
+          <div class="server-stat-value" id="selectedPremiumTier">-</div>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Server boosts</div>
-          <div class="server-stat-value" id="selectedBoostCount">—</div>
+          <div class="server-stat-value" id="selectedBoostCount">-</div>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Approx. online share</div>
-          <div class="server-stat-value" id="selectedOnlineShare">—</div>
+          <div class="server-stat-value" id="selectedOnlineShare">-</div>
         </div>
         <div class="server-stat-card">
           <div class="server-stat-label">Preferred locale</div>
-          <div class="server-stat-value" id="selectedServerLocale">—</div>
+          <div class="server-stat-value" id="selectedServerLocale">-</div>
         </div>
       </div>
       <p class="muted" id="selectedServerLiveMeta" style="margin:12px 0 0;font-size:13px;">Choose a server to load its live details.</p>
@@ -3287,8 +3288,8 @@ select, input, textarea {
 <section class="page" id="page-help">
   <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Quick answers for the things people usually get stuck on.</p>
   <div class="grid">
-    <article class="panel full"><h2>How do I sign in?</h2><p>Hit Continue with Discord, approve the permissions, and you’ll come back signed in. That’s it — no extra account to create.</p></article>
-    <article class="panel full"><h2>Why can't I log in?</h2><p>Most of the time it’s a mismatch on the Discord redirect URL, or the backend isn’t up. Safari can also block the login cookie — try another browser if it fails there.</p></article>
+    <article class="panel full"><h2>How do I sign in?</h2><p>Hit Continue with Discord, approve the permissions, and you’ll come back signed in. That’s it - no extra account to create.</p></article>
+    <article class="panel full"><h2>Why can't I log in?</h2><p>Most of the time it’s a mismatch on the Discord redirect URL, or the backend isn’t up. Safari can also block the login cookie - try another browser if it fails there.</p></article>
     <article class="panel full"><h2>How do I add Rhymo?</h2><p>Open Settings and click Add to Discord, or use any Add to Discord button on the site. Glance at the permissions, then approve.</p></article>
     <article class="panel full"><h2>How do I select a server?</h2><p>Sign in, open Server Management, load your servers, and pick one from the list. You’ll only see servers where you have manage permissions.</p></article>
   </div>
@@ -3331,7 +3332,7 @@ select, input, textarea {
     <article class="panel full">
       <div class="panel-head">
         <h2 style="margin:0;">Commands</h2>
-        <span class="pill" id="commandCount">—</span>
+        <span class="pill" id="commandCount">-</span>
       </div>
       <div id="commandList"><div class="empty">Loading commands...</div></div>
     </article>
@@ -3348,7 +3349,7 @@ select, input, textarea {
       <div class="panel-head">
         <div>
           <h2 style="margin:0;">Choose your language</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Tap a card or use the dropdown — both stay in sync.</p>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Tap a card or use the dropdown - both stay in sync.</p>
         </div>
         <span class="pill" id="languageActivePill">English</span>
       </div>
@@ -3361,12 +3362,12 @@ select, input, textarea {
         <span>Or pick from the list</span>
         <select id="languageSelect">
           <option value="en">English</option>
-          <option value="so">Somali — Soomaali</option>
-          <option value="es">Spanish — Español</option>
-          <option value="fr">French — Français</option>
-          <option value="de">German — Deutsch</option>
-          <option value="pt">Portuguese — Português</option>
-          <option value="ar">Arabic — العربية</option>
+          <option value="so">Somali - Soomaali</option>
+          <option value="es">Spanish - Español</option>
+          <option value="fr">French - Français</option>
+          <option value="de">German - Deutsch</option>
+          <option value="pt">Portuguese - Português</option>
+          <option value="ar">Arabic - العربية</option>
         </select>
       </label>
       <p id="languageMessage" class="muted">English is selected. Navigation labels will update right away.</p>
@@ -3402,44 +3403,14 @@ select, input, textarea {
 <section class="page" id="page-legacy">
   <div class="eyebrow">Preferences</div>
   <h1>Legacy Options</h1>
-  <p class="sub">Switch between the current Rhymo look and older layouts. Your choice is saved on this device.</p>
+  <p class="sub">This section is no longer available.</p>
   <div class="grid">
     <article class="panel full">
-      <div class="panel-head">
-        <div>
-          <h2 style="margin:0;">Website layout</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:13px;">Modern, Classic, or the Original blue dashboard from early Rhymo.</p>
-        </div>
-        <span class="pill" id="legacyLayoutPill">Modern</span>
+      <div class="empty">Legacy layout options have been removed.</div>
+      <div class="actions" style="margin-top:14px;">
+        <button class="primary" data-go="settings">Open Settings</button>
+        <button data-go="home">Back to Home</button>
       </div>
-      <div class="legacy-option-cards" id="legacyLayoutCards">
-        <button type="button" class="legacy-card active" data-layout="modern" id="legacyModernBtn">
-          <strong>Modern</strong>
-          <span>Current Rhymo mint theme, soft glow, and updated visuals.</span>
-        </button>
-        <button type="button" class="legacy-card" data-layout="classic" id="legacyClassicBtn">
-          <strong>Classic</strong>
-          <span>Flatter panels, fewer animations — simplified recent layout.</span>
-        </button>
-        <button type="button" class="legacy-card" data-layout="original" id="legacyOriginalBtn">
-          <strong>Original</strong>
-          <span>Early blue Rhymo dashboard look from the first public site.</span>
-        </button>
-      </div>
-      <p class="muted" id="legacyLayoutMessage" style="margin-top:14px;">Modern layout is active.</p>
-    </article>
-    <article class="panel">
-      <h2>Original includes</h2>
-      <ul class="lang-feature-list">
-        <li>Blue / indigo color scheme</li>
-        <li>Rounded soft cards like the first dashboard</li>
-        <li>Simpler hero and status panels</li>
-        <li>Same features — visual style only</li>
-      </ul>
-    </article>
-    <article class="panel">
-      <h2>Note</h2>
-      <p class="muted" style="margin:0;">Layout is saved per Discord account on this device (and as guest when logged out). You can switch anytime.</p>
     </article>
   </div>
 </section>
@@ -3454,7 +3425,7 @@ select, input, textarea {
           <span class="owner-badge" id="settingsOwnerBadge" title="Rhymo owner">★</span>
         </span>
         <div>
-          <div class="profile-name" id="settingsName">—</div>
+          <div class="profile-name" id="settingsName">-</div>
           <div class="muted" id="settingsId"></div>
           <span class="pill owner-pill" id="settingsOwnerPill">Owner</span>
         </div>
@@ -3467,7 +3438,7 @@ select, input, textarea {
     </article>
     <article class="panel full">
       <h2>Accent color</h2>
-      <p class="muted" style="margin-bottom:12px;">Choose a color you like — it’ll show up on buttons, links, and the little highlights around the site.</p>
+      <p class="muted" style="margin-bottom:12px;">Choose a color you like - it’ll show up on buttons, links, and the little highlights around the site.</p>
       <div class="accent-picker" id="accentPicker">
         <button type="button" class="accent-swatch" data-accent="#7dff9c" style="--swatch:#7dff9c" title="Rhymo Mint" aria-label="Rhymo Mint"></button>
         <button type="button" class="accent-swatch" data-accent="#4ade80" style="--swatch:#4ade80" title="Rhymo Green" aria-label="Rhymo Green"></button>
@@ -3520,12 +3491,12 @@ select, input, textarea {
       <label class="field"><span>Interface language</span>
         <select id="settingsLanguage">
           <option value="en">English</option>
-          <option value="so">Somali — Soomaali</option>
-          <option value="es">Spanish — Español</option>
-          <option value="fr">French — Français</option>
-          <option value="de">German — Deutsch</option>
-          <option value="pt">Portuguese — Português</option>
-          <option value="ar">Arabic — العربية</option>
+          <option value="so">Somali - Soomaali</option>
+          <option value="es">Spanish - Español</option>
+          <option value="fr">French - Français</option>
+          <option value="de">German - Deutsch</option>
+          <option value="pt">Portuguese - Português</option>
+          <option value="ar">Arabic - العربية</option>
         </select>
       </label>
     </article>
@@ -3549,7 +3520,7 @@ select, input, textarea {
   <div class="grid">
     <article class="panel full">
       <h2>1. Acceptance of Terms</h2>
-      <p>By accessing, browsing, or using Rhymo — including the website, web dashboard, Discord bot, APIs, and any related services (collectively, the “Service”) — you agree to be bound by these Terms of Service (“Terms”). If you do not agree to these Terms, you must not access or use the Service.</p>
+      <p>By accessing, browsing, or using Rhymo - including the website, web dashboard, Discord bot, APIs, and any related services (collectively, the “Service”) - you agree to be bound by these Terms of Service (“Terms”). If you do not agree to these Terms, you must not access or use the Service.</p>
       <p>These Terms constitute a legally binding agreement between you and the operators of Rhymo. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms.</p>
     </article>
 
@@ -3711,10 +3682,10 @@ select, input, textarea {
       <h2>4. Legal Bases for Processing (where applicable)</h2>
       <p>If you are in a region that requires a legal basis for processing (such as the EEA/UK), we rely on:</p>
       <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
-        <li><strong>Contract</strong> — to provide the Service you request</li>
-        <li><strong>Legitimate interests</strong> — to operate, secure, and improve Rhymo, and to prevent abuse</li>
-        <li><strong>Consent</strong> — where we ask for it (for example certain cookies or optional features)</li>
-        <li><strong>Legal obligation</strong> — when we must process data to comply with the law</li>
+        <li><strong>Contract</strong> - to provide the Service you request</li>
+        <li><strong>Legitimate interests</strong> - to operate, secure, and improve Rhymo, and to prevent abuse</li>
+        <li><strong>Consent</strong> - where we ask for it (for example certain cookies or optional features)</li>
+        <li><strong>Legal obligation</strong> - when we must process data to comply with the law</li>
       </ul>
     </article>
 
@@ -3722,11 +3693,11 @@ select, input, textarea {
       <h2>5. How We Share Information</h2>
       <p>We may share information in these limited situations:</p>
       <ul style="margin: 8px 0 12px 20px; color: var(--muted); line-height: 1.7;">
-        <li><strong>Service providers</strong> — hosting, database, and infrastructure providers that help us run Rhymo. They are only permitted to process data on our behalf.</li>
-        <li><strong>Discord</strong> — the Service interacts with Discord’s API; your use of Discord is governed by Discord’s own Privacy Policy and Terms.</li>
-        <li><strong>Legal requirements</strong> — if required by law, regulation, legal process, or governmental request.</li>
-        <li><strong>Protection of rights</strong> — to protect the safety, rights, or property of Rhymo, our users, or the public.</li>
-        <li><strong>Business transfers</strong> — in connection with a merger, acquisition, or sale of assets, subject to appropriate confidentiality protections.</li>
+        <li><strong>Service providers</strong> - hosting, database, and infrastructure providers that help us run Rhymo. They are only permitted to process data on our behalf.</li>
+        <li><strong>Discord</strong> - the Service interacts with Discord’s API; your use of Discord is governed by Discord’s own Privacy Policy and Terms.</li>
+        <li><strong>Legal requirements</strong> - if required by law, regulation, legal process, or governmental request.</li>
+        <li><strong>Protection of rights</strong> - to protect the safety, rights, or property of Rhymo, our users, or the public.</li>
+        <li><strong>Business transfers</strong> - in connection with a merger, acquisition, or sale of assets, subject to appropriate confidentiality protections.</li>
       </ul>
       <p>We do not share your information with third parties for their own marketing purposes.</p>
     </article>
@@ -3827,7 +3798,6 @@ const pages = [
   ["help", "Help Center"],
   ["changelog", "Changelog"],
   ["language", "Language Settings"],
-  ["legacy", "Legacy Options"],
   ["settings", "Settings"],
   ["terms", "Terms of Service"],
   ["privacy", "Privacy Policy"]
@@ -3878,7 +3848,7 @@ function buildNav(container) {
     { label: "Main", items: ["home", "features", "dashboard", "status"] },
     { label: "Tools", items: ["servers", "commands", "search"] },
     { label: "Info", items: ["notifications", "help", "changelog"] },
-    { label: "Account", items: ["settings", "language", "legacy", "terms", "privacy"] }
+    { label: "Account", items: ["settings", "language", "terms", "privacy"] }
   ];
 
   groups.forEach(group => {
@@ -3945,7 +3915,7 @@ async function request(path, options = {}) {
   }
   try {
     const savedUser = JSON.parse(localStorage.getItem("rhymo_user") || "null");
-    // Only send session id — never a client-claimed user id (prevents identity spoofing)
+    // Only send session id - never a client-claimed user id (prevents identity spoofing)
     if (savedUser?.sid) headers.set("X-Rhymo-Session", savedUser.sid);
   } catch {}
   return fetch(api(path), {
@@ -4119,7 +4089,7 @@ function setUser(user) {
 async function refreshAccount() {
   const params = new URLSearchParams(window.location.search);
 
-  // OAuth return path — works even when Safari blocks cross-site cookies
+  // OAuth return path - works even when Safari blocks cross-site cookies
   if (params.has("auth_data")) {
     try {
       const data = JSON.parse(decodeURIComponent(params.get("auth_data")));
@@ -4187,8 +4157,8 @@ $("settingsLogoutBtn")?.addEventListener("click", logout);
 $("accountBtn")?.addEventListener("click", () => showPage("dashboard"));
 
 /* ===== AI ASSISTANT ===== */
-const AI_GREETING = "Hi — I\u2019m Rhymo AI, a general assistant.\n\nAsk about anything — school, tech, Discord, Rhymo, coding, or the web.\n\n**Tips**\n- Paste code or attach a file/photo\n- Ask website questions about Rhymo features\n- For live facts I may search the web\n- Code blocks support **Copy** and **Download**";
-const AI_MAX_CHAT_MESSAGES = 200; // per Discord user — NOT reset by New chat
+const AI_GREETING = "Hi - I\u2019m Rhymo AI, a general assistant.\n\nAsk about anything - school, tech, Discord, Rhymo, coding, or the web.\n\n**Tips**\n- Paste code or attach a file/photo\n- Ask website questions about Rhymo features\n- For live facts I may search the web\n- Code blocks support **Copy** and **Download**";
+const AI_MAX_CHAT_MESSAGES = 200; // per Discord user - NOT reset by New chat
 const AI_API_HISTORY_LIMIT = 10;  // only recent turns are sent to the API (saves usage)
 const AI_MAX_INPUT_CHARS = 2000;
 const AI_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
@@ -4355,7 +4325,7 @@ function startAiCooldownTicker() {
       clearInterval(aiCooldownTimer);
       aiCooldownTimer = null;
       const status = $("aiStatus");
-      if (status && currentUser) status.textContent = "Ready — press Send or Enter.";
+      if (status && currentUser) status.textContent = "Ready - press Send or Enter.";
       updateAiAssistantControls();
       return;
     }
@@ -4565,7 +4535,7 @@ function updateAiAssistantControls() {
       status.textContent.startsWith("You’ve hit message limit") ||
       status.textContent.startsWith("This chat reached")
     ) {
-      status.textContent = "Ready — press Send or Enter.";
+      status.textContent = "Ready - press Send or Enter.";
     }
   }
 }
@@ -4683,7 +4653,7 @@ async function handleAiFilesSelected(fileList) {
 const AI_TOPIC_PATTERNS = {
   financial: {
     label: "Financial disclaimer",
-    text: "This is not financial advice. Rhymo AI is not a financial advisor. Decisions about money, investing, taxes, or crypto can be risky — verify details and consider a qualified professional.",
+    text: "This is not financial advice. Rhymo AI is not a financial advisor. Decisions about money, investing, taxes, or crypto can be risky - verify details and consider a qualified professional.",
     patterns: [
       /\b(stock|stocks|invest|investing|investment|portfolio|dividend|broker|etf|mutual fund|401k|ira|roth)\b/i,
       /\b(crypto|bitcoin|ethereum|trading|forex|options trading|day trade)\b/i,
@@ -4703,7 +4673,7 @@ const AI_TOPIC_PATTERNS = {
   },
   legal: {
     label: "Legal disclaimer",
-    text: "This is not legal advice. Rhymo AI is not a lawyer and this is not an attorney-client relationship. Laws vary by location — consult a licensed attorney for your situation.",
+    text: "This is not legal advice. Rhymo AI is not a lawyer and this is not an attorney-client relationship. Laws vary by location - consult a licensed attorney for your situation.",
     patterns: [
       /\b(legal advice|lawyer|attorney|sue|lawsuit|litigation|court|judge|plaintiff|defendant)\b/i,
       /\b(contract|liability|statute|regulation|compliance|copyright|trademark|patent)\b/i,
@@ -5140,7 +5110,7 @@ function switchAiThread(threadId, options = {}) {
   updateAiAssistantControls();
   const status = $("aiStatus");
   if (status && !isAiCooldownActive() && getAiUsageCount() < AI_MAX_CHAT_MESSAGES) {
-    status.textContent = "Loaded thread — continue anytime.";
+    status.textContent = "Loaded thread - continue anytime.";
   }
 }
 
@@ -5191,7 +5161,7 @@ function resetAIChat(options = {}) {
   const status = $("aiStatus");
   if (status) {
     status.textContent = currentUser
-      ? "New thread ready — press Send or Enter."
+      ? "New thread ready - press Send or Enter."
       : "Sign in with Discord to chat.";
   }
   updateAiAssistantControls();
@@ -5351,7 +5321,7 @@ async function sendAiMessage(event) {
     if (data.cooldown || isAiCooldownActive() || getAiUsageCount() >= AI_MAX_CHAT_MESSAGES) {
       $("aiStatus").textContent = getAiLimitMessage();
     } else {
-      $("aiStatus").textContent = "Ready — press Send or Enter.";
+      $("aiStatus").textContent = "Ready - press Send or Enter.";
     }
   } catch (error) {
     if (requestVersion !== aiRequestVersion) return;
@@ -5658,14 +5628,14 @@ function resetServerDetails() {
   $("selectedServerName").textContent = "No server selected";
   $("selectedServerDescription").textContent = "Choose a server above to see its details.";
   setServerDetailsLiveState("Idle", "Choose a server to start live updates.");
-  $("selectedBotStatus").textContent = "—";
-  $("selectedCommandCount").textContent = "—";
-  if ($("selectedMemberCount")) $("selectedMemberCount").textContent = "—";
-  if ($("selectedPresenceCount")) $("selectedPresenceCount").textContent = "—";
-  $("selectedPremiumTier").textContent = "—";
-  $("selectedBoostCount").textContent = "—";
-  $("selectedOnlineShare").textContent = "—";
-  $("selectedServerLocale").textContent = "—";
+  $("selectedBotStatus").textContent = "-";
+  $("selectedCommandCount").textContent = "-";
+  if ($("selectedMemberCount")) $("selectedMemberCount").textContent = "-";
+  if ($("selectedPresenceCount")) $("selectedPresenceCount").textContent = "-";
+  $("selectedPremiumTier").textContent = "-";
+  $("selectedBoostCount").textContent = "-";
+  $("selectedOnlineShare").textContent = "-";
+  $("selectedServerLocale").textContent = "-";
   $("selectedServerLiveMeta").textContent = "Choose a server to load its live details.";
   $("serverPulsePill").textContent = "Waiting";
   $("serverPulsePill").classList.remove("pill-live");
@@ -5828,7 +5798,7 @@ async function loadCommandLogs(options = {}) {
     empty.className = "empty";
     empty.textContent = "Select a server you manage to see recent commands.";
     target.appendChild(empty);
-    $("selectedCommandCount").textContent = "—";
+    $("selectedCommandCount").textContent = "-";
     if ($("loadCommandLogsBtn")) $("loadCommandLogsBtn").disabled = true;
     setCommandLogsLiveState("Idle");
     return;
@@ -5937,7 +5907,7 @@ async function loadServerDetails(options = {}) {
   if (!silent) {
     $("selectedServerDescription").textContent = "Loading server details...";
     $("selectedBotStatus").textContent = "Checking...";
-    $("selectedCommandCount").textContent = "—";
+    $("selectedCommandCount").textContent = "-";
     $("serverPulsePill").textContent = "Loading";
     $("serverPulsePill").classList.remove("pill-live");
     $("selectedServerLiveMeta").textContent = "Fetching live server details...";
@@ -5981,26 +5951,26 @@ async function loadServerDetails(options = {}) {
     $("selectedPremiumTier").textContent =
       live && Number.isFinite(Number(live.premiumTier))
         ? "Tier " + Number(live.premiumTier)
-        : "—";
+        : "-";
     $("selectedBoostCount").textContent =
       live && Number.isFinite(Number(live.premiumSubscriptionCount))
         ? Number(live.premiumSubscriptionCount).toLocaleString()
-        : "—";
+        : "-";
     if ($("selectedMemberCount")) {
       $("selectedMemberCount").textContent =
-        live?.memberCount != null ? Number(live.memberCount).toLocaleString() : "—";
+        live?.memberCount != null ? Number(live.memberCount).toLocaleString() : "-";
     }
     if ($("selectedPresenceCount")) {
       $("selectedPresenceCount").textContent =
-        live?.presenceCount != null ? Number(live.presenceCount).toLocaleString() : "—";
+        live?.presenceCount != null ? Number(live.presenceCount).toLocaleString() : "-";
     }
     const memberCount = live?.memberCount == null ? NaN : Number(live.memberCount);
     const presenceCount = live?.presenceCount == null ? NaN : Number(live.presenceCount);
     $("selectedOnlineShare").textContent =
       Number.isFinite(memberCount) && memberCount > 0 && Number.isFinite(presenceCount)
         ? Math.min(100, Math.round((presenceCount / memberCount) * 100)) + "%"
-        : "—";
-    $("selectedServerLocale").textContent = live?.preferredLocale || "—";
+        : "-";
+    $("selectedServerLocale").textContent = live?.preferredLocale || "-";
     $("selectedServerLiveMeta").textContent = live
       ? live.description || "This server has no description set."
       : details.botInstalled === false
@@ -6229,7 +6199,7 @@ $("configBtn")?.addEventListener("click", () => {
 
 /* ===== NOTIFICATIONS ===== */
 /* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
-// Hardcoded — badge and panels only for this Discord user ID
+// Hardcoded - badge and panels only for this Discord user ID
 const RHYMO_OWNER_USER_ID = "1481780053682688001";
 let isOwner = false;
 
@@ -6471,7 +6441,7 @@ async function loadSitePosts() {
     const path = isOwner ? "/api/admin/posts" : "/api/site-posts";
     const response = await request(path);
     if (response.status === 401 || response.status === 403) {
-      // Session may not be owner anymore — fall back to public list
+      // Session may not be owner anymore - fall back to public list
       if (isOwner) {
         isOwner = false;
         if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
@@ -6864,7 +6834,7 @@ function setLanguage(lang) {
     if (![...sel.options].some(o => o.value === lang)) {
       const opt = document.createElement("option");
       opt.value = lang;
-      opt.textContent = meta.label + " — " + meta.native;
+      opt.textContent = meta.label + " - " + meta.native;
       sel.appendChild(opt);
     }
     sel.value = lang;
@@ -6964,87 +6934,15 @@ try {
 }
 
 
-/* ===== LEGACY LAYOUT ===== */
-function getLayoutStorageKey() {
-  // Per Discord user when signed in; guest key when logged out
-  return currentUser?.id
-    ? "rhymo-layout:" + String(currentUser.id)
-    : "rhymo-layout:guest";
-}
-
-function applyLegacyLayout(mode, options = {}) {
-  const allowed = ["modern", "classic", "original"];
-  if (!allowed.includes(mode)) mode = "modern";
-
-  document.body.classList.toggle("layout-legacy", mode === "classic");
-  document.body.classList.toggle("layout-original", mode === "original");
-
-  const labels = {
-    modern: "Modern",
-    classic: "Classic",
-    original: "Original"
-  };
-  const messages = {
-    modern: "Modern layout is active.",
-    classic: "Classic layout is active. Switch back anytime.",
-    original: "Original blue Rhymo layout is active — the early dashboard look."
-  };
-
-  if ($("legacyLayoutPill")) $("legacyLayoutPill").textContent = labels[mode];
-  if ($("legacyLayoutMessage")) $("legacyLayoutMessage").textContent = messages[mode];
-
-  document.querySelectorAll(".legacy-card").forEach(card => {
-    card.classList.toggle("active", card.dataset.layout === mode);
-  });
-
-  // Original forces the early blue accent for this session look
-  if (mode === "original" && options.applyOriginalAccent !== false) {
-    document.documentElement.style.setProperty("--accent", "#6d8cff");
-    document.documentElement.style.setProperty("--accent-2", "#5b7cfa");
-    document.documentElement.style.setProperty("--glow", "rgba(109, 140, 255, 0.22)");
-  }
-
-  if (options.persist !== false) {
-    try {
-      localStorage.setItem(getLayoutStorageKey(), mode);
-      // migrate away from old shared key when possible
-      if (currentUser?.id) localStorage.removeItem("rhymo-layout");
-    } catch {}
-  }
-}
-
+/* ===== LAYOUT: Classic by default (fewer animations) ===== */
 function loadLegacyLayout() {
-  let mode = "modern";
-  try {
-    const keyed = localStorage.getItem(getLayoutStorageKey());
-    if (keyed === "classic" || keyed === "modern" || keyed === "original") {
-      mode = keyed;
-    } else {
-      // one-time migration from old device-wide key
-      const legacy = localStorage.getItem("rhymo-layout");
-      if (legacy === "classic" || legacy === "modern" || legacy === "original") mode = legacy;
-    }
-  } catch {}
-  applyLegacyLayout(mode, { persist: false });
+  document.body.classList.add("layout-legacy");
+  document.body.classList.remove("layout-original");
 }
-
-$("legacyModernBtn")?.addEventListener("click", () => {
-  applyLegacyLayout("modern");
-  if (typeof loadAccentForCurrentUser === "function") loadAccentForCurrentUser();
-    if (typeof loadLegacyLayout === "function") loadLegacyLayout();
-});
-$("legacyClassicBtn")?.addEventListener("click", () => applyLegacyLayout("classic"));
-$("legacyOriginalBtn")?.addEventListener("click", () => applyLegacyLayout("original"));
-$("legacyLayoutCards")?.addEventListener("click", e => {
-  const card = e.target.closest(".legacy-card");
-  if (!card) return;
-  const mode = card.dataset.layout || "modern";
-  applyLegacyLayout(mode);
-  if (mode === "modern" && typeof loadAccentForCurrentUser === "function") {
-    loadAccentForCurrentUser();
-  }
-});
-
+function applyLegacyLayout() {
+  document.body.classList.add("layout-legacy");
+  document.body.classList.remove("layout-original");
+}
 loadLegacyLayout();
 
 /* ===== BOT METRICS ===== */
