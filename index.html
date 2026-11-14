@@ -3055,56 +3055,6 @@ select, input, textarea {
   }
 }
 
-/* Owner Postgres console */
-.pg-table-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 320px;
-  overflow: auto;
-}
-.pg-table-list button {
-  width: 100%;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 0;
-  padding: 10px 12px;
-}
-.pg-table-list button.active {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-.pg-scroll {
-  overflow: auto;
-  max-height: min(55vh, 520px);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-.pg-data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-.pg-data-table th,
-.pg-data-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  white-space: nowrap;
-  max-width: 240px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pg-data-table th {
-  position: sticky;
-  top: 0;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-weight: 600;
-  z-index: 1;
-}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -3610,56 +3560,6 @@ select, input, textarea {
 </section>
 
 
-<section class="page" id="page-postgres">
-  <div class="eyebrow">Owner</div>
-  <h1>Postgres</h1>
-  <p class="sub">Private database console for your Neon/Postgres data. Only visible to the site owner.</p>
-  <div class="grid" id="postgresGate">
-    <article class="panel full">
-      <div class="empty">Owner access required. Sign in with the owner Discord account.</div>
-    </article>
-  </div>
-  <div class="grid" id="postgresApp" hidden>
-    <article class="panel">
-      <div class="stat" id="pgStatTables">0</div>
-      <div class="label">Tables</div>
-    </article>
-    <article class="panel">
-      <div class="stat" id="pgStatRows">0</div>
-      <div class="label">Rows (sum)</div>
-    </article>
-    <article class="panel">
-      <div class="stat" style="font-size:22px;">PG</div>
-      <div class="label">Engine</div>
-    </article>
-    <article class="panel full">
-      <div class="panel-head">
-        <h2 style="margin:0;">Tables</h2>
-        <button type="button" id="pgRefreshBtn">Refresh</button>
-      </div>
-      <div id="pgTableList" class="pg-table-list"></div>
-    </article>
-    <article class="panel full">
-      <div class="panel-head">
-        <div>
-          <h2 style="margin:0;" id="pgTableTitle">Select a table</h2>
-          <p class="muted" style="margin:4px 0 0;font-size:12.5px;" id="pgTableMeta">Read-only browser</p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" id="pgPrevBtn" disabled>Prev</button>
-          <button type="button" id="pgNextBtn" disabled>Next</button>
-        </div>
-      </div>
-      <div class="pg-scroll">
-        <table class="pg-data-table">
-          <thead id="pgThead"></thead>
-          <tbody id="pgTbody"></tbody>
-        </table>
-      </div>
-      <p class="muted" style="margin:10px 0 0;font-size:12.5px;">Owner-only · max 100 rows per page · no arbitrary SQL</p>
-    </article>
-  </div>
-</section>
 
 <section class="page" id="page-settings">
   <div class="eyebrow">Account</div><h1>Settings</h1><p class="sub">Your account, accent color, language, and the invite link to add Rhymo.</p>
@@ -4046,7 +3946,6 @@ const pages = [
   ["changelog", "Changelog"],
   ["language", "Language Settings"],
   ["settings", "Settings"],
-  ["postgres", "Postgres"],
   ["terms", "Terms of Service"],
   ["privacy", "Privacy Policy"]
 ];
@@ -4088,19 +3987,9 @@ function showPage(id, push = true) {
       }
     }
   }
-
-  // Owner Postgres console
-  if (id === "postgres") {
-    if (!isOwner) {
-      showPage("home", false);
-      return;
-    }
-    loadPostgresOverview();
-  }
 }
 
 function buildNav(container) {
-  if (!container) return;
   container.innerHTML = "";
   const groups = [
     { label: "Main", items: ["home", "features", "dashboard", "status"] },
@@ -4108,10 +3997,6 @@ function buildNav(container) {
     { label: "Info", items: ["notifications", "help", "changelog"] },
     { label: "Account", items: ["settings", "language", "terms", "privacy"] }
   ];
-  // Owner-only Postgres console in the menu
-  if (typeof isOwner === "boolean" && isOwner) {
-    groups.splice(2, 0, { label: "Owner", items: ["postgres"] });
-  }
 
   groups.forEach(group => {
     const label = document.createElement("div");
@@ -4132,16 +4017,6 @@ function buildNav(container) {
   });
 }
 
-function rebuildOwnerNav() {
-  buildNav($("sidebar"));
-  buildNav($("drawer"));
-  // Re-highlight active page
-  const active = document.querySelector(".page.active");
-  const id = active?.id?.replace(/^page-/, "") || "home";
-  document.querySelectorAll(".navbtn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.go === id);
-  });
-}
 
 buildNav($("sidebar"));
 buildNav($("drawer"));
@@ -6494,131 +6369,6 @@ $("configBtn")?.addEventListener("click", () => {
 
 /* ===== NOTIFICATIONS ===== */
 
-/* ===== OWNER POSTGRES CONSOLE ===== */
-let pgActiveTable = null;
-let pgOffset = 0;
-const PG_LIMIT = 25;
-
-function updatePostgresPageAccess() {
-  const gate = $("postgresGate");
-  const app = $("postgresApp");
-  if (!gate || !app) return;
-  if (isOwner) {
-    gate.hidden = true;
-    app.hidden = false;
-  } else {
-    gate.hidden = false;
-    app.hidden = true;
-    if (location.hash.replace(/^#/, "") === "postgres") {
-      showPage("home");
-    }
-  }
-}
-
-async function loadPostgresOverview() {
-  if (!isOwner) return;
-  const list = $("pgTableList");
-  if (!list) return;
-  list.innerHTML = '<div class="empty">Loading tables…</div>';
-  try {
-    const res = await request("/api/admin/db/overview");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    const tables = data.tables || [];
-    if ($("pgStatTables")) $("pgStatTables").textContent = String(tables.length);
-    if ($("pgStatRows")) {
-      $("pgStatRows").textContent = String(
-        tables.reduce((a, t) => a + (Number(t.rows) || 0), 0)
-      );
-    }
-    list.replaceChildren();
-    if (!tables.length) {
-      list.innerHTML = '<div class="empty">No tables found.</div>';
-      return;
-    }
-    tables.forEach(t => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.innerHTML = `<span>${t.name}</span><span class="muted">${t.rows ?? "-"}</span>`;
-      if (pgActiveTable === t.name) btn.classList.add("active");
-      btn.addEventListener("click", () => {
-        pgActiveTable = t.name;
-        pgOffset = 0;
-        list.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        loadPostgresTable();
-      });
-      list.appendChild(btn);
-    });
-  } catch (err) {
-    list.innerHTML = `<div class="empty">Could not load tables. ${err.message || ""}</div>`;
-  }
-}
-
-async function loadPostgresTable() {
-  if (!isOwner || !pgActiveTable) return;
-  if ($("pgTableTitle")) $("pgTableTitle").textContent = pgActiveTable;
-  if ($("pgTableMeta")) $("pgTableMeta").textContent = "Loading…";
-  try {
-    const res = await request(
-      `/api/admin/db/table/${encodeURIComponent(pgActiveTable)}?limit=${PG_LIMIT}&offset=${pgOffset}`
-    );
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    const total = data.total || 0;
-    if ($("pgTableMeta")) {
-      $("pgTableMeta").textContent = `${total} rows · showing ${total ? pgOffset + 1 : 0}–${Math.min(pgOffset + PG_LIMIT, total)}`;
-    }
-    if ($("pgPrevBtn")) $("pgPrevBtn").disabled = pgOffset <= 0;
-    if ($("pgNextBtn")) $("pgNextBtn").disabled = pgOffset + PG_LIMIT >= total;
-
-    const cols = (data.columns || []).map(c => c.column_name);
-    const thead = $("pgThead");
-    const tbody = $("pgTbody");
-    if (!thead || !tbody) return;
-    thead.replaceChildren();
-    tbody.replaceChildren();
-    const hr = document.createElement("tr");
-    cols.forEach(c => {
-      const th = document.createElement("th");
-      th.textContent = c;
-      hr.appendChild(th);
-    });
-    thead.appendChild(hr);
-    (data.rows || []).forEach(row => {
-      const tr = document.createElement("tr");
-      cols.forEach(c => {
-        const td = document.createElement("td");
-        let v = row[c];
-        if (v == null) v = "null";
-        else if (typeof v === "object") v = JSON.stringify(v);
-        td.textContent = String(v);
-        td.title = String(v);
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    if ($("pgTableMeta")) $("pgTableMeta").textContent = "Failed: " + (err.message || "error");
-  }
-}
-
-$("pgRefreshBtn")?.addEventListener("click", () => {
-  loadPostgresOverview();
-  if (pgActiveTable) loadPostgresTable();
-});
-$("pgPrevBtn")?.addEventListener("click", () => {
-  pgOffset = Math.max(0, pgOffset - PG_LIMIT);
-  loadPostgresTable();
-});
-$("pgNextBtn")?.addEventListener("click", () => {
-  pgOffset += PG_LIMIT;
-  loadPostgresTable();
-});
-
-// Auto-load when opening Postgres page
-const _showPagePg = typeof showPage === "function" ? showPage : null;
-
 /* ===== OWNER + SITE POSTS (Announcements / Changelog) ===== */
 // Hardcoded - badge and panels only for this Discord user ID
 const RHYMO_OWNER_USER_ID = "1481780053682688001";
@@ -6674,8 +6424,6 @@ async function checkOwner() {
   if (announcePanel) announcePanel.style.display = isOwner ? "block" : "none";
   if (changelogPanel) changelogPanel.style.display = isOwner ? "block" : "none";
   updateOwnerBadges();
-  if (typeof rebuildOwnerNav === "function") rebuildOwnerNav();
-  if (typeof updatePostgresPageAccess === "function") updatePostgresPageAccess();
 }
 
 function renderPostList(targetId, posts, emptyText) {
