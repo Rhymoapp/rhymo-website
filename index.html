@@ -4041,6 +4041,40 @@ select.embed-native-store {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
+
+/* CONFIG TOGGLE */
+.config-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.config-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+  font-size: 14px;
+  font-weight: 600;
+}
+.config-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.config-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+#page-server-config .panel {
+  overflow: visible !important;
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4465,7 +4499,7 @@ select.embed-native-store {
 <section class="page" id="page-embed-builder">
   <div class="eyebrow">Tools</div>
   <h1>Embed Builder</h1>
-  <p class="sub">Build a Discord embed and send it with Rhymo to a channel you manage.</p>
+  <p class="sub">Build a Discord embed and send it with Rhymo. Requires Discord login and <strong>Manage Server</strong> on that server. Rhymo must be in the server.</p>
   <div class="grid">
     <article class="panel full">
       <h2 style="margin-top:0;">Server</h2>
@@ -4573,6 +4607,78 @@ select.embed-native-store {
     </article>
   </div>
 </section>
+
+<section class="page" id="page-server-config">
+  <div class="eyebrow">Tools</div>
+  <h1>Configuration</h1>
+  <p class="sub">Tune Rhymo protection for a server you manage. Turning systems on or off is owner-only.</p>
+  <div class="grid">
+    <article class="panel full">
+      <h2 style="margin-top:0;">Server</h2>
+      <p class="muted" style="margin-top:0;font-size:13px;">You need <strong>Manage Server</strong> to view this. Only the <strong>server owner</strong> can change on/off toggles.</p>
+      <label class="embed-field">
+        <span>Server</span>
+        <select id="configServerSelect" class="embed-native-store" aria-hidden="true" tabindex="-1">
+          <option value="">Sign in and load servers…</option>
+        </select>
+        <div class="custom-select" id="configServerCustom" data-for="configServerSelect">
+          <button type="button" class="custom-select-trigger" id="configServerTrigger">
+            <span class="cs-label">Sign in and load servers…</span>
+            <span class="cs-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="custom-select-menu" id="configServerMenu" role="listbox"></div>
+        </div>
+      </label>
+      <div id="configPermNote" class="notice" role="status">Select a server to load configuration.</div>
+    </article>
+
+    <article class="panel full" id="configSecurityCard">
+      <h2 style="margin-top:0;">Security modules</h2>
+      <div class="config-toggle-grid" id="configToggleGrid">
+        <label class="config-toggle"><span>Anti-nuke</span><input type="checkbox" id="cfg_anti_nuke_enabled" disabled></label>
+        <label class="config-toggle"><span>Anti-spam</span><input type="checkbox" id="cfg_anti_spam_enabled" disabled></label>
+        <label class="config-toggle"><span>Webhook scanner</span><input type="checkbox" id="cfg_webhook_scanner_enabled" disabled></label>
+        <label class="config-toggle"><span>Anti-raid</span><input type="checkbox" id="cfg_anti_raid_enabled" disabled></label>
+        <label class="config-toggle"><span>Delete invites on raid</span><input type="checkbox" id="cfg_anti_raid_pause_invites" disabled></label>
+      </div>
+    </article>
+
+    <article class="panel full" id="configThresholdsCard">
+      <h2 style="margin-top:0;">Thresholds</h2>
+      <p class="muted" style="font-size:13px;margin-top:0;">Owners can edit these. Staff with Manage Server can view them here.</p>
+      <div class="config-fields">
+        <label class="embed-field"><span>Anti-nuke channel deletes</span><input type="number" id="cfg_anti_nuke_channel_deletes" min="1" max="25" disabled></label>
+        <label class="embed-field"><span>Anti-nuke punishment</span>
+          <select id="cfg_anti_nuke_punishment" disabled>
+            <option value="strip_roles">Strip roles</option>
+            <option value="timeout">Timeout</option>
+            <option value="kick">Kick</option>
+            <option value="ban">Ban</option>
+          </select>
+        </label>
+        <label class="embed-field"><span>Anti-spam messages</span><input type="number" id="cfg_anti_spam_messages" min="3" max="30" disabled></label>
+        <label class="embed-field"><span>Anti-spam window (seconds)</span><input type="number" id="cfg_anti_spam_window_sec" min="3" max="60" disabled></label>
+        <label class="embed-field"><span>Anti-spam punishment</span>
+          <select id="cfg_anti_spam_punishment" disabled>
+            <option value="timeout">Timeout</option>
+            <option value="strip_roles">Strip roles</option>
+            <option value="kick">Kick</option>
+            <option value="ban">Ban</option>
+          </select>
+        </label>
+        <label class="embed-field"><span>Anti-spam timeout (seconds)</span><input type="number" id="cfg_anti_spam_timeout_sec" min="10" max="2419200" disabled></label>
+        <label class="embed-field"><span>Anti-raid joins</span><input type="number" id="cfg_anti_raid_joins" min="3" max="50" disabled></label>
+        <label class="embed-field"><span>Anti-raid window (seconds)</span><input type="number" id="cfg_anti_raid_window_sec" min="3" max="120" disabled></label>
+      </div>
+      <div class="actions" style="margin-top:14px;">
+        <button type="button" class="primary" id="configSaveBtn" disabled>Save configuration</button>
+        <button type="button" id="configReloadBtn" disabled>Reload</button>
+      </div>
+      <div id="configSaveMsg" class="notice" role="status" style="margin-top:10px;"></div>
+    </article>
+  </div>
+</section>
+
 
 
 <section class="page" id="page-help">
@@ -5090,6 +5196,7 @@ const pages = [
   ["notifications", "Notification Center"],
   ["servers", "Server Management"],
   ["embed-builder", "Embed Builder"],
+  ["server-config", "Configuration"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
   ["changelog", "Changelog"],
@@ -5132,14 +5239,14 @@ function showPage(id, push = true) {
 
   document.querySelectorAll(".navbtn").forEach(b => {
     const go = b.dataset.go;
-    const active = go === id || (go === "servers" && id === "embed-builder" && b.classList.contains("navbtn-parent"));
+    const active = go === id || (go === "servers" && (id === "embed-builder" || id === "server-config") && b.classList.contains("navbtn-parent"));
     b.classList.toggle("active", active);
   });
   // Highlight submenu; expand when landing on a child route (not on every redraw)
   document.querySelectorAll(".nav-subwrap").forEach(wrap => {
     const parent = wrap.querySelector(".navbtn-parent");
     if (!parent || parent.dataset.go !== "servers") return;
-    if (id === "embed-builder" || id === "servers") {
+    if (id === "embed-builder" || id === "server-config" || id === "servers") {
       wrap.classList.add("open");
       parent.setAttribute("aria-expanded", "true");
     }
@@ -5165,6 +5272,7 @@ function showPage(id, push = true) {
       if (!managedServers.length) loadServers();
       else loadServers({ silent: true });
       if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
+  if (typeof refreshConfigServerSelect === "function") refreshConfigServerSelect();
       if (selectedGuildId && typeof loadEmbedChannels === "function") loadEmbedChannels(selectedGuildId);
     } catch (err) {
       console.error("Embed builder load failed:", err);
@@ -5184,7 +5292,8 @@ function buildNav(container) {
       submenus: {
         servers: [
           { id: "servers", label: "Overview" },
-          { id: "embed-builder", label: "Embed Builder" }
+          { id: "embed-builder", label: "Embed Builder" },
+          { id: "server-config", label: "Configuration" }
         ]
       }
     },
@@ -8932,6 +9041,170 @@ $("embedSendBtn")?.addEventListener("click", async () => {
   }
 });
 
+
+
+/* ===== SERVER CONFIG ===== */
+function refreshConfigServerSelect() {
+  const sel = $("configServerSelect");
+  if (!sel) return;
+  const list = typeof managedServers !== "undefined" && Array.isArray(managedServers) ? managedServers : [];
+  const prev = sel.value || selectedGuildId || "";
+  sel.innerHTML = "";
+  if (!currentUser) {
+    sel.innerHTML = '<option value="">Sign in to load servers…</option>';
+    syncCustomSelect("configServerSelect", "configServerMenu", "configServerTrigger");
+    return;
+  }
+  if (!list.length) {
+    sel.innerHTML = '<option value="">No manageable servers</option>';
+    syncCustomSelect("configServerSelect", "configServerMenu", "configServerTrigger");
+    return;
+  }
+  const ph = document.createElement("option");
+  ph.value = "";
+  ph.textContent = "Choose a server…";
+  sel.appendChild(ph);
+  list.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.name || s.id;
+    sel.appendChild(opt);
+  });
+  if (prev && list.some(s => String(s.id) === String(prev))) sel.value = prev;
+  syncCustomSelect("configServerSelect", "configServerMenu", "configServerTrigger");
+}
+
+function setConfigFieldsEnabled(enabled) {
+  const ids = [
+    "cfg_anti_nuke_enabled","cfg_anti_spam_enabled","cfg_webhook_scanner_enabled","cfg_anti_raid_enabled","cfg_anti_raid_pause_invites",
+    "cfg_anti_nuke_channel_deletes","cfg_anti_nuke_punishment","cfg_anti_spam_messages","cfg_anti_spam_window_sec",
+    "cfg_anti_spam_punishment","cfg_anti_spam_timeout_sec","cfg_anti_raid_joins","cfg_anti_raid_window_sec"
+  ];
+  ids.forEach(id => { if ($(id)) $(id).disabled = !enabled; });
+  if ($("configSaveBtn")) $("configSaveBtn").disabled = !enabled;
+  if ($("configReloadBtn")) $("configReloadBtn").disabled = !enabled;
+}
+
+function applyConfigToForm(settings) {
+  const s = settings || {};
+  const map = {
+    cfg_anti_nuke_enabled: !!s.anti_nuke_enabled,
+    cfg_anti_spam_enabled: !!s.anti_spam_enabled,
+    cfg_webhook_scanner_enabled: !!s.webhook_scanner_enabled,
+    cfg_anti_raid_enabled: !!s.anti_raid_enabled,
+    cfg_anti_raid_pause_invites: !!s.anti_raid_pause_invites,
+    cfg_anti_nuke_channel_deletes: s.anti_nuke_channel_deletes ?? 3,
+    cfg_anti_nuke_punishment: s.anti_nuke_punishment || "strip_roles",
+    cfg_anti_spam_messages: s.anti_spam_messages ?? 6,
+    cfg_anti_spam_window_sec: s.anti_spam_window_sec ?? 8,
+    cfg_anti_spam_punishment: s.anti_spam_punishment || "timeout",
+    cfg_anti_spam_timeout_sec: s.anti_spam_timeout_sec ?? 600,
+    cfg_anti_raid_joins: s.anti_raid_joins ?? 8,
+    cfg_anti_raid_window_sec: s.anti_raid_window_sec ?? 12
+  };
+  Object.entries(map).forEach(([id, val]) => {
+    const el = $(id);
+    if (!el) return;
+    if (el.type === "checkbox") el.checked = !!val;
+    else el.value = val;
+  });
+}
+
+async function loadServerConfig(guildId) {
+  const note = $("configPermNote");
+  const msg = $("configSaveMsg");
+  if (!guildId) {
+    setConfigFieldsEnabled(false);
+    if (note) note.textContent = "Select a server to load configuration.";
+    return;
+  }
+  if (!currentUser) {
+    setConfigFieldsEnabled(false);
+    if (note) note.textContent = "Sign in with Discord. You need Manage Server on the target server.";
+    return;
+  }
+  if (note) note.textContent = "Loading configuration…";
+  if (msg) msg.textContent = "";
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/config");
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Could not load configuration.");
+    applyConfigToForm(data.settings || {});
+    const canEdit = data.canEditToggles === true;
+    setConfigFieldsEnabled(canEdit);
+    if ($("configReloadBtn")) $("configReloadBtn").disabled = false;
+    if (note) {
+      note.textContent = canEdit
+        ? "You are the server owner — you can edit and save configuration."
+        : "View only. You need to be the server owner to change configuration toggles and thresholds.";
+    }
+  } catch (error) {
+    console.error("loadServerConfig:", error);
+    setConfigFieldsEnabled(false);
+    if (note) note.textContent = error.message || "Could not load configuration.";
+  }
+}
+
+$("configServerSelect")?.addEventListener("change", () => {
+  const gid = $("configServerSelect")?.value || "";
+  if (gid) {
+    selectedGuildId = gid;
+    if ($("serverSelect")) $("serverSelect").value = gid;
+  }
+  loadServerConfig(gid);
+});
+
+$("configReloadBtn")?.addEventListener("click", () => {
+  const gid = $("configServerSelect")?.value || selectedGuildId;
+  if (gid) loadServerConfig(gid);
+});
+
+$("configSaveBtn")?.addEventListener("click", async () => {
+  const guildId = $("configServerSelect")?.value || selectedGuildId;
+  const msg = $("configSaveMsg");
+  if (!guildId) {
+    if (msg) msg.textContent = "Select a server first.";
+    return;
+  }
+  const payload = {
+    anti_nuke_enabled: !!$("cfg_anti_nuke_enabled")?.checked,
+    anti_spam_enabled: !!$("cfg_anti_spam_enabled")?.checked,
+    webhook_scanner_enabled: !!$("cfg_webhook_scanner_enabled")?.checked,
+    anti_raid_enabled: !!$("cfg_anti_raid_enabled")?.checked,
+    anti_raid_pause_invites: !!$("cfg_anti_raid_pause_invites")?.checked,
+    anti_nuke_channel_deletes: Number($("cfg_anti_nuke_channel_deletes")?.value),
+    anti_nuke_punishment: $("cfg_anti_nuke_punishment")?.value,
+    anti_spam_messages: Number($("cfg_anti_spam_messages")?.value),
+    anti_spam_window_sec: Number($("cfg_anti_spam_window_sec")?.value),
+    anti_spam_punishment: $("cfg_anti_spam_punishment")?.value,
+    anti_spam_timeout_sec: Number($("cfg_anti_spam_timeout_sec")?.value),
+    anti_raid_joins: Number($("cfg_anti_raid_joins")?.value),
+    anti_raid_window_sec: Number($("cfg_anti_raid_window_sec")?.value)
+  };
+  if (msg) msg.textContent = "Saving…";
+  if ($("configSaveBtn")) $("configSaveBtn").disabled = true;
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/config", {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Save failed.");
+    applyConfigToForm(data.settings || payload);
+    if (msg) msg.textContent = "Configuration saved.";
+    toast("Configuration saved.");
+  } catch (error) {
+    console.error("config save:", error);
+    if (msg) msg.textContent = error.message || "Could not save.";
+    toast(error.message || "Could not save configuration.");
+  } finally {
+    if ($("configSaveBtn")) $("configSaveBtn").disabled = false;
+  }
+});
+
+bindCustomSelect("configServerCustom", "configServerSelect", "configServerMenu", "configServerTrigger");
+
+// Hook server list refresh
 
 </script>
 </body>
