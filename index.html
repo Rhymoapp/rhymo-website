@@ -507,10 +507,10 @@ button:disabled {
 .navbtn:hover {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
-  transform: translateX(3px);
+  transform: none;
 }
 .navbtn:hover .ns {
-  transform: scale(1.15);
+  transform: none;
 }
 .navbtn.active {
   background: rgba(129, 140, 248, 0.14);
@@ -3522,8 +3522,6 @@ button.primary,
 .top-search,
 .iconbtn,
 #menuToggle,
-.navbtn,
-#drawer .navbtn,
 .brand img,
 .lp-mascot,
 .profile-pic,
@@ -3802,6 +3800,72 @@ img.lp-mascot,
   display: inline-block;
   transform: none !important;
 }
+
+/* SUBMENU HARD FIX */
+#drawer .nav-subwrap,
+.sidebar .nav-subwrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+#drawer .navbtn-parent,
+.sidebar .navbtn-parent {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 8px !important;
+  transform: none !important;
+  overflow: hidden !important;
+  direction: ltr !important;
+  text-align: left !important;
+  -webkit-backface-visibility: visible !important;
+  backface-visibility: visible !important;
+}
+#drawer .navbtn-parent .nav-parent-label,
+.sidebar .navbtn-parent .nav-parent-label {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  transform: none !important;
+  text-align: left !important;
+}
+#drawer .navbtn-parent .nav-sub-chevron,
+.sidebar .navbtn-parent .nav-sub-chevron {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  transform: none !important;
+  margin-left: 6px;
+}
+#drawer .nav-subwrap.open .nav-sub-chevron,
+.sidebar .nav-subwrap.open .nav-sub-chevron {
+  transform: rotate(180deg) !important;
+}
+#drawer .nav-submenu,
+.sidebar .nav-submenu {
+  display: none !important;
+  flex-direction: column !important;
+  padding-left: 10px;
+  margin: 2px 0 6px 8px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+#drawer .nav-subwrap.open > .nav-submenu,
+.sidebar .nav-subwrap.open > .nav-submenu {
+  display: flex !important;
+}
+#drawer .navbtn-sub,
+.sidebar .navbtn-sub {
+  transform: none !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4870,10 +4934,11 @@ function showPage(id, push = true) {
     const active = go === id || (go === "servers" && id === "embed-builder" && b.classList.contains("navbtn-parent"));
     b.classList.toggle("active", active);
   });
-  // Auto-expand Server Management submenu when on servers or embed-builder
+  // Highlight submenu; expand when landing on a child route (not on every redraw)
   document.querySelectorAll(".nav-subwrap").forEach(wrap => {
     const parent = wrap.querySelector(".navbtn-parent");
-    if (parent && (parent.dataset.go === "servers") && (id === "servers" || id === "embed-builder")) {
+    if (!parent || parent.dataset.go !== "servers") return;
+    if (id === "embed-builder" || id === "servers") {
       wrap.classList.add("open");
       parent.setAttribute("aria-expanded", "true");
     }
@@ -4949,7 +5014,7 @@ function buildNav(container) {
         parentBtn.setAttribute("aria-label", entry[1] + " submenu");
         const parentLabel = document.createElement("span");
         parentLabel.className = "nav-parent-label";
-        parentLabel.textContent = entry[1];
+        parentLabel.textContent = id === "servers" ? "Servers" : entry[1];
         const parentChev = document.createElement("span");
         parentChev.className = "nav-sub-chevron";
         parentChev.setAttribute("aria-hidden", "true");
@@ -4958,16 +5023,20 @@ function buildNav(container) {
         parentBtn.addEventListener("click", e => {
           e.preventDefault();
           e.stopPropagation();
-          const open = !wrap.classList.contains("open");
-          // close other open submenus in this container
+          const willOpen = !wrap.classList.contains("open");
           container.querySelectorAll(".nav-subwrap.open").forEach(other => {
             if (other !== wrap) {
               other.classList.remove("open");
               other.querySelector(".navbtn-parent")?.setAttribute("aria-expanded", "false");
             }
           });
-          wrap.classList.toggle("open", open);
-          parentBtn.setAttribute("aria-expanded", open ? "true" : "false");
+          if (willOpen) {
+            wrap.classList.add("open");
+            parentBtn.setAttribute("aria-expanded", "true");
+          } else {
+            wrap.classList.remove("open");
+            parentBtn.setAttribute("aria-expanded", "false");
+          }
         });
         wrap.appendChild(parentBtn);
 
