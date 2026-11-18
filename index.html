@@ -3984,6 +3984,35 @@ select.embed-native-store {
   pointer-events: none !important;
   left: -9999px !important;
 }
+
+/* EMBED SELECT OVERFLOW — menus must escape panels */
+#page-embed-builder .panel,
+#page-embed-builder .grid,
+#page-embed-builder .embed-field,
+#page-embed-builder .embed-builder-form,
+#page-embed-builder .embed-builder-grid {
+  overflow: visible !important;
+}
+#page-embed-builder .custom-select {
+  position: relative;
+  z-index: 5;
+}
+#page-embed-builder .custom-select.open {
+  z-index: 80;
+}
+#page-embed-builder .custom-select-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 90;
+  max-height: min(280px, 45vh);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #12121a;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -8508,19 +8537,56 @@ function syncCustomSelect(selectId, menuId, triggerId) {
   trigger.disabled = !!sel.disabled;
 }
 
+function positionCustomMenu(wrap, trigger, menu) {
+  if (!wrap || !trigger || !menu) return;
+  const rect = trigger.getBoundingClientRect();
+  const maxH = Math.min(280, Math.floor(window.innerHeight * 0.45));
+  const spaceBelow = window.innerHeight - rect.bottom - 12;
+  const spaceAbove = rect.top - 12;
+  const openUp = spaceBelow < 160 && spaceAbove > spaceBelow;
+  const height = Math.min(maxH, openUp ? spaceAbove : spaceBelow);
+  menu.style.position = "fixed";
+  menu.style.left = Math.max(8, rect.left) + "px";
+  menu.style.width = Math.max(160, rect.width) + "px";
+  menu.style.right = "auto";
+  menu.style.maxHeight = Math.max(120, height) + "px";
+  menu.style.zIndex = "2000";
+  if (openUp) {
+    menu.style.top = "auto";
+    menu.style.bottom = (window.innerHeight - rect.top + 6) + "px";
+  } else {
+    menu.style.bottom = "auto";
+    menu.style.top = (rect.bottom + 6) + "px";
+  }
+}
+
 function bindCustomSelect(customId, selectId, menuId, triggerId) {
   const wrap = $(customId);
   const trigger = $(triggerId);
-  if (!wrap || !trigger) return;
+  const menu = $(menuId);
+  if (!wrap || !trigger || !menu) return;
   trigger.addEventListener("click", e => {
     e.preventDefault();
+    e.stopPropagation();
     if (trigger.disabled) return;
-    const open = wrap.classList.toggle("open");
+    const willOpen = !wrap.classList.contains("open");
     document.querySelectorAll(".custom-select.open").forEach(el => {
       if (el !== wrap) el.classList.remove("open");
     });
-    if (open) syncCustomSelect(selectId, menuId, triggerId);
+    if (willOpen) {
+      syncCustomSelect(selectId, menuId, triggerId);
+      wrap.classList.add("open");
+      positionCustomMenu(wrap, trigger, menu);
+    } else {
+      wrap.classList.remove("open");
+    }
   });
+  window.addEventListener("resize", () => {
+    if (wrap.classList.contains("open")) positionCustomMenu(wrap, trigger, menu);
+  });
+  window.addEventListener("scroll", () => {
+    if (wrap.classList.contains("open")) positionCustomMenu(wrap, trigger, menu);
+  }, true);
 }
 
 document.addEventListener("click", e => {
