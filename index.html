@@ -3732,13 +3732,34 @@ img.lp-mascot,
   gap: 2px;
 }
 .navbtn-parent {
-  position: relative;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+  transform: none !important;
+  overflow: hidden;
+}
+.navbtn-parent:hover {
+  transform: none !important;
+}
+.nav-parent-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  direction: ltr;
+  unicode-bidi: plaintext;
 }
 .nav-sub-chevron {
-  margin-left: auto;
-  opacity: 0.55;
+  flex: 0 0 auto;
+  opacity: 0.6;
   font-size: 12px;
+  line-height: 1;
   transition: transform 0.2s ease;
+  transform: none;
 }
 .nav-subwrap.open .nav-sub-chevron {
   transform: rotate(180deg);
@@ -3747,9 +3768,9 @@ img.lp-mascot,
   display: none;
   flex-direction: column;
   gap: 2px;
-  padding: 2px 0 4px 10px;
-  margin: 0 0 4px 6px;
-  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  padding: 2px 0 6px 8px;
+  margin: 0 0 4px 8px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 .nav-subwrap.open .nav-submenu {
   display: flex;
@@ -3758,11 +3779,28 @@ img.lp-mascot,
   font-size: 13.5px !important;
   padding: 9px 12px !important;
   min-height: 40px;
-  opacity: 0.95;
+  transform: none !important;
+}
+.navbtn-sub:hover {
+  transform: none !important;
 }
 #drawer .nav-subwrap,
 .sidebar .nav-subwrap {
   width: 100%;
+}
+
+/* NAVBTN TRANSFORM FIX */
+#drawer .navbtn,
+.sidebar .navbtn {
+  transform: none;
+}
+#drawer .navbtn:hover,
+.sidebar .navbtn:hover {
+  transform: none;
+}
+.navbtn .ns {
+  display: inline-block;
+  transform: none !important;
 }
 </style>
 </head>
@@ -4908,9 +4946,27 @@ function buildNav(container) {
         parentBtn.className = "navbtn navbtn-parent";
         parentBtn.dataset.go = id;
         parentBtn.setAttribute("aria-expanded", "false");
-        parentBtn.innerHTML = `<span class="ns">›</span><span>${entry[1]}</span><span class="nav-sub-chevron" aria-hidden="true">▾</span>`;
-        parentBtn.addEventListener("click", () => {
-          const open = wrap.classList.toggle("open");
+        parentBtn.setAttribute("aria-label", entry[1] + " submenu");
+        const parentLabel = document.createElement("span");
+        parentLabel.className = "nav-parent-label";
+        parentLabel.textContent = entry[1];
+        const parentChev = document.createElement("span");
+        parentChev.className = "nav-sub-chevron";
+        parentChev.setAttribute("aria-hidden", "true");
+        parentChev.textContent = "▾";
+        parentBtn.append(parentLabel, parentChev);
+        parentBtn.addEventListener("click", e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const open = !wrap.classList.contains("open");
+          // close other open submenus in this container
+          container.querySelectorAll(".nav-subwrap.open").forEach(other => {
+            if (other !== wrap) {
+              other.classList.remove("open");
+              other.querySelector(".navbtn-parent")?.setAttribute("aria-expanded", "false");
+            }
+          });
+          wrap.classList.toggle("open", open);
           parentBtn.setAttribute("aria-expanded", open ? "true" : "false");
         });
         wrap.appendChild(parentBtn);
