@@ -4075,6 +4075,68 @@ select.embed-native-store {
 #page-server-config .panel {
   overflow: visible !important;
 }
+
+/* SERVERS SUBMENU FINAL */
+#drawer .navbtn-parent,
+.sidebar .navbtn-parent {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  background: #14141c !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  overflow: hidden !important;
+  direction: ltr !important;
+}
+#drawer .navbtn-parent::before,
+#drawer .navbtn-parent::after,
+.sidebar .navbtn-parent::before,
+.sidebar .navbtn-parent::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+#drawer .nav-parent-label,
+.sidebar .nav-parent-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  text-align: left !important;
+}
+#drawer .nav-sub-chevron,
+.sidebar .nav-sub-chevron {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  transform: rotate(0deg) !important;
+  transition: transform 0.2s ease;
+  opacity: 0.75;
+  font-weight: 700;
+}
+#drawer .nav-subwrap.open > .navbtn-parent .nav-sub-chevron,
+.sidebar .nav-subwrap.open > .navbtn-parent .nav-sub-chevron {
+  transform: rotate(90deg) !important;
+}
+#drawer .nav-submenu,
+.sidebar .nav-submenu {
+  display: none !important;
+}
+#drawer .nav-subwrap.open > .nav-submenu,
+.sidebar .nav-subwrap.open > .nav-submenu {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4610,8 +4672,8 @@ select.embed-native-store {
 
 <section class="page" id="page-server-config">
   <div class="eyebrow">Tools</div>
-  <h1>Configuration</h1>
-  <p class="sub">Tune Rhymo protection for a server you manage. Turning systems on or off is owner-only.</p>
+  <h1>Security Panel</h1>
+  <p class="sub">Same settings as <code>/security panel</code> in Discord. Turning systems on or off is owner-only.</p>
   <div class="grid">
     <article class="panel full">
       <h2 style="margin-top:0;">Server</h2>
@@ -5196,7 +5258,7 @@ const pages = [
   ["notifications", "Notification Center"],
   ["servers", "Server Management"],
   ["embed-builder", "Embed Builder"],
-  ["server-config", "Configuration"],
+  ["server-config", "Security Panel"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
   ["changelog", "Changelog"],
@@ -5293,7 +5355,7 @@ function buildNav(container) {
         servers: [
           { id: "servers", label: "Overview" },
           { id: "embed-builder", label: "Embed Builder" },
-          { id: "server-config", label: "Configuration" }
+          { id: "server-config", label: "Security Panel" }
         ]
       }
     },
@@ -5321,14 +5383,16 @@ function buildNav(container) {
         parentBtn.className = "navbtn navbtn-parent";
         parentBtn.dataset.go = id;
         parentBtn.setAttribute("aria-expanded", "false");
-        parentBtn.setAttribute("aria-label", entry[1] + " submenu");
+        parentBtn.setAttribute("aria-label", "Toggle Servers menu");
+        // Single clean label — never use entry[1] here (avoids ghost "Server Management" text)
+        parentBtn.replaceChildren();
         const parentLabel = document.createElement("span");
         parentLabel.className = "nav-parent-label";
-        parentLabel.textContent = id === "servers" ? "Servers" : entry[1];
+        parentLabel.textContent = "Servers";
         const parentChev = document.createElement("span");
         parentChev.className = "nav-sub-chevron";
         parentChev.setAttribute("aria-hidden", "true");
-        parentChev.textContent = "▾";
+        parentChev.textContent = "›";
         parentBtn.append(parentLabel, parentChev);
         parentBtn.addEventListener("click", e => {
           e.preventDefault();
@@ -5337,16 +5401,12 @@ function buildNav(container) {
           container.querySelectorAll(".nav-subwrap.open").forEach(other => {
             if (other !== wrap) {
               other.classList.remove("open");
-              other.querySelector(".navbtn-parent")?.setAttribute("aria-expanded", "false");
+              const op = other.querySelector(".navbtn-parent");
+              if (op) op.setAttribute("aria-expanded", "false");
             }
           });
-          if (willOpen) {
-            wrap.classList.add("open");
-            parentBtn.setAttribute("aria-expanded", "true");
-          } else {
-            wrap.classList.remove("open");
-            parentBtn.setAttribute("aria-expanded", "false");
-          }
+          wrap.classList.toggle("open", willOpen);
+          parentBtn.setAttribute("aria-expanded", willOpen ? "true" : "false");
         });
         wrap.appendChild(parentBtn);
 
