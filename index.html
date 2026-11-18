@@ -3723,6 +3723,47 @@ img.lp-mascot,
   word-break: break-word;
 }
 
+
+/* NAV SUBMENU — Server Management */
+.nav-subwrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2px;
+}
+.navbtn-parent {
+  position: relative;
+}
+.nav-sub-chevron {
+  margin-left: auto;
+  opacity: 0.55;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+.nav-subwrap.open .nav-sub-chevron {
+  transform: rotate(180deg);
+}
+.nav-submenu {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 4px 10px;
+  margin: 0 0 4px 6px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.nav-subwrap.open .nav-submenu {
+  display: flex;
+}
+.navbtn-sub {
+  font-size: 13.5px !important;
+  padding: 9px 12px !important;
+  min-height: 40px;
+  opacity: 0.95;
+}
+#drawer .nav-subwrap,
+.sidebar .nav-subwrap {
+  width: 100%;
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4142,86 +4183,94 @@ img.lp-mascot,
     <!-- kept for existing JS hooks -->
     <button id="configBtn" class="hidden" aria-hidden="true">View server details</button>
   </div>
+</section>
 
-    <article class="panel full embed-builder-card" id="embedBuilderCard">
-      <button type="button" class="embed-builder-toggle" id="embedBuilderToggle" aria-expanded="false" aria-controls="embedBuilderBody">
-        <span>
-          <strong>Embed Builder</strong>
-          <span class="muted" style="display:block;font-size:12.5px;margin-top:2px;">Build a Discord embed and send it to a channel with Rhymo</span>
-        </span>
-        <span class="embed-builder-chevron" aria-hidden="true">▾</span>
-      </button>
-      <div class="embed-builder-body" id="embedBuilderBody" hidden>
-        <p class="muted" style="margin:0 0 12px;font-size:13px;">Select a server above first. Only text channels are listed. Rhymo must be in the server and able to send messages there.</p>
-        <div class="embed-builder-grid">
-          <div class="embed-builder-form">
+<section class="page" id="page-embed-builder">
+  <div class="eyebrow">Tools</div>
+  <h1>Embed Builder</h1>
+  <p class="sub">Build a Discord embed and send it with Rhymo to a channel you manage.</p>
+  <div class="grid">
+    <article class="panel full">
+      <h2 style="margin-top:0;">Server</h2>
+      <p class="muted" style="margin-top:0;font-size:13px;">Choose a server you manage. Rhymo must be in the server.</p>
+      <label class="embed-field">
+        <span>Server</span>
+        <select id="embedServerSelect">
+          <option value="">Sign in and load servers…</option>
+        </select>
+      </label>
+      <label class="embed-field">
+        <span>Channel</span>
+        <select id="embedChannelSelect" disabled>
+          <option value="">Select a server first…</option>
+        </select>
+      </label>
+    </article>
+    <article class="panel full">
+      <div class="embed-builder-grid">
+        <div class="embed-builder-form">
+          <label class="embed-field">
+            <span>Message content <span class="muted">(optional text above embed)</span></span>
+            <textarea id="embedContent" rows="2" maxlength="2000" placeholder="Optional plain text…"></textarea>
+          </label>
+          <label class="embed-field">
+            <span>Title</span>
+            <input id="embedTitle" type="text" maxlength="256" placeholder="Embed title">
+          </label>
+          <label class="embed-field">
+            <span>Description</span>
+            <textarea id="embedDescription" rows="4" maxlength="4096" placeholder="Main embed text…"></textarea>
+          </label>
+          <div class="embed-row-2">
             <label class="embed-field">
-              <span>Channel</span>
-              <select id="embedChannelSelect" disabled>
-                <option value="">Select a server first…</option>
-              </select>
+              <span>Author</span>
+              <input id="embedAuthor" type="text" maxlength="256" placeholder="Author name">
             </label>
             <label class="embed-field">
-              <span>Message content <span class="muted">(optional text above embed)</span></span>
-              <textarea id="embedContent" rows="2" maxlength="2000" placeholder="Optional plain text…"></textarea>
+              <span>Color</span>
+              <input id="embedColor" type="color" value="#8b7cff">
             </label>
-            <label class="embed-field">
-              <span>Title</span>
-              <input id="embedTitle" type="text" maxlength="256" placeholder="Embed title">
-            </label>
-            <label class="embed-field">
-              <span>Description</span>
-              <textarea id="embedDescription" rows="4" maxlength="4096" placeholder="Main embed text…"></textarea>
-            </label>
-            <div class="embed-row-2">
-              <label class="embed-field">
-                <span>Author</span>
-                <input id="embedAuthor" type="text" maxlength="256" placeholder="Author name">
-              </label>
-              <label class="embed-field">
-                <span>Color</span>
-                <input id="embedColor" type="color" value="#8b7cff">
-              </label>
-            </div>
-            <label class="embed-field">
-              <span>Footer</span>
-              <input id="embedFooter" type="text" maxlength="2048" placeholder="Footer text">
-            </label>
-            <label class="embed-field">
-              <span>Image URL</span>
-              <input id="embedImageUrl" type="url" maxlength="512" placeholder="https://…">
-            </label>
-            <label class="embed-field">
-              <span>Thumbnail URL</span>
-              <input id="embedThumbUrl" type="url" maxlength="512" placeholder="https://…">
-            </label>
-            <div class="actions" style="margin-top:8px;">
-              <button type="button" class="primary" id="embedSendBtn" disabled>Send embed</button>
-              <button type="button" id="embedResetBtn">Reset</button>
-            </div>
-            <div id="embedBuilderMsg" class="notice" role="status" style="margin-top:10px;">Pick a server and channel, then build your embed.</div>
           </div>
-          <div class="embed-builder-preview-wrap">
-            <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Live preview</div>
-            <div class="discord-embed-preview" id="embedPreview">
-              <div class="discord-embed" id="embedPreviewCard">
-                <div class="discord-embed-bar" id="embedPreviewBar"></div>
-                <div class="discord-embed-inner">
-                  <div class="discord-embed-author" id="embedPreviewAuthor" hidden></div>
-                  <div class="discord-embed-title" id="embedPreviewTitle" hidden></div>
-                  <div class="discord-embed-desc" id="embedPreviewDesc" hidden></div>
-                  <img class="discord-embed-image" id="embedPreviewImage" alt="" hidden>
-                  <div class="discord-embed-footer" id="embedPreviewFooter" hidden></div>
-                </div>
-                <img class="discord-embed-thumb" id="embedPreviewThumb" alt="" hidden>
+          <label class="embed-field">
+            <span>Footer</span>
+            <input id="embedFooter" type="text" maxlength="2048" placeholder="Footer text">
+          </label>
+          <label class="embed-field">
+            <span>Image URL</span>
+            <input id="embedImageUrl" type="url" maxlength="512" placeholder="https://…">
+          </label>
+          <label class="embed-field">
+            <span>Thumbnail URL</span>
+            <input id="embedThumbUrl" type="url" maxlength="512" placeholder="https://…">
+          </label>
+          <div class="actions" style="margin-top:8px;">
+            <button type="button" class="primary" id="embedSendBtn" disabled>Send embed</button>
+            <button type="button" id="embedResetBtn">Reset</button>
+          </div>
+          <div id="embedBuilderMsg" class="notice" role="status" style="margin-top:10px;">Pick a server and channel, then build your embed.</div>
+        </div>
+        <div class="embed-builder-preview-wrap">
+          <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Live preview</div>
+          <div class="discord-embed-preview" id="embedPreview">
+            <div class="discord-embed" id="embedPreviewCard">
+              <div class="discord-embed-bar" id="embedPreviewBar"></div>
+              <div class="discord-embed-inner">
+                <div class="discord-embed-author" id="embedPreviewAuthor" hidden></div>
+                <div class="discord-embed-title" id="embedPreviewTitle" hidden></div>
+                <div class="discord-embed-desc" id="embedPreviewDesc" hidden></div>
+                <img class="discord-embed-image" id="embedPreviewImage" alt="" hidden>
+                <div class="discord-embed-footer" id="embedPreviewFooter" hidden></div>
               </div>
-              <div class="discord-embed-content-preview muted" id="embedPreviewContent" hidden></div>
+              <img class="discord-embed-thumb" id="embedPreviewThumb" alt="" hidden>
             </div>
+            <div class="discord-embed-content-preview muted" id="embedPreviewContent" hidden></div>
           </div>
         </div>
       </div>
     </article>
+  </div>
 </section>
+
 
 <section class="page" id="page-help">
   <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Quick answers for the things people usually get stuck on.</p>
@@ -4737,6 +4786,7 @@ const pages = [
   ["status", "System Status"],
   ["notifications", "Notification Center"],
   ["servers", "Server Management"],
+  ["embed-builder", "Embed Builder"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
   ["changelog", "Changelog"],
@@ -4778,7 +4828,17 @@ function showPage(id, push = true) {
   }
 
   document.querySelectorAll(".navbtn").forEach(b => {
-    b.classList.toggle("active", b.dataset.go === id);
+    const go = b.dataset.go;
+    const active = go === id || (go === "servers" && id === "embed-builder" && b.classList.contains("navbtn-parent"));
+    b.classList.toggle("active", active);
+  });
+  // Auto-expand Server Management submenu when on servers or embed-builder
+  document.querySelectorAll(".nav-subwrap").forEach(wrap => {
+    const parent = wrap.querySelector(".navbtn-parent");
+    if (parent && (parent.dataset.go === "servers") && (id === "servers" || id === "embed-builder")) {
+      wrap.classList.add("open");
+      parent.setAttribute("aria-expanded", "true");
+    }
   });
 
   if (push) history.replaceState(null, "", "#" + id);
@@ -4796,6 +4856,16 @@ function showPage(id, push = true) {
       console.error("Server management load failed:", err);
     }
   }
+  if (id === "embed-builder" && currentUser && typeof loadServers === "function") {
+    try {
+      if (!managedServers.length) loadServers();
+      else loadServers({ silent: true });
+      if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
+      if (selectedGuildId && typeof loadEmbedChannels === "function") loadEmbedChannels(selectedGuildId);
+    } catch (err) {
+      console.error("Embed builder load failed:", err);
+    }
+  }
 }
 
 function buildNav(container) {
@@ -4803,7 +4873,17 @@ function buildNav(container) {
   container.innerHTML = "";
   const groups = [
     { label: "Main", items: ["home", "features", "dashboard", "status"] },
-    { label: "Tools", items: ["servers", "commands"] },
+    {
+      label: "Tools",
+      items: ["servers", "commands"],
+      // Nested under Server Management in the menu
+      submenus: {
+        servers: [
+          { id: "servers", label: "Overview" },
+          { id: "embed-builder", label: "Embed Builder" }
+        ]
+      }
+    },
     { label: "Info", items: ["notifications", "help", "changelog"] },
     { label: "Account", items: ["settings", "language", "terms", "privacy"] }
   ];
@@ -4817,6 +4897,43 @@ function buildNav(container) {
     group.items.forEach(id => {
       const entry = pages.find(p => p[0] === id);
       if (!entry) return;
+      const subs = group.submenus && group.submenus[id];
+
+      if (subs && subs.length) {
+        const wrap = document.createElement("div");
+        wrap.className = "nav-subwrap";
+
+        const parentBtn = document.createElement("button");
+        parentBtn.type = "button";
+        parentBtn.className = "navbtn navbtn-parent";
+        parentBtn.dataset.go = id;
+        parentBtn.setAttribute("aria-expanded", "false");
+        parentBtn.innerHTML = `<span class="ns">›</span><span>${entry[1]}</span><span class="nav-sub-chevron" aria-hidden="true">▾</span>`;
+        parentBtn.addEventListener("click", () => {
+          const open = wrap.classList.toggle("open");
+          parentBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        wrap.appendChild(parentBtn);
+
+        const sub = document.createElement("div");
+        sub.className = "nav-submenu";
+        subs.forEach(item => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "navbtn navbtn-sub";
+          b.dataset.go = item.id;
+          b.innerHTML = `<span class="ns">›</span><span>${item.label}</span>`;
+          b.addEventListener("click", e => {
+            e.stopPropagation();
+            showPage(item.id);
+          });
+          sub.appendChild(b);
+        });
+        wrap.appendChild(sub);
+        container.appendChild(wrap);
+        return;
+      }
+
       const btn = document.createElement("button");
       btn.className = "navbtn";
       btn.dataset.go = id;
@@ -6687,6 +6804,7 @@ async function loadServers(options = {}) {
     if (selectedGuildId && managedServers.some(s => s.id === selectedGuildId)) {
       select.value = selectedGuildId;
       renderManagedServerList();
+  if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
       if (!silent) serverMessage(`Loaded ${managedServers.length} server(s). Choose one to continue. The list refreshes every minute.`);
       if (!silent) await loadServerDetails();
     } else {
@@ -8096,6 +8214,209 @@ if ($("topSearchResults")) $("topSearchResults").hidden = true;
 
 refreshAccount().then(() => checkOwner());
 // request() above already attaches X-User-ID + X-Rhymo-Session from localStorage
+
+
+/* ===== EMBED BUILDER ===== */
+function refreshEmbedServerSelect() {
+  const sel = $("embedServerSelect");
+  if (!sel) return;
+  const list = typeof managedServers !== "undefined" && Array.isArray(managedServers) ? managedServers : [];
+  const prev = sel.value || selectedGuildId || "";
+  sel.innerHTML = "";
+  if (!currentUser) {
+    sel.innerHTML = '<option value="">Sign in to load servers…</option>';
+    return;
+  }
+  if (!list.length) {
+    sel.innerHTML = '<option value="">No manageable servers</option>';
+    return;
+  }
+  const ph = document.createElement("option");
+  ph.value = "";
+  ph.textContent = "Choose a server…";
+  sel.appendChild(ph);
+  list.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.name || s.id;
+    sel.appendChild(opt);
+  });
+  if (prev && list.some(s => String(s.id) === String(prev))) sel.value = prev;
+}
+
+function updateEmbedPreview() {
+  const title = ($("embedTitle")?.value || "").trim();
+  const desc = ($("embedDescription")?.value || "").trim();
+  const footer = ($("embedFooter")?.value || "").trim();
+  const author = ($("embedAuthor")?.value || "").trim();
+  const imageUrl = ($("embedImageUrl")?.value || "").trim();
+  const thumbUrl = ($("embedThumbUrl")?.value || "").trim();
+  const content = ($("embedContent")?.value || "").trim();
+  const color = ($("embedColor")?.value || "#8b7cff");
+
+  const bar = $("embedPreviewBar");
+  if (bar) bar.style.background = color;
+
+  const elAuthor = $("embedPreviewAuthor");
+  const elTitle = $("embedPreviewTitle");
+  const elDesc = $("embedPreviewDesc");
+  const elFooter = $("embedPreviewFooter");
+  const elImage = $("embedPreviewImage");
+  const elThumb = $("embedPreviewThumb");
+  const elContent = $("embedPreviewContent");
+
+  if (elAuthor) { elAuthor.hidden = !author; elAuthor.textContent = author; }
+  if (elTitle) { elTitle.hidden = !title; elTitle.textContent = title; }
+  if (elDesc) { elDesc.hidden = !desc; elDesc.textContent = desc; }
+  if (elFooter) { elFooter.hidden = !footer; elFooter.textContent = footer; }
+  if (elImage) {
+    if (imageUrl) {
+      elImage.hidden = false;
+      elImage.src = imageUrl;
+      elImage.onerror = () => { elImage.hidden = true; };
+    } else {
+      elImage.removeAttribute("src");
+      elImage.hidden = true;
+    }
+  }
+  if (elThumb) {
+    if (thumbUrl) {
+      elThumb.hidden = false;
+      elThumb.src = thumbUrl;
+      elThumb.onerror = () => { elThumb.hidden = true; };
+    } else {
+      elThumb.removeAttribute("src");
+      elThumb.hidden = true;
+    }
+  }
+  if (elContent) { elContent.hidden = !content; elContent.textContent = content; }
+
+  const guildId = $("embedServerSelect")?.value || selectedGuildId;
+  const ch = $("embedChannelSelect")?.value;
+  if ($("embedSendBtn")) $("embedSendBtn").disabled = !guildId || !ch;
+}
+
+["embedTitle","embedDescription","embedFooter","embedAuthor","embedImageUrl","embedThumbUrl","embedContent","embedColor","embedChannelSelect"]
+  .forEach(id => {
+    $(id)?.addEventListener("input", updateEmbedPreview);
+    $(id)?.addEventListener("change", updateEmbedPreview);
+  });
+
+$("embedServerSelect")?.addEventListener("change", () => {
+  const gid = $("embedServerSelect")?.value || "";
+  if (gid) {
+    selectedGuildId = gid;
+    if ($("serverSelect")) $("serverSelect").value = gid;
+    loadEmbedChannels(gid);
+  } else {
+    loadEmbedChannels(null);
+  }
+  updateEmbedPreview();
+});
+
+async function loadEmbedChannels(guildId) {
+  const sel = $("embedChannelSelect");
+  const msg = $("embedBuilderMsg");
+  if (!sel) return;
+  if (!guildId) {
+    sel.innerHTML = '<option value="">Select a server first…</option>';
+    sel.disabled = true;
+    return;
+  }
+  if (!currentUser) {
+    sel.innerHTML = '<option value="">Sign in first…</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = true;
+  sel.innerHTML = '<option value="">Loading channels…</option>';
+  if (msg) msg.textContent = "Loading channels…";
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/channels");
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Could not load channels.");
+    const channels = Array.isArray(data.channels) ? data.channels : [];
+    sel.innerHTML = "";
+    if (!channels.length) {
+      sel.innerHTML = '<option value="">No text channels found</option>';
+      sel.disabled = true;
+      if (msg) msg.textContent = "No text channels available (or Rhymo cannot see them).";
+      return;
+    }
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Choose a channel…";
+    sel.appendChild(placeholder);
+    channels.forEach(ch => {
+      const opt = document.createElement("option");
+      opt.value = ch.id;
+      opt.textContent = "#" + (ch.name || ch.id) + (ch.type === "announcement" ? " (announcement)" : "");
+      sel.appendChild(opt);
+    });
+    sel.disabled = false;
+    if (msg) msg.textContent = "Pick a channel and build your embed.";
+    updateEmbedPreview();
+  } catch (error) {
+    console.error("embed channels:", error);
+    sel.innerHTML = '<option value="">Could not load channels</option>';
+    sel.disabled = true;
+    if (msg) msg.textContent = error.message || "Could not load channels.";
+  }
+}
+
+$("embedResetBtn")?.addEventListener("click", () => {
+  ["embedTitle","embedDescription","embedFooter","embedAuthor","embedImageUrl","embedThumbUrl","embedContent"].forEach(id => {
+    if ($(id)) $(id).value = "";
+  });
+  if ($("embedColor")) $("embedColor").value = "#8b7cff";
+  updateEmbedPreview();
+  if ($("embedBuilderMsg")) $("embedBuilderMsg").textContent = "Form cleared.";
+});
+
+$("embedSendBtn")?.addEventListener("click", async () => {
+  const guildId = $("embedServerSelect")?.value || selectedGuildId || $("serverSelect")?.value;
+  const channelId = $("embedChannelSelect")?.value;
+  const msg = $("embedBuilderMsg");
+  if (!guildId || !channelId) {
+    if (msg) msg.textContent = "Select a server and channel first.";
+    return;
+  }
+  const payload = {
+    title: ($("embedTitle")?.value || "").trim(),
+    description: ($("embedDescription")?.value || "").trim(),
+    footer: ($("embedFooter")?.value || "").trim(),
+    author: ($("embedAuthor")?.value || "").trim(),
+    imageUrl: ($("embedImageUrl")?.value || "").trim(),
+    thumbnailUrl: ($("embedThumbUrl")?.value || "").trim(),
+    content: ($("embedContent")?.value || "").trim(),
+    color: ($("embedColor")?.value || "#8b7cff")
+  };
+  if (!payload.title && !payload.description && !payload.imageUrl && !payload.footer && !payload.author) {
+    if (msg) msg.textContent = "Add at least a title, description, image, footer, or author.";
+    return;
+  }
+  const btn = $("embedSendBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+  if (msg) msg.textContent = "Sending embed…";
+  try {
+    const response = await request(
+      "/api/servers/" + encodeURIComponent(guildId) + "/channels/" + encodeURIComponent(channelId) + "/embed",
+      { method: "POST", body: JSON.stringify(payload) }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Send failed.");
+    if (msg) msg.textContent = "Sent to #" + (data.channelName || "channel") + ".";
+    toast("Embed sent.");
+  } catch (error) {
+    console.error("embed send:", error);
+    if (msg) msg.textContent = error.message || "Could not send embed.";
+    toast(error.message || "Could not send embed.");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Send embed"; }
+    updateEmbedPreview();
+  }
+});
+
 
 </script>
 </body>
