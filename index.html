@@ -5334,10 +5334,22 @@ function showPage(id, push = true) {
       if (!managedServers.length) loadServers();
       else loadServers({ silent: true });
       if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
-  if (typeof refreshConfigServerSelect === "function") refreshConfigServerSelect();
       if (selectedGuildId && typeof loadEmbedChannels === "function") loadEmbedChannels(selectedGuildId);
     } catch (err) {
       console.error("Embed builder load failed:", err);
+    }
+  }
+  if (id === "server-config") {
+    try {
+      if (currentUser && typeof loadServers === "function") {
+        if (!managedServers.length) loadServers();
+        else loadServers({ silent: true });
+      }
+      if (typeof refreshConfigServerSelect === "function") refreshConfigServerSelect();
+      const gid = ($("configServerSelect") && $("configServerSelect").value) || selectedGuildId;
+      if (gid && typeof loadServerConfig === "function") loadServerConfig(gid);
+    } catch (err) {
+      console.error("Security panel load failed:", err);
     }
   }
 }
@@ -7284,6 +7296,9 @@ async function loadServers(options = {}) {
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
 
     managedServers = Array.isArray(data.servers) ? data.servers : [];
+    if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
+    if (typeof refreshConfigServerSelect === "function") refreshConfigServerSelect();
+
     const select = $("serverSelect");
     const previousSelection = selectedGuildId;
 
@@ -9116,8 +9131,12 @@ function refreshConfigServerSelect() {
     return;
   }
   if (!list.length) {
-    sel.innerHTML = '<option value="">No manageable servers</option>';
+    sel.innerHTML = '<option value="">Loading servers…</option>';
     syncCustomSelect("configServerSelect", "configServerMenu", "configServerTrigger");
+    // Kick a load if nothing in memory yet
+    if (typeof loadServers === "function") {
+      loadServers({ silent: true }).catch(() => {});
+    }
     return;
   }
   const ph = document.createElement("option");
