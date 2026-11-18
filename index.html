@@ -839,21 +839,20 @@ footer {
   width: min(280px, 85vw);
   max-width: 85vw;
   z-index: 50;
-  background: rgba(9, 9, 11, 0.97);
+  background: #0a0a10;
   border-right: 1px solid var(--border);
   padding: 16px;
   overflow-x: hidden;
   overflow-y: auto;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transform: translate3d(-100%, 0, 0);
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.32s;
+  /* no transform — iOS was mirroring nav label text */
+  margin-left: -110%;
+  transition: margin-left 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.28s;
   visibility: hidden;
   pointer-events: none;
   box-sizing: border-box;
 }
 #drawer.open {
-  transform: translate3d(0, 0, 0);
+  margin-left: 0;
   visibility: visible;
   pointer-events: auto;
 }
@@ -3866,6 +3865,125 @@ img.lp-mascot,
   transform: none !important;
 }
 
+
+/* KILL NAV TRANSFORM */
+#drawer .navbtn,
+#drawer .navbtn:hover,
+#drawer .navbtn.active,
+#drawer .navbtn-parent,
+#drawer .navbtn-sub,
+#drawer .nav-parent-label,
+#drawer .nav-sub-chevron,
+#drawer .ns {
+  transform: none !important;
+  -webkit-transform: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  text-shadow: none !important;
+}
+#drawer .nav-subwrap.open .nav-sub-chevron {
+  transform: rotate(180deg) !important;
+  -webkit-transform: rotate(180deg) !important;
+}
+#drawer .navbtn-parent {
+  background: #14141c !important;
+}
+#drawer .navbtn-parent .nav-parent-label {
+  /* only one label */
+  content: none !important;
+}
+#drawer .navbtn-parent::before,
+#drawer .navbtn-parent::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* CUSTOM SELECT (embed builder) */
+.custom-select {
+  position: relative;
+  width: 100%;
+  user-select: none;
+}
+.custom-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.28);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  min-height: 48px;
+  transform: none !important;
+}
+.custom-select-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.custom-select-trigger .cs-chevron {
+  opacity: 0.6;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+.custom-select.open .cs-chevron {
+  transform: rotate(180deg);
+}
+.custom-select-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 40;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #14141c;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+}
+.custom-select.open .custom-select-menu {
+  display: block;
+}
+.custom-select-option {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 12px 12px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.custom-select-option:hover,
+.custom-select-option[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.custom-select-option:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+/* hide native selects used only as data stores */
+select.embed-native-store {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  left: -9999px !important;
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4297,15 +4415,29 @@ img.lp-mascot,
       <p class="muted" style="margin-top:0;font-size:13px;">Choose a server you manage. Rhymo must be in the server.</p>
       <label class="embed-field">
         <span>Server</span>
-        <select id="embedServerSelect">
+        <select id="embedServerSelect" class="embed-native-store" aria-hidden="true" tabindex="-1">
           <option value="">Sign in and load servers…</option>
         </select>
+        <div class="custom-select" id="embedServerCustom" data-for="embedServerSelect">
+          <button type="button" class="custom-select-trigger" id="embedServerTrigger">
+            <span class="cs-label">Sign in and load servers…</span>
+            <span class="cs-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="custom-select-menu" id="embedServerMenu" role="listbox"></div>
+        </div>
       </label>
       <label class="embed-field">
         <span>Channel</span>
-        <select id="embedChannelSelect" disabled>
+        <select id="embedChannelSelect" class="embed-native-store" aria-hidden="true" tabindex="-1" disabled>
           <option value="">Select a server first…</option>
         </select>
+        <div class="custom-select" id="embedChannelCustom" data-for="embedChannelSelect">
+          <button type="button" class="custom-select-trigger" id="embedChannelTrigger" disabled>
+            <span class="cs-label">Select a server first…</span>
+            <span class="cs-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="custom-select-menu" id="embedChannelMenu" role="listbox"></div>
+        </div>
       </label>
     </article>
     <article class="panel full">
@@ -8342,6 +8474,66 @@ refreshAccount().then(() => checkOwner());
 
 
 /* ===== EMBED BUILDER ===== */
+
+/* CUSTOM SELECT HELPERS */
+function syncCustomSelect(selectId, menuId, triggerId) {
+  const sel = $(selectId);
+  const menu = $(menuId);
+  const trigger = $(triggerId);
+  if (!sel || !menu || !trigger) return;
+  const label = trigger.querySelector(".cs-label");
+  menu.innerHTML = "";
+  const opts = Array.from(sel.options || []);
+  opts.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "custom-select-option";
+    btn.setAttribute("role", "option");
+    btn.dataset.value = opt.value;
+    btn.textContent = opt.textContent || opt.value || "—";
+    btn.disabled = opt.disabled || (!opt.value && idx === 0 && opts.length > 1);
+    btn.setAttribute("aria-selected", opt.selected ? "true" : "false");
+    btn.addEventListener("click", () => {
+      sel.value = opt.value;
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+      if (label) label.textContent = opt.textContent || "—";
+      menu.querySelectorAll(".custom-select-option").forEach(b => b.setAttribute("aria-selected", "false"));
+      btn.setAttribute("aria-selected", "true");
+      trigger.closest(".custom-select")?.classList.remove("open");
+    });
+    menu.appendChild(btn);
+  });
+  const selected = sel.options[sel.selectedIndex];
+  if (label) label.textContent = selected ? selected.textContent : "—";
+  trigger.disabled = !!sel.disabled;
+}
+
+function bindCustomSelect(customId, selectId, menuId, triggerId) {
+  const wrap = $(customId);
+  const trigger = $(triggerId);
+  if (!wrap || !trigger) return;
+  trigger.addEventListener("click", e => {
+    e.preventDefault();
+    if (trigger.disabled) return;
+    const open = wrap.classList.toggle("open");
+    document.querySelectorAll(".custom-select.open").forEach(el => {
+      if (el !== wrap) el.classList.remove("open");
+    });
+    if (open) syncCustomSelect(selectId, menuId, triggerId);
+  });
+}
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".custom-select")) {
+    document.querySelectorAll(".custom-select.open").forEach(el => el.classList.remove("open"));
+  }
+});
+
+bindCustomSelect("embedServerCustom", "embedServerSelect", "embedServerMenu", "embedServerTrigger");
+bindCustomSelect("embedChannelCustom", "embedChannelSelect", "embedChannelMenu", "embedChannelTrigger");
+
+const _refreshEmbedServerSelect = typeof refreshEmbedServerSelect === "function" ? refreshEmbedServerSelect : null;
+
 function refreshEmbedServerSelect() {
   const sel = $("embedServerSelect");
   if (!sel) return;
@@ -8367,6 +8559,7 @@ function refreshEmbedServerSelect() {
     sel.appendChild(opt);
   });
   if (prev && list.some(s => String(s.id) === String(prev))) sel.value = prev;
+  syncCustomSelect("embedServerSelect", "embedServerMenu", "embedServerTrigger");
 }
 
 function updateEmbedPreview() {
@@ -8446,6 +8639,7 @@ async function loadEmbedChannels(guildId) {
   if (!guildId) {
     sel.innerHTML = '<option value="">Select a server first…</option>';
     sel.disabled = true;
+    syncCustomSelect("embedChannelSelect", "embedChannelMenu", "embedChannelTrigger");
     return;
   }
   if (!currentUser) {
@@ -8480,12 +8674,14 @@ async function loadEmbedChannels(guildId) {
     });
     sel.disabled = false;
     if (msg) msg.textContent = "Pick a channel and build your embed.";
+    syncCustomSelect("embedChannelSelect", "embedChannelMenu", "embedChannelTrigger");
     updateEmbedPreview();
   } catch (error) {
     console.error("embed channels:", error);
     sel.innerHTML = '<option value="">Could not load channels</option>';
     sel.disabled = true;
     if (msg) msg.textContent = error.message || "Could not load channels.";
+    syncCustomSelect("embedChannelSelect", "embedChannelMenu", "embedChannelTrigger");
   }
 }
 
