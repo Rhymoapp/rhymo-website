@@ -4013,6 +4013,34 @@ select.embed-native-store {
   border: 1px solid rgba(255,255,255,0.12);
   box-shadow: 0 18px 50px rgba(0,0,0,0.55);
 }
+
+/* EMBED FILE ROW */
+.embed-file-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.embed-file-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 40px;
+  transform: none !important;
+}
+.embed-file-btn.subtle {
+  opacity: 0.85;
+}
+.embed-file-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4499,12 +4527,24 @@ select.embed-native-store {
             <input id="embedFooter" type="text" maxlength="2048" placeholder="Footer text">
           </label>
           <label class="embed-field">
-            <span>Image URL</span>
-            <input id="embedImageUrl" type="url" maxlength="512" placeholder="https://…">
+            <span>Image</span>
+            <input id="embedImageUrl" type="url" maxlength="512" placeholder="https://… or choose from gallery">
+            <div class="embed-file-row">
+              <input id="embedImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+              <button type="button" class="embed-file-btn" id="embedImagePickBtn">Choose from gallery</button>
+              <button type="button" class="embed-file-btn subtle" id="embedImageClearBtn" hidden>Clear file</button>
+            </div>
+            <span class="muted" id="embedImageFileName" style="font-size:12px;font-weight:500;"></span>
           </label>
           <label class="embed-field">
-            <span>Thumbnail URL</span>
-            <input id="embedThumbUrl" type="url" maxlength="512" placeholder="https://…">
+            <span>Thumbnail</span>
+            <input id="embedThumbUrl" type="url" maxlength="512" placeholder="https://… or choose from gallery">
+            <div class="embed-file-row">
+              <input id="embedThumbFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+              <button type="button" class="embed-file-btn" id="embedThumbPickBtn">Choose from gallery</button>
+              <button type="button" class="embed-file-btn subtle" id="embedThumbClearBtn" hidden>Clear file</button>
+            </div>
+            <span class="muted" id="embedThumbFileName" style="font-size:12px;font-weight:500;"></span>
           </label>
           <div class="actions" style="margin-top:8px;">
             <button type="button" class="primary" id="embedSendBtn" disabled>Send embed</button>
@@ -8504,6 +8544,68 @@ refreshAccount().then(() => checkOwner());
 
 /* ===== EMBED BUILDER ===== */
 
+/* EMBED LOCAL FILES */
+window.__embedImageData = "";
+window.__embedThumbData = "";
+
+function readImageFile(file, maxBytes = 7_000_000) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Choose an image file (png, jpg, webp, gif)."));
+      return;
+    }
+    if (file.size > maxBytes) {
+      reject(new Error("Image is too large (max about 7MB)."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read that image."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function wireEmbedFilePicker(pickBtnId, fileInputId, clearBtnId, nameId, which) {
+  const pick = $(pickBtnId);
+  const input = $(fileInputId);
+  const clear = $(clearBtnId);
+  const nameEl = $(nameId);
+  if (!pick || !input) return;
+  pick.addEventListener("click", () => input.click());
+  input.addEventListener("change", async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      const data = await readImageFile(file);
+      if (which === "image") {
+        window.__embedImageData = data;
+        if ($("embedImageUrl")) $("embedImageUrl").value = "";
+      } else {
+        window.__embedThumbData = data;
+        if ($("embedThumbUrl")) $("embedThumbUrl").value = "";
+      }
+      if (nameEl) nameEl.textContent = file.name || "Selected image";
+      if (clear) clear.hidden = false;
+      updateEmbedPreview();
+    } catch (err) {
+      toast(err.message || "Could not use that image.");
+      input.value = "";
+    }
+  });
+  clear?.addEventListener("click", () => {
+    input.value = "";
+    if (which === "image") window.__embedImageData = "";
+    else window.__embedThumbData = "";
+    if (nameEl) nameEl.textContent = "";
+    if (clear) clear.hidden = true;
+    updateEmbedPreview();
+  });
+}
+
+wireEmbedFilePicker("embedImagePickBtn", "embedImageFile", "embedImageClearBtn", "embedImageFileName", "image");
+wireEmbedFilePicker("embedThumbPickBtn", "embedThumbFile", "embedThumbClearBtn", "embedThumbFileName", "thumb");
+
+
 /* CUSTOM SELECT HELPERS */
 function syncCustomSelect(selectId, menuId, triggerId) {
   const sel = $(selectId);
@@ -8633,8 +8735,8 @@ function updateEmbedPreview() {
   const desc = ($("embedDescription")?.value || "").trim();
   const footer = ($("embedFooter")?.value || "").trim();
   const author = ($("embedAuthor")?.value || "").trim();
-  const imageUrl = ($("embedImageUrl")?.value || "").trim();
-  const thumbUrl = ($("embedThumbUrl")?.value || "").trim();
+  const imageUrl = window.__embedImageData || ($("embedImageUrl")?.value || "").trim();
+  const thumbUrl = window.__embedThumbData || ($("embedThumbUrl")?.value || "").trim();
   const content = ($("embedContent")?.value || "").trim();
   const color = ($("embedColor")?.value || "#8b7cff");
 
@@ -8685,6 +8787,22 @@ function updateEmbedPreview() {
     $(id)?.addEventListener("input", updateEmbedPreview);
     $(id)?.addEventListener("change", updateEmbedPreview);
   });
+$("embedImageUrl")?.addEventListener("input", () => {
+  if (($("embedImageUrl")?.value || "").trim()) {
+    window.__embedImageData = "";
+    if ($("embedImageFile")) $("embedImageFile").value = "";
+    if ($("embedImageFileName")) $("embedImageFileName").textContent = "";
+    if ($("embedImageClearBtn")) $("embedImageClearBtn").hidden = true;
+  }
+});
+$("embedThumbUrl")?.addEventListener("input", () => {
+  if (($("embedThumbUrl")?.value || "").trim()) {
+    window.__embedThumbData = "";
+    if ($("embedThumbFile")) $("embedThumbFile").value = "";
+    if ($("embedThumbFileName")) $("embedThumbFileName").textContent = "";
+    if ($("embedThumbClearBtn")) $("embedThumbClearBtn").hidden = true;
+  }
+});
 
 $("embedServerSelect")?.addEventListener("change", () => {
   const gid = $("embedServerSelect")?.value || "";
@@ -8756,6 +8874,14 @@ $("embedResetBtn")?.addEventListener("click", () => {
     if ($(id)) $(id).value = "";
   });
   if ($("embedColor")) $("embedColor").value = "#8b7cff";
+  window.__embedImageData = "";
+  window.__embedThumbData = "";
+  if ($("embedImageFile")) $("embedImageFile").value = "";
+  if ($("embedThumbFile")) $("embedThumbFile").value = "";
+  if ($("embedImageFileName")) $("embedImageFileName").textContent = "";
+  if ($("embedThumbFileName")) $("embedThumbFileName").textContent = "";
+  if ($("embedImageClearBtn")) $("embedImageClearBtn").hidden = true;
+  if ($("embedThumbClearBtn")) $("embedThumbClearBtn").hidden = true;
   updateEmbedPreview();
   if ($("embedBuilderMsg")) $("embedBuilderMsg").textContent = "Form cleared.";
 });
@@ -8773,12 +8899,14 @@ $("embedSendBtn")?.addEventListener("click", async () => {
     description: ($("embedDescription")?.value || "").trim(),
     footer: ($("embedFooter")?.value || "").trim(),
     author: ($("embedAuthor")?.value || "").trim(),
-    imageUrl: ($("embedImageUrl")?.value || "").trim(),
-    thumbnailUrl: ($("embedThumbUrl")?.value || "").trim(),
+    imageUrl: window.__embedImageData ? "" : ($("embedImageUrl")?.value || "").trim(),
+    thumbnailUrl: window.__embedThumbData ? "" : ($("embedThumbUrl")?.value || "").trim(),
+    imageData: window.__embedImageData || "",
+    thumbnailData: window.__embedThumbData || "",
     content: ($("embedContent")?.value || "").trim(),
     color: ($("embedColor")?.value || "#8b7cff")
   };
-  if (!payload.title && !payload.description && !payload.imageUrl && !payload.footer && !payload.author) {
+  if (!payload.title && !payload.description && !payload.imageUrl && !payload.imageData && !payload.footer && !payload.author && !payload.thumbnailData) {
     if (msg) msg.textContent = "Add at least a title, description, image, footer, or author.";
     return;
   }
