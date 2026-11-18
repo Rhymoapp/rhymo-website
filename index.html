@@ -3578,6 +3578,151 @@ img.lp-mascot,
   image-rendering: auto;
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
+
+/* EMBED BUILDER STYLES */
+.embed-builder-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.embed-builder-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+}
+.embed-builder-toggle:hover {
+  background: rgba(255,255,255,0.03);
+}
+.embed-builder-chevron {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+.embed-builder-toggle[aria-expanded="true"] .embed-builder-chevron {
+  transform: rotate(180deg);
+}
+.embed-builder-body {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+}
+.embed-builder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 800px) {
+  .embed-builder-grid { grid-template-columns: 1fr; }
+}
+.embed-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.embed-field input,
+.embed-field textarea,
+.embed-field select {
+  font: inherit;
+  font-weight: 500;
+  color: var(--text);
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.embed-field input[type="color"] {
+  padding: 4px;
+  height: 42px;
+  cursor: pointer;
+}
+.embed-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 10px;
+}
+.discord-embed-preview {
+  background: #1e1f22;
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 120px;
+}
+.discord-embed {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4px 1fr auto;
+  background: #2b2d31;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 100%;
+}
+.discord-embed-bar {
+  background: #8b7cff;
+  grid-row: 1 / span 2;
+}
+.discord-embed-inner {
+  padding: 12px 14px 12px 12px;
+  min-width: 0;
+}
+.discord-embed-author {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f2f3f5;
+  margin-bottom: 6px;
+}
+.discord-embed-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f2f3f5;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+.discord-embed-desc {
+  font-size: 13.5px;
+  color: #dbdee1;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.discord-embed-image {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 4px;
+  margin-top: 10px;
+  object-fit: contain;
+}
+.discord-embed-footer {
+  font-size: 11.5px;
+  color: #b5bac1;
+  margin-top: 10px;
+}
+.discord-embed-thumb {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 12px 12px 0 0;
+}
+.discord-embed-content-preview {
+  margin-top: 10px;
+  font-size: 13.5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -3997,6 +4142,85 @@ img.lp-mascot,
     <!-- kept for existing JS hooks -->
     <button id="configBtn" class="hidden" aria-hidden="true">View server details</button>
   </div>
+
+    <article class="panel full embed-builder-card" id="embedBuilderCard">
+      <button type="button" class="embed-builder-toggle" id="embedBuilderToggle" aria-expanded="false" aria-controls="embedBuilderBody">
+        <span>
+          <strong>Embed Builder</strong>
+          <span class="muted" style="display:block;font-size:12.5px;margin-top:2px;">Build a Discord embed and send it to a channel with Rhymo</span>
+        </span>
+        <span class="embed-builder-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="embed-builder-body" id="embedBuilderBody" hidden>
+        <p class="muted" style="margin:0 0 12px;font-size:13px;">Select a server above first. Only text channels are listed. Rhymo must be in the server and able to send messages there.</p>
+        <div class="embed-builder-grid">
+          <div class="embed-builder-form">
+            <label class="embed-field">
+              <span>Channel</span>
+              <select id="embedChannelSelect" disabled>
+                <option value="">Select a server first…</option>
+              </select>
+            </label>
+            <label class="embed-field">
+              <span>Message content <span class="muted">(optional text above embed)</span></span>
+              <textarea id="embedContent" rows="2" maxlength="2000" placeholder="Optional plain text…"></textarea>
+            </label>
+            <label class="embed-field">
+              <span>Title</span>
+              <input id="embedTitle" type="text" maxlength="256" placeholder="Embed title">
+            </label>
+            <label class="embed-field">
+              <span>Description</span>
+              <textarea id="embedDescription" rows="4" maxlength="4096" placeholder="Main embed text…"></textarea>
+            </label>
+            <div class="embed-row-2">
+              <label class="embed-field">
+                <span>Author</span>
+                <input id="embedAuthor" type="text" maxlength="256" placeholder="Author name">
+              </label>
+              <label class="embed-field">
+                <span>Color</span>
+                <input id="embedColor" type="color" value="#8b7cff">
+              </label>
+            </div>
+            <label class="embed-field">
+              <span>Footer</span>
+              <input id="embedFooter" type="text" maxlength="2048" placeholder="Footer text">
+            </label>
+            <label class="embed-field">
+              <span>Image URL</span>
+              <input id="embedImageUrl" type="url" maxlength="512" placeholder="https://…">
+            </label>
+            <label class="embed-field">
+              <span>Thumbnail URL</span>
+              <input id="embedThumbUrl" type="url" maxlength="512" placeholder="https://…">
+            </label>
+            <div class="actions" style="margin-top:8px;">
+              <button type="button" class="primary" id="embedSendBtn" disabled>Send embed</button>
+              <button type="button" id="embedResetBtn">Reset</button>
+            </div>
+            <div id="embedBuilderMsg" class="notice" role="status" style="margin-top:10px;">Pick a server and channel, then build your embed.</div>
+          </div>
+          <div class="embed-builder-preview-wrap">
+            <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Live preview</div>
+            <div class="discord-embed-preview" id="embedPreview">
+              <div class="discord-embed" id="embedPreviewCard">
+                <div class="discord-embed-bar" id="embedPreviewBar"></div>
+                <div class="discord-embed-inner">
+                  <div class="discord-embed-author" id="embedPreviewAuthor" hidden></div>
+                  <div class="discord-embed-title" id="embedPreviewTitle" hidden></div>
+                  <div class="discord-embed-desc" id="embedPreviewDesc" hidden></div>
+                  <img class="discord-embed-image" id="embedPreviewImage" alt="" hidden>
+                  <div class="discord-embed-footer" id="embedPreviewFooter" hidden></div>
+                </div>
+                <img class="discord-embed-thumb" id="embedPreviewThumb" alt="" hidden>
+              </div>
+              <div class="discord-embed-content-preview muted" id="embedPreviewContent" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
 </section>
 
 <section class="page" id="page-help">
@@ -6659,6 +6883,7 @@ async function loadServerDetails(options = {}) {
   if (serverDetailsRequestsInFlight.has(guildId)) return;
   serverDetailsRequestsInFlight.add(guildId);
   selectedGuildId = guildId;
+  if ($("embedBuilderBody") && !$("embedBuilderBody").hidden) loadEmbedChannels(selectedGuildId);
   renderManagedServerList();
   const selected = managedServers.find(item => item.id === guildId);
   $("selectedServerName").textContent = selected?.name || "Selected server";
