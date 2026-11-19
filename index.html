@@ -4688,9 +4688,9 @@ select.embed-native-store {
       <h2 style="margin-top:0;">Post target</h2>
       <label class="embed-field">
         <span>Server</span>
-        <select id="ibServerSelect" class="embed-native-store" aria-hidden="true" tabindex="-1"><option value="">Sign in…</option></select>
+        <select id="ibServerSelect" class="embed-native-store" aria-hidden="true" tabindex="-1"><option value="">Choose a server…</option></select>
         <div class="custom-select" id="ibServerCustom">
-          <button type="button" class="custom-select-trigger" id="ibServerTrigger"><span class="cs-label">Sign in…</span><span class="cs-chevron">▾</span></button>
+          <button type="button" class="custom-select-trigger" id="ibServerTrigger"><span class="cs-label">Choose a server…</span><span class="cs-chevron">▾</span></button>
           <div class="custom-select-menu" id="ibServerMenu" role="listbox"></div>
         </div>
       </label>
@@ -5343,10 +5343,22 @@ function showPage(id, push = true) {
       if (!managedServers.length) loadServers();
       else loadServers({ silent: true });
       if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
-    if (typeof ibRefreshServerSelect === "function") ibRefreshServerSelect();
       if (selectedGuildId && typeof loadEmbedChannels === "function") loadEmbedChannels(selectedGuildId);
     } catch (err) {
       console.error("Embed builder load failed:", err);
+    }
+  }
+  if (id === "interaction-builder") {
+    try {
+      if (currentUser && typeof loadServers === "function") {
+        if (!managedServers.length) loadServers();
+        else loadServers({ silent: true });
+      }
+      if (typeof ibRefreshServerSelect === "function") ibRefreshServerSelect();
+      const gid = ($("ibServerSelect") && $("ibServerSelect").value) || selectedGuildId;
+      if (gid && typeof ibLoadChannels === "function") ibLoadChannels(gid);
+    } catch (err) {
+      console.error("Interaction builder load failed:", err);
     }
   }
 }
@@ -5665,7 +5677,10 @@ function setUser(user) {
   if (typeof loadServers === "function") {
     loadServers();
   }
+  if (typeof ibRefreshServerSelect === "function") ibRefreshServerSelect();
+  if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
 }
+
 
 async function refreshAccount() {
   const params = new URLSearchParams(window.location.search);
@@ -7293,6 +7308,7 @@ async function loadServers(options = {}) {
     if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
 
     managedServers = Array.isArray(data.servers) ? data.servers : [];
+    if (typeof ibRefreshServerSelect === "function") ibRefreshServerSelect();
     if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
 
     const select = $("serverSelect");
