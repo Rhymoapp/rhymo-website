@@ -4103,6 +4103,49 @@ select.embed-native-store {
   flex-direction: column !important;
 }
 
+
+/* IB BUILDER STYLES */
+.ib-page-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.ib-page-tab {
+  border:1px solid var(--border); background:rgba(0,0,0,.25); color:var(--text);
+  border-radius:999px; padding:8px 14px; font:inherit; font-weight:600; cursor:pointer;
+  transform:none !important;
+}
+.ib-page-tab.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.ib-components-list { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
+.ib-comp-card {
+  border:1px solid var(--border); border-radius:14px; padding:12px 14px;
+  background:rgba(0,0,0,.2);
+}
+.ib-comp-card h3 { margin:0 0 10px; font-size:14px; }
+.ib-comp-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px;
+}
+.ib-preview-stack {
+  background:#1e1f22; border-radius:12px; padding:14px; min-height:120px;
+}
+.ib-preview-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.ib-preview-btn {
+  border:0; border-radius:8px; padding:8px 14px; font:inherit; font-weight:600;
+  cursor:pointer; color:#fff; transform:none !important;
+}
+.ib-preview-btn.primary { background:#5865F2; }
+.ib-preview-btn.secondary { background:#4e5058; }
+.ib-preview-btn.success { background:#248046; }
+.ib-preview-btn.danger { background:#DA373C; }
+.ib-preview-btn.link { background:transparent; color:#00a8fc; text-decoration:underline; }
+.ib-preview-select {
+  width:100%; margin-top:10px; padding:10px 12px; border-radius:8px;
+  border:1px solid #3f4147; background:#2b2d31; color:#f2f3f5; font:inherit;
+}
+.ib-preview-reply {
+  margin-top:12px; padding:10px 12px; border-radius:8px;
+  background:#2b2d31; color:#dbdee1; font-size:13.5px; white-space:pre-wrap;
+}
+#page-interaction-builder .panel { overflow: visible !important; }
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4615,7 +4658,7 @@ select.embed-native-store {
           <div id="embedBuilderMsg" class="notice" role="status" style="margin-top:10px;">Pick a server and channel, then build your embed.</div>
         </div>
         <div class="embed-builder-preview-wrap">
-          <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Live preview</div>
+          <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Preview</div>
           <div class="discord-embed-preview" id="embedPreview">
             <div class="discord-embed" id="embedPreviewCard">
               <div class="discord-embed-bar" id="embedPreviewBar"></div>
@@ -4635,6 +4678,76 @@ select.embed-native-store {
     </article>
   </div>
 </section>
+
+<section class="page" id="page-interaction-builder">
+  <div class="eyebrow">Tools</div>
+  <h1>Interaction Builder</h1>
+  <p class="sub">Build embeds with buttons and dropdowns. Requires <strong>Manage Messages</strong> (or Manage Server / Admin). Preview is interactive — try your buttons before posting.</p>
+  <div class="grid">
+    <article class="panel full">
+      <h2 style="margin-top:0;">Post target</h2>
+      <label class="embed-field">
+        <span>Server</span>
+        <select id="ibServerSelect" class="embed-native-store" aria-hidden="true" tabindex="-1"><option value="">Sign in…</option></select>
+        <div class="custom-select" id="ibServerCustom">
+          <button type="button" class="custom-select-trigger" id="ibServerTrigger"><span class="cs-label">Sign in…</span><span class="cs-chevron">▾</span></button>
+          <div class="custom-select-menu" id="ibServerMenu" role="listbox"></div>
+        </div>
+      </label>
+      <label class="embed-field">
+        <span>Channel</span>
+        <select id="ibChannelSelect" class="embed-native-store" aria-hidden="true" tabindex="-1" disabled><option value="">Select a server first…</option></select>
+        <div class="custom-select" id="ibChannelCustom">
+          <button type="button" class="custom-select-trigger" id="ibChannelTrigger" disabled><span class="cs-label">Select a server first…</span><span class="cs-chevron">▾</span></button>
+          <div class="custom-select-menu" id="ibChannelMenu" role="listbox"></div>
+        </div>
+      </label>
+    </article>
+
+    <article class="panel full">
+      <div class="panel-head">
+        <h2 style="margin:0;">Pages</h2>
+        <button type="button" id="ibAddPageBtn">Add page</button>
+      </div>
+      <div id="ibPageTabs" class="ib-page-tabs"></div>
+      <p class="muted" style="font-size:12.5px;margin:8px 0 0;">Each page is one embed. Buttons can open another page or reply with text. Link buttons open a URL.</p>
+    </article>
+
+    <article class="panel full">
+      <h2 style="margin-top:0;">Page content</h2>
+      <label class="embed-field"><span>Message content (optional)</span><textarea id="ibContent" rows="2" maxlength="2000" placeholder="Text above the embed…"></textarea></label>
+      <label class="embed-field"><span>Title</span><input id="ibTitle" type="text" maxlength="256" placeholder="Embed title"></label>
+      <label class="embed-field"><span>Description</span><textarea id="ibDescription" rows="4" maxlength="4096" placeholder="Embed description…"></textarea></label>
+      <div class="embed-row-2">
+        <label class="embed-field"><span>Footer</span><input id="ibFooter" type="text" maxlength="2048" placeholder="Footer"></label>
+        <label class="embed-field"><span>Color</span><input id="ibColor" type="color" value="#8b7cff"></label>
+      </div>
+    </article>
+
+    <article class="panel full">
+      <div class="panel-head">
+        <h2 style="margin:0;">Components</h2>
+        <div class="actions">
+          <button type="button" id="ibAddButtonBtn">Add button</button>
+          <button type="button" id="ibAddSelectBtn">Add dropdown</button>
+        </div>
+      </div>
+      <div id="ibComponentsList" class="ib-components-list"></div>
+    </article>
+
+    <article class="panel full">
+      <div class="muted" style="font-size:12px;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;">Preview</div>
+      <p class="muted" style="font-size:12.5px;margin:0 0 10px;">Interactive — click buttons and use dropdowns to test. This is a simulation of Discord.</p>
+      <div id="ibPreviewStack" class="ib-preview-stack"></div>
+      <div class="actions" style="margin-top:14px;">
+        <button type="button" class="primary" id="ibSendBtn" disabled>Post to channel</button>
+        <button type="button" id="ibResetBtn">Reset builder</button>
+      </div>
+      <div id="ibMsg" class="notice" role="status" style="margin-top:10px;">Build a page, add buttons or a dropdown, then preview.</div>
+    </article>
+  </div>
+</section>
+
 
 
 
@@ -5154,6 +5267,7 @@ const pages = [
   ["notifications", "Notification Center"],
   ["servers", "Server Management"],
   ["embed-builder", "Embed Builder"],
+  ["interaction-builder", "Interaction Builder"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
   ["changelog", "Changelog"],
@@ -5196,14 +5310,14 @@ function showPage(id, push = true) {
 
   document.querySelectorAll(".navbtn").forEach(b => {
     const go = b.dataset.go;
-    const active = go === id || (go === "servers" && (id === "embed-builder") && b.classList.contains("navbtn-parent"));
+    const active = go === id || (go === "servers" && (id === "embed-builder" || id === "interaction-builder") && b.classList.contains("navbtn-parent"));
     b.classList.toggle("active", active);
   });
   // Highlight submenu; expand when landing on a child route (not on every redraw)
   document.querySelectorAll(".nav-subwrap").forEach(wrap => {
     const parent = wrap.querySelector(".navbtn-parent");
     if (!parent || parent.dataset.go !== "servers") return;
-    if (id === "embed-builder" || id === "servers") {
+    if (id === "embed-builder" || id === "interaction-builder" || id === "servers") {
       wrap.classList.add("open");
       parent.setAttribute("aria-expanded", "true");
     }
@@ -5229,6 +5343,7 @@ function showPage(id, push = true) {
       if (!managedServers.length) loadServers();
       else loadServers({ silent: true });
       if (typeof refreshEmbedServerSelect === "function") refreshEmbedServerSelect();
+    if (typeof ibRefreshServerSelect === "function") ibRefreshServerSelect();
       if (selectedGuildId && typeof loadEmbedChannels === "function") loadEmbedChannels(selectedGuildId);
     } catch (err) {
       console.error("Embed builder load failed:", err);
@@ -5248,7 +5363,8 @@ function buildNav(container) {
       submenus: {
         servers: [
           { id: "servers", label: "Overview" },
-          { id: "embed-builder", label: "Embed Builder" }
+          { id: "embed-builder", label: "Embed Builder" },
+          { id: "interaction-builder", label: "Interaction Builder" }
         ]
       }
     },
@@ -8999,6 +9115,480 @@ $("embedSendBtn")?.addEventListener("click", async () => {
 
 
 // Hook server list refresh
+
+
+/* ===== INTERACTION BUILDER ===== */
+window.__ib = {
+  pages: [
+    { content:"", title:"", description:"", footer:"", color:"#8b7cff", components:[] }
+  ],
+  active: 0,
+  previewPage: 0
+};
+
+function ibPage() {
+  return window.__ib.pages[window.__ib.active] || window.__ib.pages[0];
+}
+
+function ibRefreshServerSelect() {
+  const sel = $("ibServerSelect");
+  if (!sel) return;
+  const list = Array.isArray(managedServers) ? managedServers : [];
+  const prev = sel.value || selectedGuildId || "";
+  sel.innerHTML = "";
+  if (!currentUser) {
+    sel.innerHTML = '<option value="">Sign in to load servers…</option>';
+    syncCustomSelect("ibServerSelect", "ibServerMenu", "ibServerTrigger");
+    return;
+  }
+  if (!list.length) {
+    sel.innerHTML = '<option value="">Loading servers…</option>';
+    syncCustomSelect("ibServerSelect", "ibServerMenu", "ibServerTrigger");
+    if (typeof loadServers === "function") loadServers({ silent: true }).catch(() => {});
+    return;
+  }
+  sel.innerHTML = '<option value="">Choose a server…</option>';
+  list.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.name || s.id;
+    sel.appendChild(opt);
+  });
+  if (prev && list.some(s => String(s.id) === String(prev))) sel.value = prev;
+  syncCustomSelect("ibServerSelect", "ibServerMenu", "ibServerTrigger");
+}
+
+async function ibLoadChannels(guildId) {
+  const sel = $("ibChannelSelect");
+  if (!sel) return;
+  if (!guildId || !currentUser) {
+    sel.innerHTML = '<option value="">Select a server first…</option>';
+    sel.disabled = true;
+    syncCustomSelect("ibChannelSelect", "ibChannelMenu", "ibChannelTrigger");
+    return;
+  }
+  sel.disabled = true;
+  sel.innerHTML = '<option value="">Loading channels…</option>';
+  syncCustomSelect("ibChannelSelect", "ibChannelMenu", "ibChannelTrigger");
+  try {
+    const response = await request("/api/servers/" + encodeURIComponent(guildId) + "/channels");
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Could not load channels.");
+    const channels = Array.isArray(data.channels) ? data.channels : [];
+    sel.innerHTML = '<option value="">Choose a channel…</option>';
+    channels.forEach(ch => {
+      const opt = document.createElement("option");
+      opt.value = ch.id;
+      opt.textContent = "#" + (ch.name || ch.id);
+      sel.appendChild(opt);
+    });
+    sel.disabled = !channels.length;
+    syncCustomSelect("ibChannelSelect", "ibChannelMenu", "ibChannelTrigger");
+    ibUpdateSendEnabled();
+  } catch (e) {
+    sel.innerHTML = '<option value="">Could not load channels</option>';
+    sel.disabled = true;
+    syncCustomSelect("ibChannelSelect", "ibChannelMenu", "ibChannelTrigger");
+    if ($("ibMsg")) $("ibMsg").textContent = e.message || "Could not load channels.";
+  }
+}
+
+function ibRenderTabs() {
+  const tabs = $("ibPageTabs");
+  if (!tabs) return;
+  tabs.innerHTML = "";
+  window.__ib.pages.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "ib-page-tab" + (i === window.__ib.active ? " active" : "");
+    b.textContent = "Page " + (i + 1) + (p.title ? " · " + p.title.slice(0, 16) : "");
+    b.addEventListener("click", () => {
+      ibSaveFormToPage();
+      window.__ib.active = i;
+      window.__ib.previewPage = i;
+      ibLoadPageToForm();
+      ibRenderTabs();
+      ibRenderComponents();
+      ibRenderPreview();
+    });
+    tabs.appendChild(b);
+  });
+}
+
+function ibSaveFormToPage() {
+  const p = ibPage();
+  if (!p) return;
+  p.content = ($("ibContent")?.value || "").trim();
+  p.title = ($("ibTitle")?.value || "").trim();
+  p.description = ($("ibDescription")?.value || "").trim();
+  p.footer = ($("ibFooter")?.value || "").trim();
+  p.color = ($("ibColor")?.value || "#8b7cff");
+}
+
+function ibLoadPageToForm() {
+  const p = ibPage();
+  if (!p) return;
+  if ($("ibContent")) $("ibContent").value = p.content || "";
+  if ($("ibTitle")) $("ibTitle").value = p.title || "";
+  if ($("ibDescription")) $("ibDescription").value = p.description || "";
+  if ($("ibFooter")) $("ibFooter").value = p.footer || "";
+  if ($("ibColor")) $("ibColor").value = p.color || "#8b7cff";
+}
+
+function ibRenderComponents() {
+  const list = $("ibComponentsList");
+  if (!list) return;
+  const p = ibPage();
+  list.innerHTML = "";
+  if (!p.components.length) {
+    list.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">No components yet. Add a button or dropdown.</p>';
+    return;
+  }
+  p.components.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "ib-comp-card";
+    if (c.type === "button") {
+      card.innerHTML = `
+        <h3>Button ${idx + 1}</h3>
+        <div class="ib-comp-grid">
+          <label class="embed-field"><span>Label</span><input data-k="label" data-i="${idx}" value="${escapeAttr(c.label || "")}" maxlength="80"></label>
+          <label class="embed-field"><span>Color / style</span>
+            <select data-k="style" data-i="${idx}">
+              <option value="primary"${c.style==="primary"?" selected":""}>Blue (Primary)</option>
+              <option value="secondary"${c.style==="secondary"?" selected":""}>Gray (Secondary)</option>
+              <option value="success"${c.style==="success"?" selected":""}>Green (Success)</option>
+              <option value="danger"${c.style==="danger"?" selected":""}>Red (Danger)</option>
+              <option value="link"${c.style==="link"?" selected":""}>Link (URL)</option>
+            </select>
+          </label>
+          <label class="embed-field"><span>On click</span>
+            <select data-k="action" data-i="${idx}">
+              <option value="reply"${c.action==="reply"?" selected":""}>Reply with text</option>
+              <option value="page"${c.action==="page"?" selected":""}>Open page</option>
+              <option value="link"${c.action==="link"?" selected":""}>Open URL</option>
+            </select>
+          </label>
+          <label class="embed-field"><span>Reply text</span><input data-k="replyText" data-i="${idx}" value="${escapeAttr(c.replyText || "")}" maxlength="500" placeholder="Shown when clicked"></label>
+          <label class="embed-field"><span>Go to page #</span><input data-k="pageIndex" data-i="${idx}" type="number" min="1" max="8" value="${(Number(c.pageIndex)||0)+1}"></label>
+          <label class="embed-field"><span>URL (link style)</span><input data-k="url" data-i="${idx}" value="${escapeAttr(c.url || "")}" placeholder="https://…"></label>
+        </div>
+        <button type="button" data-remove="${idx}" style="margin-top:10px;">Remove</button>`;
+    } else {
+      const opts = (c.options || []).map((o, oi) =>
+        `<div class="ib-comp-grid" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+          <label class="embed-field"><span>Option ${oi+1} label</span><input data-sel="${idx}" data-oi="${oi}" data-k="label" value="${escapeAttr(o.label||"")}" maxlength="100"></label>
+          <label class="embed-field"><span>Description</span><input data-sel="${idx}" data-oi="${oi}" data-k="description" value="${escapeAttr(o.description||"")}" maxlength="100"></label>
+          <label class="embed-field"><span>On select</span>
+            <select data-sel="${idx}" data-oi="${oi}" data-k="action">
+              <option value="reply"${o.action==="reply"?" selected":""}>Reply with text</option>
+              <option value="page"${o.action==="page"?" selected":""}>Open page</option>
+            </select>
+          </label>
+          <label class="embed-field"><span>Reply text</span><input data-sel="${idx}" data-oi="${oi}" data-k="replyText" value="${escapeAttr(o.replyText||"")}" maxlength="500"></label>
+          <label class="embed-field"><span>Go to page #</span><input data-sel="${idx}" data-oi="${oi}" data-k="pageIndex" type="number" min="1" max="8" value="${(Number(o.pageIndex)||0)+1}"></label>
+        </div>`
+      ).join("");
+      card.innerHTML = `
+        <h3>Dropdown ${idx + 1}</h3>
+        <label class="embed-field"><span>Placeholder</span><input data-k="placeholder" data-i="${idx}" value="${escapeAttr(c.placeholder || "Choose an option")}" maxlength="150"></label>
+        ${opts}
+        <div class="actions" style="margin-top:10px;">
+          <button type="button" data-add-opt="${idx}">Add option</button>
+          <button type="button" data-remove="${idx}">Remove dropdown</button>
+        </div>`;
+    }
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll("[data-k][data-i]").forEach(el => {
+    el.addEventListener("input", () => ibCompField(el));
+    el.addEventListener("change", () => ibCompField(el));
+  });
+  list.querySelectorAll("[data-sel]").forEach(el => {
+    el.addEventListener("input", () => ibSelField(el));
+    el.addEventListener("change", () => ibSelField(el));
+  });
+  list.querySelectorAll("[data-remove]").forEach(el => {
+    el.addEventListener("click", () => {
+      const i = Number(el.getAttribute("data-remove"));
+      ibPage().components.splice(i, 1);
+      ibRenderComponents();
+      ibRenderPreview();
+    });
+  });
+  list.querySelectorAll("[data-add-opt]").forEach(el => {
+    el.addEventListener("click", () => {
+      const i = Number(el.getAttribute("data-add-opt"));
+      const c = ibPage().components[i];
+      if (!c.options) c.options = [];
+      if (c.options.length >= 25) return;
+      c.options.push({ label: "Option", description: "", action: "reply", replyText: "", pageIndex: 0 });
+      ibRenderComponents();
+      ibRenderPreview();
+    });
+  });
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+}
+
+function ibCompField(el) {
+  const i = Number(el.getAttribute("data-i"));
+  const k = el.getAttribute("data-k");
+  const c = ibPage().components[i];
+  if (!c) return;
+  let v = el.value;
+  if (k === "pageIndex") v = Math.max(0, Math.min(7, (Number(v) || 1) - 1));
+  c[k] = v;
+  if (k === "style" && v === "link") c.action = "link";
+  ibRenderPreview();
+}
+
+function ibSelField(el) {
+  const i = Number(el.getAttribute("data-sel"));
+  const oi = Number(el.getAttribute("data-oi"));
+  const k = el.getAttribute("data-k");
+  const c = ibPage().components[i];
+  if (!c || !c.options || !c.options[oi]) return;
+  let v = el.value;
+  if (k === "pageIndex") v = Math.max(0, Math.min(7, (Number(v) || 1) - 1));
+  c.options[oi][k] = v;
+  ibRenderPreview();
+}
+
+function ibRenderPreview() {
+  const root = $("ibPreviewStack");
+  if (!root) return;
+  ibSaveFormToPage();
+  const pages = window.__ib.pages;
+  let idx = window.__ib.previewPage;
+  if (idx < 0 || idx >= pages.length) idx = 0;
+  const page = pages[idx];
+  const color = page.color || "#8b7cff";
+  root.innerHTML = "";
+
+  const wrap = document.createElement("div");
+  wrap.className = "discord-embed-preview";
+  wrap.style.background = "transparent";
+  wrap.style.padding = "0";
+
+  if (page.content) {
+    const content = document.createElement("div");
+    content.className = "discord-embed-content-preview";
+    content.style.color = "#dbdee1";
+    content.style.marginBottom = "8px";
+    content.textContent = page.content;
+    wrap.appendChild(content);
+  }
+
+  const embed = document.createElement("div");
+  embed.className = "discord-embed";
+  embed.innerHTML = `
+    <div class="discord-embed-bar" style="background:${color}"></div>
+    <div class="discord-embed-inner">
+      ${page.title ? `<div class="discord-embed-title"></div>` : ""}
+      ${page.description ? `<div class="discord-embed-desc"></div>` : ""}
+      ${page.footer ? `<div class="discord-embed-footer"></div>` : ""}
+    </div>`;
+  wrap.appendChild(embed);
+  if (page.title) embed.querySelector(".discord-embed-title").textContent = page.title;
+  if (page.description) embed.querySelector(".discord-embed-desc").textContent = page.description;
+  if (page.footer) embed.querySelector(".discord-embed-footer").textContent = page.footer;
+
+  const actions = document.createElement("div");
+  actions.className = "ib-preview-actions";
+  (page.components || []).forEach(c => {
+    if (c.type === "button") {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "ib-preview-btn " + (c.style || "primary");
+      b.textContent = c.label || "Button";
+      b.addEventListener("click", () => {
+        const reply = root.querySelector(".ib-preview-reply") || document.createElement("div");
+        reply.className = "ib-preview-reply";
+        if (c.style === "link" || c.action === "link") {
+          reply.textContent = "Link button → " + (c.url || "(no URL set)");
+          if (!root.querySelector(".ib-preview-reply")) root.appendChild(reply);
+          return;
+        }
+        if (c.action === "page") {
+          const next = Math.max(0, Math.min(pages.length - 1, Number(c.pageIndex) || 0));
+          window.__ib.previewPage = next;
+          ibRenderPreview();
+          return;
+        }
+        reply.textContent = c.replyText || "(no reply text)";
+        if (!root.querySelector(".ib-preview-reply")) root.appendChild(reply);
+      });
+      actions.appendChild(b);
+    } else if (c.type === "select") {
+      const sel = document.createElement("select");
+      sel.className = "ib-preview-select";
+      const ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = c.placeholder || "Choose an option";
+      sel.appendChild(ph);
+      (c.options || []).forEach((o, oi) => {
+        const opt = document.createElement("option");
+        opt.value = String(oi);
+        opt.textContent = o.label || "Option";
+        sel.appendChild(opt);
+      });
+      sel.addEventListener("change", () => {
+        const oi = Number(sel.value);
+        const o = (c.options || [])[oi];
+        if (!o) return;
+        if (o.action === "page") {
+          const next = Math.max(0, Math.min(pages.length - 1, Number(o.pageIndex) || 0));
+          window.__ib.previewPage = next;
+          ibRenderPreview();
+          return;
+        }
+        let reply = root.querySelector(".ib-preview-reply");
+        if (!reply) {
+          reply = document.createElement("div");
+          reply.className = "ib-preview-reply";
+          root.appendChild(reply);
+        }
+        reply.textContent = o.replyText || "(no reply text)";
+      });
+      actions.appendChild(sel);
+    }
+  });
+  wrap.appendChild(actions);
+
+  if (pages.length > 1) {
+    const nav = document.createElement("div");
+    nav.className = "muted";
+    nav.style.marginTop = "10px";
+    nav.style.fontSize = "12px";
+    nav.textContent = "Previewing page " + (idx + 1) + " of " + pages.length;
+    wrap.appendChild(nav);
+  }
+
+  root.appendChild(wrap);
+  ibUpdateSendEnabled();
+}
+
+function ibUpdateSendEnabled() {
+  const ok = $("ibServerSelect")?.value && $("ibChannelSelect")?.value;
+  if ($("ibSendBtn")) $("ibSendBtn").disabled = !ok;
+}
+
+$("ibServerSelect")?.addEventListener("change", () => {
+  const gid = $("ibServerSelect")?.value || "";
+  if (gid) {
+    selectedGuildId = gid;
+    ibLoadChannels(gid);
+  } else {
+    ibLoadChannels(null);
+  }
+  ibUpdateSendEnabled();
+});
+$("ibChannelSelect")?.addEventListener("change", ibUpdateSendEnabled);
+
+["ibContent","ibTitle","ibDescription","ibFooter","ibColor"].forEach(id => {
+  $(id)?.addEventListener("input", () => { ibSaveFormToPage(); ibRenderTabs(); ibRenderPreview(); });
+});
+
+$("ibAddPageBtn")?.addEventListener("click", () => {
+  if (window.__ib.pages.length >= 8) {
+    if ($("ibMsg")) $("ibMsg").textContent = "Maximum 8 pages.";
+    return;
+  }
+  ibSaveFormToPage();
+  window.__ib.pages.push({ content:"", title:"", description:"", footer:"", color:"#8b7cff", components:[] });
+  window.__ib.active = window.__ib.pages.length - 1;
+  window.__ib.previewPage = window.__ib.active;
+  ibLoadPageToForm();
+  ibRenderTabs();
+  ibRenderComponents();
+  ibRenderPreview();
+});
+
+$("ibAddButtonBtn")?.addEventListener("click", () => {
+  const p = ibPage();
+  if (p.components.length >= 5) {
+    if ($("ibMsg")) $("ibMsg").textContent = "Max 5 component rows worth of controls per page (Discord limit).";
+    return;
+  }
+  p.components.push({ type:"button", label:"Click me", style:"primary", action:"reply", replyText:"Hello!", pageIndex:0, url:"" });
+  ibRenderComponents();
+  ibRenderPreview();
+});
+
+$("ibAddSelectBtn")?.addEventListener("click", () => {
+  const p = ibPage();
+  if (p.components.length >= 5) return;
+  p.components.push({
+    type:"select",
+    placeholder:"Choose an option",
+    options:[
+      { label:"Option A", description:"", action:"reply", replyText:"You picked A", pageIndex:0 },
+      { label:"Option B", description:"", action:"page", replyText:"", pageIndex:0 }
+    ]
+  });
+  ibRenderComponents();
+  ibRenderPreview();
+});
+
+$("ibResetBtn")?.addEventListener("click", () => {
+  window.__ib = { pages:[{ content:"", title:"", description:"", footer:"", color:"#8b7cff", components:[] }], active:0, previewPage:0 };
+  ibLoadPageToForm();
+  ibRenderTabs();
+  ibRenderComponents();
+  ibRenderPreview();
+  if ($("ibMsg")) $("ibMsg").textContent = "Builder reset.";
+});
+
+$("ibSendBtn")?.addEventListener("click", async () => {
+  ibSaveFormToPage();
+  const guildId = $("ibServerSelect")?.value;
+  const channelId = $("ibChannelSelect")?.value;
+  const msg = $("ibMsg");
+  if (!guildId || !channelId) {
+    if (msg) msg.textContent = "Select a server and channel.";
+    return;
+  }
+  const pages = window.__ib.pages.map(p => ({
+    content: p.content,
+    title: p.title,
+    description: p.description,
+    footer: p.footer,
+    color: p.color,
+    components: p.components
+  }));
+  if (!pages.some(p => p.title || p.description || (p.components && p.components.length))) {
+    if (msg) msg.textContent = "Add content or components first.";
+    return;
+  }
+  if ($("ibSendBtn")) { $("ibSendBtn").disabled = true; $("ibSendBtn").textContent = "Posting…"; }
+  if (msg) msg.textContent = "Posting interaction message…";
+  try {
+    const response = await request(
+      "/api/servers/" + encodeURIComponent(guildId) + "/channels/" + encodeURIComponent(channelId) + "/interaction-message",
+      { method: "POST", body: JSON.stringify({ pages, startPage: window.__ib.active }) }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Post failed.");
+    if (msg) msg.textContent = "Posted to #" + (data.channelName || "channel") + ".";
+    toast("Interaction message posted.");
+  } catch (e) {
+    if (msg) msg.textContent = e.message || "Could not post.";
+    toast(e.message || "Could not post.");
+  } finally {
+    if ($("ibSendBtn")) { $("ibSendBtn").disabled = false; $("ibSendBtn").textContent = "Post to channel"; }
+    ibUpdateSendEnabled();
+  }
+});
+
+bindCustomSelect("ibServerCustom", "ibServerSelect", "ibServerMenu", "ibServerTrigger");
+bindCustomSelect("ibChannelCustom", "ibChannelSelect", "ibChannelMenu", "ibChannelTrigger");
+ibRenderTabs();
+ibLoadPageToForm();
+ibRenderComponents();
+ibRenderPreview();
 
 </script>
 </body>
