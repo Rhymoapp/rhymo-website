@@ -4499,6 +4499,35 @@ select.embed-native-store {
     linear-gradient(180deg, rgba(8, 6, 16, 0.5) 0%, rgba(8, 6, 16, 0.7) 40%, rgba(8, 6, 16, 0.9) 100%);
 }
 body { background: #0a0614 !important; }
+
+/* Servers submenu: no ghost labels, drawer stays open while toggling */
+.navbtn-parent {
+  position: relative;
+  isolation: isolate;
+}
+.navbtn-parent .nav-parent-label {
+  display: block;
+  transform: none !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  text-align: left !important;
+}
+.navbtn-parent .nav-sub-chevron {
+  transform: rotate(0deg);
+}
+.nav-subwrap.open .navbtn-parent .nav-sub-chevron {
+  transform: rotate(90deg);
+}
+/* Kill any accidental duplicate text from ::before/::after */
+.navbtn-parent::before,
+.navbtn-parent::after {
+  content: none !important;
+  display: none !important;
+}
+#drawer .navbtn-parent,
+.sidebar .navbtn-parent {
+  overflow: hidden;
+}
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -5581,13 +5610,14 @@ function showPage(id, push = true) {
 
   document.querySelectorAll(".navbtn").forEach(b => {
     const go = b.dataset.go;
-    const active = go === id || (go === "servers" && (id === "embed-builder" || id === "interaction-builder") && b.classList.contains("navbtn-parent"));
-    b.classList.toggle("active", active);
+    const isServerFamily = id === "servers" || id === "embed-builder" || id === "interaction-builder";
+    const active = go === id || (b.classList.contains("navbtn-parent") && b.dataset.submenu === "servers" && isServerFamily);
+    b.classList.toggle("active", !!active);
   });
-  // Highlight submenu; expand when landing on a child route (not on every redraw)
+  // Expand Servers submenu when landing on a child page
   document.querySelectorAll(".nav-subwrap").forEach(wrap => {
     const parent = wrap.querySelector(".navbtn-parent");
-    if (!parent || parent.dataset.go !== "servers") return;
+    if (!parent || parent.dataset.submenu !== "servers") return;
     if (id === "embed-builder" || id === "interaction-builder" || id === "servers") {
       wrap.classList.add("open");
       parent.setAttribute("aria-expanded", "true");
@@ -5673,10 +5703,10 @@ function buildNav(container) {
         const parentBtn = document.createElement("button");
         parentBtn.type = "button";
         parentBtn.className = "navbtn navbtn-parent";
-        parentBtn.dataset.go = id;
+        // IMPORTANT: do NOT set data-go on the parent — that would call showPage() and close the drawer
+        parentBtn.dataset.submenu = id;
         parentBtn.setAttribute("aria-expanded", "false");
-        parentBtn.setAttribute("aria-label", "Toggle Servers menu");
-        // Single clean label, never use entry[1] here (avoids ghost "Server Management" text)
+        parentBtn.setAttribute("aria-label", "Servers menu");
         parentBtn.replaceChildren();
         const parentLabel = document.createElement("span");
         parentLabel.className = "nav-parent-label";
@@ -5711,6 +5741,7 @@ function buildNav(container) {
           b.dataset.go = item.id;
           b.innerHTML = `<span class="ns">›</span><span>${item.label}</span>`;
           b.addEventListener("click", e => {
+            e.preventDefault();
             e.stopPropagation();
             showPage(item.id);
           });
