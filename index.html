@@ -76,10 +76,7 @@ article {
 }
 
 /* Atmospheric background */
-body::before {
-  content: none !important;
-  display: none !important;
-}
+body::before { content: none !important; display: none !important; }
 
 body::after {
   content: "";
@@ -2665,15 +2662,6 @@ select, input, textarea {
 
 /* ========== LEGACY LAYOUT MODE ========== */
 body.layout-legacy {
-  --radius: 10px;
-  --radius-sm: 8px;
-  --bg: #09090b;
-  --surface: rgba(24, 24, 27, 0.92);
-  --surface-2: #18181b;
-  --border: rgba(255, 255, 255, 0.1);
-  --muted: #a1a1aa;
-}
-body.layout-legacy {
   background: transparent !important;
 }
 body.layout-legacy .hero {
@@ -4454,7 +4442,7 @@ select.embed-native-store {
   z-index: -2;
   overflow: hidden;
   pointer-events: none;
-  background: #12081f;
+  background: #0a0614;
 }
 #bgVideo {
   position: absolute;
@@ -4464,10 +4452,10 @@ select.embed-native-store {
   min-height: 100%;
   width: auto;
   height: auto;
-  transform: translate(-50%, -50%) scale(1.12);
+  transform: translate(-50%, -50%) scale(1.15);
   object-fit: cover;
-  filter: blur(2px) saturate(1.15) brightness(0.72);
-  opacity: 1;
+  filter: blur(2.5px) saturate(1.15) brightness(0.7);
+  opacity: 0.95;
 }
 #bgVideoShade {
   position: fixed;
@@ -4475,11 +4463,11 @@ select.embed-native-store {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 20%, rgba(139, 92, 246, 0.18), transparent 60%),
+    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.2), transparent 55%),
     linear-gradient(180deg,
-      rgba(10, 6, 20, 0.35) 0%,
-      rgba(10, 6, 20, 0.45) 50%,
-      rgba(10, 6, 20, 0.62) 100%);
+      rgba(8, 6, 16, 0.4) 0%,
+      rgba(8, 6, 16, 0.52) 45%,
+      rgba(8, 6, 16, 0.68) 100%);
 }
 html, body {
   background: transparent !important;
@@ -4982,57 +4970,19 @@ html, body {
 }
 
 
-/* FORCE animated background visible */
-html, body, body.layout-legacy {
-  background: transparent !important;
-}
-#bgVideoWrap {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: -2 !important;
-  display: block !important;
-  opacity: 1 !important;
-  background: #12081f !important;
-}
-#bgVideo {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  width: auto !important;
-  height: auto !important;
-  transform: translate(-50%, -50%) scale(1.1) !important;
-  object-fit: cover !important;
-  filter: blur(2px) saturate(1.2) brightness(0.78) !important;
-  opacity: 1 !important;
-  display: block !important;
-}
-#bgVideoShade {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  background:
-    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.2), transparent 55%),
-    linear-gradient(180deg, rgba(10,6,20,0.28) 0%, rgba(10,6,20,0.4) 55%, rgba(10,6,20,0.55) 100%) !important;
-}
+
+
+/* BG video visible through layout */
 .layout, main, .content, #page-home, .guns-stage, .page, .page-home-guns {
   background: transparent !important;
-  box-shadow: none !important;
-}
-#page-home::before {
-  display: none !important;
-  content: none !important;
-  opacity: 0 !important;
 }
 .sidebar {
-  background: rgba(9, 9, 11, 0.45) !important;
+  background: rgba(9, 9, 11, 0.48) !important;
+  border-right: 1px solid rgba(255,255,255,0.05) !important;
 }
 .topbar {
-  background: rgba(9, 9, 11, 0.7) !important;
+  background: rgba(9, 9, 11, 0.72) !important;
 }
-
 </style>
 </head>
 <body class="session-checking layout-legacy">
