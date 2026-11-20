@@ -4674,6 +4674,181 @@ body { background: #0a0614 !important; }
   margin-top: 3px;
 }
 
+
+/* ===== Visual polish batch ===== */
+
+/* Scoot header avatars inward (safe from screen edge) */
+.topbar {
+  padding-right: max(14px, env(safe-area-inset-right)) !important;
+  padding-left: max(12px, env(safe-area-inset-left)) !important;
+}
+.top-actions {
+  margin-right: 2px !important;
+  gap: 10px !important;
+}
+#accountBtn {
+  margin-right: 4px !important;
+  overflow: visible !important;
+}
+#accountBtn .owner-avatar-wrap {
+  overflow: visible !important;
+}
+#headerAvatar {
+  border-radius: 11px !important;
+}
+
+/* Remove white glow on hero — purple only, softer */
+.guns-glow {
+  background:
+    radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%) !important;
+  filter: blur(8px) !important;
+  opacity: 0.9;
+}
+.guns-avatar {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 70%, transparent),
+    0 0 36px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 0 72px color-mix(in srgb, var(--accent) 22%, transparent) !important;
+}
+@keyframes gunsPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent),
+      0 0 32px color-mix(in srgb, var(--accent) 35%, transparent),
+      0 0 64px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--accent) 85%, transparent),
+      0 0 48px color-mix(in srgb, var(--accent) 50%, transparent),
+      0 0 90px color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+}
+
+/* Flair: cards, pills, buttons */
+.guns-card,
+.guns-creator {
+  border-color: color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,0.06)) !important;
+  background: color-mix(in srgb, var(--accent) 8%, rgba(0,0,0,0.42)) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+}
+.guns-btn,
+.guns-social {
+  backdrop-filter: blur(8px);
+  border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,0.08)) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
+}
+.guns-btn:hover,
+.guns-social:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.12)) !important;
+}
+.panel {
+  box-shadow: 0 10px 32px rgba(0,0,0,0.22);
+}
+.navbtn.active {
+  background: color-mix(in srgb, var(--accent) 16%, rgba(255,255,255,0.04)) !important;
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
+  color: var(--text) !important;
+}
+.navbtn-sub.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+}
+
+/* Dashboard profile sit clean */
+#page-dashboard .panel .row {
+  align-items: flex-start !important;
+}
+
+/* Search not crushing brand */
+.brand {
+  flex: 0 0 auto !important;
+}
+.brand span {
+  display: inline !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+
+/* ===== Profile picture placement fix ===== */
+.topbar {
+  padding-right: max(16px, calc(env(safe-area-inset-right) + 6px)) !important;
+}
+.top-actions {
+  margin-right: 0 !important;
+  padding-right: 2px !important;
+  gap: 8px !important;
+  overflow: visible !important;
+}
+#accountBtn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  margin: 0 6px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  flex: 0 0 36px !important;
+  position: relative !important;
+}
+#accountBtn .owner-avatar-wrap {
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  position: relative !important;
+  display: block !important;
+}
+#headerAvatar {
+  width: 36px !important;
+  height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 11px !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+}
+#accountBtn .owner-badge {
+  right: -4px !important;
+  bottom: -4px !important;
+}
+
+/* Dashboard / settings avatar sits flush, not shifted */
+#page-dashboard .panel > .row,
+#page-settings .panel > .row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+#page-dashboard .owner-avatar-wrap,
+#page-settings .owner-avatar-wrap {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 64px !important;
+  overflow: visible !important;
+  position: relative !important;
+  transform: none !important;
+  left: auto !important;
+  right: auto !important;
+}
+#profileAvatar,
+#settingsAvatar {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  transform: none !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
