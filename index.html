@@ -47,7 +47,7 @@ body {
   font-family: var(--font);
   color: var(--text);
   background:
-    radial-gradient(1000px 520px at 50% -15%, rgba(255, 255, 255, 0.08), transparent 50%),
+    radial-gradient(1000px 520px at 50% -15%, rgba(139, 92, 246, 0.10), transparent 50%),
     radial-gradient(900px 500px at 10% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 55%),
     radial-gradient(800px 420px at 95% 10%, rgba(232, 163, 106, 0.08), transparent 50%),
     radial-gradient(700px 400px at 50% 110%, rgba(80, 120, 160, 0.08), transparent 55%),
@@ -1626,7 +1626,7 @@ body.drawer-open {
   border-radius: 50%;
   object-fit: cover;
   background: var(--surface-2);
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(139, 92, 246, 0.08);
   flex-shrink: 0;
 }
 .server-chip-icon.placeholder {
@@ -4487,8 +4487,9 @@ select.embed-native-store {
   min-height: 100%;
   width: auto;
   height: auto;
-  transform: translate(-50%, -50%) scale(1.15);
+  transform: translate(-50%, -50%) scale(1.2);
   object-fit: cover;
+  /* Heavy blur + darken so bright GD platforms never read as white bars */
   filter: blur(3px) saturate(1.1) brightness(0.5);
   opacity: 0.9;
 }
@@ -4498,10 +4499,15 @@ select.embed-native-store {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 15%, rgba(167, 139, 250, 0.2), transparent 55%),
-    linear-gradient(180deg, rgba(8, 6, 16, 0.5) 0%, rgba(8, 6, 16, 0.7) 40%, rgba(8, 6, 16, 0.9) 100%);
+    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.22), transparent 58%),
+    linear-gradient(180deg,
+      rgba(8, 6, 16, 0.72) 0%,
+      rgba(8, 6, 16, 0.82) 35%,
+      rgba(8, 6, 16, 0.92) 100%);
 }
-body { background: #0a0614 !important; }
+html, body {
+  background: #0a0614 !important;
+}
 
 /* Servers submenu: no ghost labels, drawer stays open while toggling */
 .navbtn-parent {
@@ -4927,6 +4933,85 @@ body { background: #0a0614 !important; }
   width: 16px !important;
   height: 16px !important;
   z-index: 6 !important;
+}
+
+
+
+/* Desktop sidebar present */
+@media (min-width: 901px) {
+  .sidebar { display: block !important; }
+  #menuToggle { display: none !important; }
+}
+@media (max-width: 900px) {
+  .sidebar { display: none !important; }
+  #menuToggle { display: grid !important; }
+  main {
+    padding-left: max(14px, env(safe-area-inset-left)) !important;
+    padding-right: max(14px, env(safe-area-inset-right)) !important;
+  }
+}
+@media (max-width: 600px) {
+  .guns-avatar {
+    width: 112px !important;
+    height: 112px !important;
+  }
+  .guns-title { font-size: clamp(2rem, 10vw, 2.6rem) !important; }
+  .top-search-wrap { max-width: min(150px, 36vw) !important; }
+}
+@media (min-width: 1400px) {
+  .content { max-width: 1360px !important; }
+}
+/* Kill leftover pure-white UI flashes */
+.panel, .guns-card, .guns-creator, .navbtn, .topbar {
+  background-color: transparent;
+}
+.panel {
+  background: rgba(18, 16, 28, 0.82) !important;
+}
+.topbar {
+  background: rgba(9, 9, 11, 0.88) !important;
+}
+
+
+/* Seamless sidebar / main edge (no light strip) */
+.layout {
+  background: transparent !important;
+}
+.sidebar {
+  background: rgba(9, 9, 11, 0.55) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow: none !important;
+}
+main {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+.content,
+#page-home,
+#page-home.page-home-guns.page {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+/* Home page should not sit in a lighter card */
+#page-home::before {
+  opacity: 0.55;
+}
+.guns-stage {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+/* Desktop: no visual break between nav column and hero */
+@media (min-width: 901px) {
+  .sidebar {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  main {
+    border-left: none !important;
+  }
 }
 
 </style>
