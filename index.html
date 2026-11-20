@@ -4576,6 +4576,64 @@ body { background: #0a0614 !important; }
   overflow: hidden;
 }
 
+
+/* Dashboard / settings profile avatar alignment */
+#page-dashboard .panel .row,
+#page-settings .panel .row {
+  align-items: flex-start !important;
+  gap: 16px !important;
+}
+#page-dashboard .owner-avatar-wrap,
+#page-settings .owner-avatar-wrap {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  position: relative !important;
+  display: block !important;
+  flex: 0 0 64px !important;
+  align-self: flex-start !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}
+#profileAvatar,
+#settingsAvatar,
+#page-dashboard .profile-pic,
+#page-settings .profile-pic {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  transform: none !important;
+}
+#page-dashboard .owner-badge,
+#page-settings .owner-badge,
+#profileOwnerBadge.owner-badge {
+  right: -4px !important;
+  bottom: -4px !important;
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 12px !important;
+  z-index: 3 !important;
+  display: none;
+}
+#profileOwnerBadge.owner-badge.show,
+#page-dashboard .owner-badge.show,
+#page-settings .owner-badge.show {
+  display: grid !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
