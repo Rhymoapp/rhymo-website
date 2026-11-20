@@ -4674,102 +4674,6 @@ body { background: #0a0614 !important; }
   margin-top: 3px;
 }
 
-
-/* ===== Visual polish batch ===== */
-
-/* Scoot header avatars inward (safe from screen edge) */
-.topbar {
-  padding-right: max(14px, env(safe-area-inset-right)) !important;
-  padding-left: max(12px, env(safe-area-inset-left)) !important;
-}
-.top-actions {
-  margin-right: 2px !important;
-  gap: 10px !important;
-}
-#accountBtn {
-  margin-right: 4px !important;
-  overflow: visible !important;
-}
-#accountBtn .owner-avatar-wrap {
-  overflow: visible !important;
-}
-#headerAvatar {
-  border-radius: 11px !important;
-}
-
-/* Remove white glow on hero — purple only, softer */
-.guns-glow {
-  background:
-    radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%) !important;
-  filter: blur(8px) !important;
-  opacity: 0.9;
-}
-.guns-avatar {
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--accent) 70%, transparent),
-    0 0 36px color-mix(in srgb, var(--accent) 40%, transparent),
-    0 0 72px color-mix(in srgb, var(--accent) 22%, transparent) !important;
-}
-@keyframes gunsPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent),
-      0 0 32px color-mix(in srgb, var(--accent) 35%, transparent),
-      0 0 64px color-mix(in srgb, var(--accent) 18%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--accent) 85%, transparent),
-      0 0 48px color-mix(in srgb, var(--accent) 50%, transparent),
-      0 0 90px color-mix(in srgb, var(--accent) 28%, transparent);
-  }
-}
-
-/* Flair: cards, pills, buttons */
-.guns-card,
-.guns-creator {
-  border-color: color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,0.06)) !important;
-  background: color-mix(in srgb, var(--accent) 8%, rgba(0,0,0,0.42)) !important;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-}
-.guns-btn,
-.guns-social {
-  backdrop-filter: blur(8px);
-  border-color: color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,0.08)) !important;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
-}
-.guns-btn:hover,
-.guns-social:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.12)) !important;
-}
-.panel {
-  box-shadow: 0 10px 32px rgba(0,0,0,0.22);
-}
-.navbtn.active {
-  background: color-mix(in srgb, var(--accent) 16%, rgba(255,255,255,0.04)) !important;
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
-  color: var(--text) !important;
-}
-.navbtn-sub.active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
-}
-
-/* Dashboard profile sit clean */
-#page-dashboard .panel .row {
-  align-items: flex-start !important;
-}
-
-/* Search not crushing brand */
-.brand {
-  flex: 0 0 auto !important;
-}
-.brand span {
-  display: inline !important;
-  max-width: none !important;
-  overflow: visible !important;
-}
-
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -5857,7 +5761,7 @@ function showPage(id, push = true) {
 
   document.querySelectorAll(".navbtn").forEach(b => {
     const go = b.dataset.go;
-    const isServerFamily = id === "servers" || id === "embed-builder" || id === "interaction-builder" || id === "commands" || id === "status" || id === "notifications";
+    const isServerFamily = id === "servers" || id === "embed-builder" || id === "interaction-builder";
     const active = go === id || (b.classList.contains("navbtn-parent") && b.dataset.submenu === "servers" && isServerFamily);
     b.classList.toggle("active", !!active);
   });
@@ -5865,7 +5769,7 @@ function showPage(id, push = true) {
   document.querySelectorAll(".nav-subwrap").forEach(wrap => {
     const parent = wrap.querySelector(".navbtn-parent");
     if (!parent || parent.dataset.submenu !== "servers") return;
-    if (id === "embed-builder" || id === "interaction-builder" || id === "servers" || id === "commands" || id === "status" || id === "notifications") {
+    if (id === "embed-builder" || id === "interaction-builder" || id === "servers") {
       wrap.classList.add("open");
       parent.setAttribute("aria-expanded", "true");
     }
@@ -5924,10 +5828,7 @@ function buildNav(container) {
         servers: [
           { id: "servers", label: "Overview" },
           { id: "embed-builder", label: "Embed Builder" },
-          { id: "interaction-builder", label: "Interaction Builder" },
-          { id: "commands", label: "Command Explorer" },
-          { id: "status", label: "System Status" },
-          { id: "notifications", label: "Notifications" }
+          { id: "interaction-builder", label: "Interaction Builder" }
         ]
       }
     },
