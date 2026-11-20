@@ -46,12 +46,7 @@ body {
   max-width: 100%;
   font-family: var(--font);
   color: var(--text);
-  background:
-    radial-gradient(1000px 520px at 50% -15%, rgba(139, 92, 246, 0.10), transparent 50%),
-    radial-gradient(900px 500px at 10% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 55%),
-    radial-gradient(800px 420px at 95% 10%, rgba(232, 163, 106, 0.08), transparent 50%),
-    radial-gradient(700px 400px at 50% 110%, rgba(80, 120, 160, 0.08), transparent 55%),
-    var(--bg);
+  background: transparent;
   line-height: 1.55;
   font-size: 1rem;
   -webkit-font-smoothing: antialiased;
@@ -82,15 +77,8 @@ article {
 
 /* Atmospheric background */
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 90% 60% at 15% -5%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(232, 163, 106, 0.1), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 110%, rgba(80, 120, 160, 0.08), transparent 45%);
-  pointer-events: none;
-  z-index: -2;
+  content: none !important;
+  display: none !important;
 }
 
 body::after {
@@ -2686,7 +2674,7 @@ body.layout-legacy {
   --muted: #a1a1aa;
 }
 body.layout-legacy {
-  background: #09090b !important;
+  background: transparent !important;
 }
 body.layout-legacy .hero {
   background: var(--surface-2) !important;
@@ -4494,7 +4482,7 @@ select.embed-native-store {
       rgba(10, 6, 20, 0.62) 100%);
 }
 html, body {
-  background: #12081f !important;
+  background: transparent !important;
 }
 
 /* Servers submenu: no ghost labels, drawer stays open while toggling */
@@ -4963,9 +4951,7 @@ html, body {
 
 
 /* Home page should not sit in a lighter card */
-#page-home::before {
-  opacity: 0.55;
-}
+
 .guns-stage {
   background: transparent !important;
   box-shadow: none !important;
@@ -4995,12 +4981,64 @@ html, body {
   background: rgba(9, 9, 11, 0.72) !important;
 }
 
+
+/* FORCE animated background visible */
+html, body, body.layout-legacy {
+  background: transparent !important;
+}
+#bgVideoWrap {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -2 !important;
+  display: block !important;
+  opacity: 1 !important;
+  background: #12081f !important;
+}
+#bgVideo {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  transform: translate(-50%, -50%) scale(1.1) !important;
+  object-fit: cover !important;
+  filter: blur(2px) saturate(1.2) brightness(0.78) !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+#bgVideoShade {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.2), transparent 55%),
+    linear-gradient(180deg, rgba(10,6,20,0.28) 0%, rgba(10,6,20,0.4) 55%, rgba(10,6,20,0.55) 100%) !important;
+}
+.layout, main, .content, #page-home, .guns-stage, .page, .page-home-guns {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#page-home::before {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+}
+.sidebar {
+  background: rgba(9, 9, 11, 0.45) !important;
+}
+.topbar {
+  background: rgba(9, 9, 11, 0.7) !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
 <div id="bgVideoWrap" aria-hidden="true">
   <video id="bgVideo" autoplay muted loop playsinline preload="auto">
-    <source src="rhymo-bg.mp4" type="video/mp4">
+    <source src="media/rhymo-bg.mp4" type="video/mp4">
   </video>
 </div>
 <div id="bgVideoShade" aria-hidden="true"></div>
