@@ -4634,6 +4634,46 @@ body { background: #0a0614 !important; }
   display: grid !important;
 }
 
+
+/* Creator card with live profile picture */
+.guns-creator {
+  text-align: left;
+}
+.guns-creator-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.guns-creator-avatar {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  flex: 0 0 52px;
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), 0 6px 18px rgba(0,0,0,0.35);
+  background: #1a1a24;
+  display: block;
+}
+.guns-creator-meta {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.guns-creator-meta .guns-creator-label {
+  margin-bottom: 2px;
+}
+.guns-creator-meta .guns-creator-name {
+  margin: 0;
+  line-height: 1.25;
+}
+.guns-creator-meta .guns-creator-handle {
+  margin-top: 3px;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -4712,9 +4752,14 @@ body { background: #0a0614 !important; }
     </div>
 
     <div class="guns-creator">
-      <div class="guns-creator-label">Creator</div>
-      <div class="guns-creator-name">Xamiar Ånier Pløwenin Ørthenburg</div>
-      <div class="guns-creator-handle">@bootleg_door · Norway · Christian</div>
+      <div class="guns-creator-row">
+        <img id="creatorAvatar" class="guns-creator-avatar" alt="Creator profile picture" width="52" height="52" decoding="async">
+        <div class="guns-creator-meta">
+          <div class="guns-creator-label">Creator <span id="creatorPronouns" class="guns-creator-pronouns"></span></div>
+          <div class="guns-creator-name" id="creatorDisplayName">Xamiar Ånier Pløwenin Ørthenburg</div>
+          <div class="guns-creator-handle"><span id="creatorUsername">@bootleg_door</span> · Norway · Christian</div>
+        </div>
+      </div>
       <a class="guns-creator-link" href="https://discord.gg/CxDZndfp73" target="_blank" rel="noopener noreferrer">Join the community</a>
     </div>
 
@@ -6026,7 +6071,8 @@ function setUser(user) {
     resetServerDetails();
     serverMessage("Please log in with Discord before loading servers.");
     isOwner = false;
-    if (typeof updateOwnerBadges === "function") updateOwnerBadges();
+    if (typeof updateOwnerBadges === "function") loadCreatorAvatar();
+  updateOwnerBadges();
     if ($("announceAdminPanel")) $("announceAdminPanel").style.display = "none";
     if ($("changelogAdminPanel")) $("changelogAdminPanel").style.display = "none";
     resetAIChat({ skipPersist: true, createThread: false });
@@ -9082,6 +9128,88 @@ async function refreshHomeServers() {
   }
 }
 
+
+function creatorAvatarUrl(user) {
+  if (!user) return null;
+  if (user.avatar && user.id) {
+    const anim = String(user.avatar).startsWith("a_");
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${anim ? "gif" : "png"}?size=128`;
+  }
+  return null;
+}
+
+function setCreatorAvatar(url) {
+  const img = $("creatorAvatar");
+  if (!img || !url) return;
+  if (img.dataset.src === url) return;
+  img.dataset.src = url;
+  img.src = url;
+  try { localStorage.setItem("rhymo_creator_avatar", url); } catch {}
+}
+
+function applyOwnerPublicProfile(data) {
+  if (!data) return;
+  if (data.avatar || data.ownerAvatar) {
+    setCreatorAvatar(data.avatar || data.ownerAvatar);
+  }
+  const display = data.displayName || data.ownerDisplayName || data.global_name;
+  const username = data.username || data.ownerUsername;
+  const pronouns = data.pronouns || data.ownerPronouns;
+
+  if (display && $("creatorDisplayName")) {
+    $("creatorDisplayName").textContent = display;
+  }
+  if (username && $("creatorUsername")) {
+    $("creatorUsername").textContent = "@" + String(username).replace(/^@/, "");
+  }
+  if ($("creatorPronouns")) {
+    $("creatorPronouns").textContent = pronouns ? ("· " + pronouns) : "";
+  }
+
+  try {
+    localStorage.setItem("rhymo_creator_profile", JSON.stringify({
+      avatar: data.avatar || data.ownerAvatar || null,
+      displayName: display || null,
+      username: username || null,
+      pronouns: pronouns || null
+    }));
+  } catch {}
+}
+
+function loadCreatorAvatar(metrics) {
+  // 1) Live from metrics (backend — avatar, name, username, pronouns)
+  if (metrics && (metrics.ownerAvatar || metrics.ownerDisplayName || metrics.ownerUsername || metrics.ownerPronouns)) {
+    applyOwnerPublicProfile({
+      ownerAvatar: metrics.ownerAvatar,
+      ownerDisplayName: metrics.ownerDisplayName,
+      ownerUsername: metrics.ownerUsername,
+      ownerPronouns: metrics.ownerPronouns
+    });
+    return;
+  }
+  // 2) Signed-in owner: freshest session data
+  try {
+    if (currentUser && String(currentUser.id) === String(RHYMO_OWNER_USER_ID)) {
+      applyOwnerPublicProfile({
+        avatar: creatorAvatarUrl(currentUser),
+        displayName: currentUser.global_name || currentUser.username,
+        username: currentUser.username,
+        pronouns: currentUser.pronouns || null
+      });
+      return;
+    }
+  } catch {}
+  // 3) Cache so guests still see your last known profile
+  try {
+    const cached = JSON.parse(localStorage.getItem("rhymo_creator_profile") || "null");
+    if (cached) applyOwnerPublicProfile(cached);
+    else {
+      const av = localStorage.getItem("rhymo_creator_avatar");
+      if (av) setCreatorAvatar(av);
+    }
+  } catch {}
+}
+
 async function refreshBotMetrics() {
   const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
   const setHtml = (id, value) => { const el = $(id); if (el) el.innerHTML = value; };
@@ -9096,6 +9224,7 @@ async function refreshBotMetrics() {
     if ($("homeServerCount") && Number.isFinite(Number(metrics.serverCount))) {
       $("homeServerCount").textContent = String(metrics.serverCount);
     }
+    loadCreatorAvatar(metrics);
     setText("botHeartbeat", metrics.online ? "Heartbeat active" : "Heartbeat stale");
     setText("botUptime", Number.isFinite(Number(metrics.uptimeSeconds))
       ? Math.floor(Number(metrics.uptimeSeconds)) + " seconds" : "--");
@@ -9155,6 +9284,8 @@ function ensureBgVideo() {
   window.addEventListener("pointerdown", tryPlay, { once: true });
 }
 ensureBgVideo();
+loadCreatorAvatar();
+
 refreshAccount().then(() => checkOwner()).catch(() => setUser(null));
 // safety: never leave the session boot screen up if something hangs
 setTimeout(() => {
