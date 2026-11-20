@@ -4849,6 +4849,56 @@ body { background: #0a0614 !important; }
   transform: none !important;
 }
 
+
+/* Header avatar truly in the corner */
+.topbar {
+  position: sticky !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding-left: max(10px, env(safe-area-inset-left)) !important;
+  padding-right: max(10px, env(safe-area-inset-right)) !important;
+  overflow: visible !important;
+}
+.top-actions {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+#accountBtn,
+#accountBtn.iconbtn {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  flex: 0 0 34px !important;
+  position: relative !important;
+}
+#accountBtn .owner-avatar-wrap {
+  width: 34px !important;
+  height: 34px !important;
+  overflow: visible !important;
+  display: block !important;
+  position: relative !important;
+}
+#headerAvatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 11px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+}
+#accountBtn .owner-badge {
+  right: -5px !important;
+  bottom: -5px !important;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -5406,7 +5456,11 @@ body { background: #0a0614 !important; }
         <h2 style="margin:0;">Components</h2>
         <div class="actions">
           <button type="button" id="ibAddButtonBtn">Add button</button>
+          <button type="button" id="ibAddLinkBtn">Add link button</button>
           <button type="button" id="ibAddSelectBtn">Add dropdown</button>
+          <button type="button" id="ibAddUserSelectBtn">Add user select</button>
+          <button type="button" id="ibAddRoleSelectBtn">Add role select</button>
+          <button type="button" id="ibAddChannelSelectBtn">Add channel select</button>
         </div>
       </div>
       <div id="ibComponentsList" class="ib-components-list"></div>
@@ -9992,7 +10046,7 @@ function ibRenderComponents() {
   const p = ibPage();
   list.innerHTML = "";
   if (!p.components.length) {
-    list.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">No components yet. Add a button or a select menu.</p>';
+    list.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">No components yet. Add a button, dropdown, or entity select.</p>';
     return;
   }
   p.components.forEach((c, idx) => {
@@ -10047,6 +10101,17 @@ function ibRenderComponents() {
         <div class="actions" style="margin-top:10px;">
           <button type="button" data-add-opt="${idx}">Add option</button>
           <button type="button" data-remove="${idx}">Remove dropdown</button>
+        </div>`;
+    } else if (c.type === "user_select" || c.type === "role_select" || c.type === "channel_select") {
+      const title = c.type === "user_select" ? "User select" : c.type === "role_select" ? "Role select" : "Channel select";
+      card.innerHTML = `
+        <h3>${title} ${idx + 1}</h3>
+        <label class="embed-field"><span>Placeholder</span><input data-k="placeholder" data-i="${idx}" value="${escapeAttr(c.placeholder || "Select…")}" maxlength="150"></label>
+        <label class="embed-field"><span>Min values</span><input data-k="minValues" data-i="${idx}" type="number" min="0" max="25" value="${Number(c.minValues) || 1}"></label>
+        <label class="embed-field"><span>Max values</span><input data-k="maxValues" data-i="${idx}" type="number" min="1" max="25" value="${Number(c.maxValues) || 1}"></label>
+        <p class="muted" style="font-size:12px;margin:8px 0 0;">Discord fills this with real ${c.type === "user_select" ? "users" : c.type === "role_select" ? "roles" : "channels"} when posted.</p>
+        <div class="actions" style="margin-top:10px;">
+          <button type="button" data-remove="${idx}">Remove</button>
         </div>`;
     }
 
@@ -10208,6 +10273,36 @@ function ibRenderPreview() {
         reply.textContent = o.replyText || "(no reply text)";
       });
       actions.appendChild(sel);
+    } else if (c.type === "user_select" || c.type === "role_select" || c.type === "channel_select") {
+      const sel = document.createElement("select");
+      sel.className = "ib-preview-select";
+      const ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = c.placeholder || (
+        c.type === "user_select" ? "Select a user" :
+        c.type === "role_select" ? "Select a role" : "Select a channel"
+      );
+      sel.appendChild(ph);
+      const demo = document.createElement("option");
+      demo.disabled = true;
+      demo.textContent = "(filled by Discord when posted)";
+      sel.appendChild(demo);
+      actions.appendChild(sel);
+    } else if (c.type === "user_select" || c.type === "role_select" || c.type === "channel_select") {
+      const sel = document.createElement("select");
+      sel.className = "ib-preview-select";
+      const ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = c.placeholder || (
+        c.type === "user_select" ? "Select a user" :
+        c.type === "role_select" ? "Select a role" : "Select a channel"
+      );
+      sel.appendChild(ph);
+      const demo = document.createElement("option");
+      demo.disabled = true;
+      demo.textContent = "(filled by Discord when posted)";
+      sel.appendChild(demo);
+      actions.appendChild(sel);
     }
   });
   wrap.appendChild(actions);
@@ -10286,6 +10381,30 @@ $("ibAddSelectBtn")?.addEventListener("click", () => {
   ibRenderComponents();
   ibRenderPreview();
 });
+
+$("ibAddLinkBtn")?.addEventListener("click", () => {
+  const p = ibPage();
+  if (p.components.length >= 5) {
+    if ($("ibMsg")) $("ibMsg").textContent = "Max 5 component rows per page (Discord limit).";
+    return;
+  }
+  p.components.push({ type:"button", label:"Open link", style:"link", action:"link", replyText:"", pageIndex:0, url:"https://" });
+  ibRenderComponents();
+  ibRenderPreview();
+});
+function ibAddEntitySelect(type, placeholder) {
+  const p = ibPage();
+  if (p.components.length >= 5) {
+    if ($("ibMsg")) $("ibMsg").textContent = "Max 5 component rows per page (Discord limit).";
+    return;
+  }
+  p.components.push({ type, placeholder, minValues: 1, maxValues: 1 });
+  ibRenderComponents();
+  ibRenderPreview();
+}
+$("ibAddUserSelectBtn")?.addEventListener("click", () => ibAddEntitySelect("user_select", "Select a user"));
+$("ibAddRoleSelectBtn")?.addEventListener("click", () => ibAddEntitySelect("role_select", "Select a role"));
+$("ibAddChannelSelectBtn")?.addEventListener("click", () => ibAddEntitySelect("channel_select", "Select a channel"));
 
 
 $("ibResetBtn")?.addEventListener("click", () => {
