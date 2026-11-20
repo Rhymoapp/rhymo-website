@@ -3133,17 +3133,7 @@ select, input, textarea {
   position: relative;
   isolation: isolate;
 }
-#page-home::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 18%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%),
-    radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 45%),
-    radial-gradient(circle at 80% 70%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 40%);
-}
+#page-home::before { display: none !important; content: none !important; }
 .lp-hero {
   text-align: center;
   padding: 48px 16px 32px;
@@ -4258,10 +4248,9 @@ select.embed-native-store {
   height: 55%;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 68%),
-    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 50%);
-  filter: blur(2px);
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+  filter: blur(8px);
+  opacity: 0.85;
 }
 .guns-avatar {
   position: relative;
@@ -4477,7 +4466,7 @@ select.embed-native-store {
   z-index: -2;
   overflow: hidden;
   pointer-events: none;
-  background: #0a0614;
+  background: #12081f;
 }
 #bgVideo {
   position: absolute;
@@ -4487,11 +4476,10 @@ select.embed-native-store {
   min-height: 100%;
   width: auto;
   height: auto;
-  transform: translate(-50%, -50%) scale(1.2);
+  transform: translate(-50%, -50%) scale(1.12);
   object-fit: cover;
-  /* Heavy blur + darken so bright GD platforms never read as white bars */
-  filter: blur(3px) saturate(1.1) brightness(0.5);
-  opacity: 0.9;
+  filter: blur(2px) saturate(1.15) brightness(0.72);
+  opacity: 1;
 }
 #bgVideoShade {
   position: fixed;
@@ -4499,14 +4487,14 @@ select.embed-native-store {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.22), transparent 58%),
+    radial-gradient(ellipse at 50% 20%, rgba(139, 92, 246, 0.18), transparent 60%),
     linear-gradient(180deg,
-      rgba(8, 6, 16, 0.72) 0%,
-      rgba(8, 6, 16, 0.82) 35%,
-      rgba(8, 6, 16, 0.92) 100%);
+      rgba(10, 6, 20, 0.35) 0%,
+      rgba(10, 6, 20, 0.45) 50%,
+      rgba(10, 6, 20, 0.62) 100%);
 }
 html, body {
-  background: #0a0614 !important;
+  background: #12081f !important;
 }
 
 /* Servers submenu: no ghost labels, drawer stays open while toggling */
@@ -4973,27 +4961,7 @@ html, body {
 }
 
 
-/* Seamless sidebar / main edge (no light strip) */
-.layout {
-  background: transparent !important;
-}
-.sidebar {
-  background: rgba(9, 9, 11, 0.55) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
-  box-shadow: none !important;
-}
-main {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-.content,
-#page-home,
-#page-home.page-home-guns.page {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
+
 /* Home page should not sit in a lighter card */
 #page-home::before {
   opacity: 0.55;
@@ -5012,6 +4980,19 @@ main {
   main {
     border-left: none !important;
   }
+}
+
+
+/* Background video must show through everything */
+.layout, main, .content, #page-home, .guns-stage, .page {
+  background: transparent !important;
+}
+.sidebar {
+  background: rgba(9, 9, 11, 0.42) !important;
+  border-right: 1px solid rgba(255,255,255,0.05) !important;
+}
+.topbar {
+  background: rgba(9, 9, 11, 0.72) !important;
 }
 
 </style>
