@@ -4528,6 +4528,54 @@ body { background: #0a0614 !important; }
 .sidebar .navbtn-parent {
   overflow: hidden;
 }
+
+/* ===== Brand full name + star outside avatar ===== */
+.brand {
+  flex: 0 0 auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+.brand span {
+  display: inline !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  font-size: inherit;
+}
+@media (max-width: 380px) {
+  .brand span { display: inline !important; }
+}
+@media (max-width: 600px) {
+  .brand span { max-width: none !important; }
+  .top-search-wrap { max-width: min(140px, 34vw) !important; }
+}
+
+/* Star badge sticks OUTSIDE the avatar */
+#accountBtn {
+  overflow: visible !important;
+}
+#accountBtn .owner-avatar-wrap {
+  overflow: visible !important;
+  position: relative !important;
+}
+#accountBtn .owner-badge,
+#headerOwnerBadge.owner-badge {
+  right: -5px !important;
+  bottom: -5px !important;
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 10px !important;
+  border-width: 2px !important;
+  z-index: 5 !important;
+}
+/* Keep avatar itself circular without clipping the badge */
+#accountBtn .owner-avatar-wrap > img {
+  border-radius: 11px !important;
+  overflow: hidden;
+}
+
 </style>
 </head>
 <body class="session-checking layout-legacy">
