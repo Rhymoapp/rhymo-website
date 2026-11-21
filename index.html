@@ -4439,7 +4439,7 @@ select.embed-native-store {
 #bgVideoWrap {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
   background: #0a0614;
@@ -4973,9 +4973,10 @@ html, body {
 
 
 
-/* Kill white top/bottom strips (iOS overscroll + safe areas) */
+
+/* Animated background — visible through page */
 html {
-  background: #0a0614 !important;
+  background: #0a0614;
   min-height: 100%;
   min-height: 100dvh;
 }
@@ -4985,33 +4986,62 @@ body {
   min-height: 100dvh;
   overscroll-behavior: none;
 }
-/* Keep video under content but never flash white */
-#bgVideoWrap {
+body.layout-legacy {
   background: #0a0614 !important;
 }
-/* Topbar must cover status-bar / notch edge */
-.topbar {
+#bgVideoWrap {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
   background: #0a0614 !important;
+}
+#bgVideo {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  transform: translate(-50%, -50%) scale(1.12) !important;
+  object-fit: cover !important;
+  filter: blur(2px) saturate(1.2) brightness(0.75) !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+#bgVideoShade {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(139, 92, 246, 0.18), transparent 55%),
+    linear-gradient(180deg,
+      rgba(10, 6, 20, 0.25) 0%,
+      rgba(10, 6, 20, 0.38) 50%,
+      rgba(10, 6, 20, 0.55) 100%) !important;
+}
+/* App content sits ABOVE video */
+.layout, .topbar, .sidebar, main, .content, .drawer-backdrop {
+  position: relative;
+  z-index: 2;
+}
+.layout, main, .content, #page-home, .guns-stage, .page, .page-home-guns {
+  background: transparent !important;
+}
+/* Topbar / sidebar readable but not solid walls */
+.topbar {
+  background: rgba(10, 6, 20, 0.82) !important;
   border-bottom: none !important;
-  box-shadow: none !important;
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* Bottom safe area never white */
-.layout, main, .content, #page-home, .guns-stage {
-  background: #0a0614 !important;
+.sidebar {
+  background: rgba(10, 6, 20, 0.78) !important;
+  border-right: 1px solid rgba(139, 92, 246, 0.12) !important;
 }
-body::after {
-  content: none !important;
-  display: none !important;
-}
-/* Footer / bottom edge */
-.site-footer, footer, .guns-footer {
-  background: #0a0614 !important;
-  border-top: none !important;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-}
-
-/* Soft purple borders (no white lines) */
+/* Soft purple borders — no white lines */
 .panel, .lp-stat, .guns-bot-card, .creator-card, .home-server-card, .navbtn, .btn {
   border-color: rgba(139, 92, 246, 0.14) !important;
 }
