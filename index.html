@@ -5045,6 +5045,18 @@ body.layout-legacy {
 .panel, .lp-stat, .guns-bot-card, .creator-card, .home-server-card, .navbtn, .btn {
   border-color: rgba(139, 92, 246, 0.14) !important;
 }
+
+/* Anti-Nuke layout viewer */
+.antinuke-h { font-size: 14px; margin: 16px 0 8px; font-weight: 600; }
+.antinuke-list { display: flex; flex-direction: column; gap: 4px; }
+.antinuke-row {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  font-size: 13px;
+}
+.antinuke-name { font-weight: 500; }
 </style>
 </head>
 <body class="session-checking layout-legacy">
@@ -5626,6 +5638,42 @@ body.layout-legacy {
 
 
 
+
+<section class="page" id="page-antinuke">
+  <div class="eyebrow">Servers</div>
+  <h1>Anti-Nuke Management</h1>
+  <p class="sub">View the current saved server layout used for nuke recovery. Read-only — only <code>!save layout</code> in Discord updates this (server owner).</p>
+
+  <div class="grid">
+    <article class="panel full">
+      <div class="panel-head">
+        <div>
+          <h2 style="margin:0;">Server</h2>
+          <p class="muted" style="margin:4px 0 0;font-size:13px;">Only servers you own or can manage are listed.</p>
+        </div>
+        <button type="button" id="antinukeRefreshBtn">Refresh</button>
+      </div>
+      <div style="margin-top:14px;">
+        <span class="muted" style="display:block;font-size:13px;margin-bottom:8px;">Choose a server</span>
+        <div id="antinukeServerList" class="managed-server-list" role="list" aria-label="Servers you can manage">
+          <div class="server-list-empty">Sign in with Discord to load servers you manage.</div>
+        </div>
+        <input type="hidden" id="antinukeServerSelect" value="">
+      </div>
+      <div id="antinukeMessage" class="notice" role="status" style="margin-top:12px;"></div>
+    </article>
+
+    <article class="panel full" id="antinukeLayoutPanel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2 style="margin:0;">Saved layout</h2>
+          <p class="muted" id="antinukeMeta" style="margin:4px 0 0;font-size:13px;"></p>
+        </div>
+      </div>
+      <div id="antinukeLayoutBody" style="margin-top:12px;"></div>
+    </article>
+  </div>
+</section>
 <section class="page" id="page-help">
   <div class="eyebrow">Support</div><h1>Help Center</h1><p class="sub">Quick answers for the things people usually get stuck on.</p>
   <div class="grid">
@@ -6091,6 +6139,7 @@ const pages = [
   ["servers", "Server Management"],
   ["embed-builder", "Embed Builder"],
   ["interaction-builder", "Interaction Builder"],
+  ["antinuke", "Anti-Nuke Management"],
   ["commands", "Command Explorer"],
   ["help", "Help Center"],
   ["changelog", "Changelog"],
@@ -6124,16 +6173,20 @@ function showPage(id, push = true) {
 
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   const page = $("page-" + id);
-  if (page) page.classList.add("active");
-  else {
+  if (page) {
+    page.classList.add("active");
+  } else {
     const home = $("page-home");
     if (home) home.classList.add("active");
     id = "home";
   }
+  if (id === "antinuke") {
+    try { ensureAntinukeServers(); } catch (e) { console.error(e); }
+  }
 
   document.querySelectorAll(".navbtn").forEach(b => {
     const go = b.dataset.go;
-    const isServerFamily = id === "servers" || id === "embed-builder" || id === "interaction-builder";
+    const isServerFamily = id === "servers" || id === "embed-builder" || id === "interaction-builder" || id === "antinuke" || id === "antinuke";
     const active = go === id || (b.classList.contains("navbtn-parent") && b.dataset.submenu === "servers" && isServerFamily);
     b.classList.toggle("active", !!active);
   });
@@ -6200,7 +6253,8 @@ function buildNav(container) {
         servers: [
           { id: "servers", label: "Overview" },
           { id: "embed-builder", label: "Embed Builder" },
-          { id: "interaction-builder", label: "Interaction Builder" }
+          { id: "interaction-builder", label: "Interaction Builder" },
+          { id: "antinuke", label: "Anti-Nuke Management" }
         ]
       }
     },
@@ -10565,6 +10619,153 @@ ibRenderTabs();
 ibLoadPageToForm();
 ibRenderComponents();
 ibRenderPreview();
+
+
+/* —— Anti-Nuke Management (read-only saved layout) —— */
+let antinukeSelectedGuildId = "";
+
+function renderAntinukeServerList(placeholder) {
+  const box = $("antinukeServerList");
+  if (!box) return;
+  if (placeholder) {
+    box.innerHTML = `<div class="server-list-empty">${placeholder}</div>`;
+    return;
+  }
+  if (!managedServers.length) {
+    box.innerHTML = `<div class="server-list-empty">No manageable servers found. You need Manage Server on a server where Rhymo is present.</div>`;
+    return;
+  }
+  box.innerHTML = "";
+  managedServers.forEach(s => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "server-list-item" + (antinukeSelectedGuildId === s.id ? " active" : "");
+    btn.setAttribute("role", "listitem");
+    const icon = s.icon
+      ? `<img src="${s.icon}" alt="" width="28" height="28" style="border-radius:50%;object-fit:cover;">`
+      : `<span class="server-list-fallback">${(s.name || "?").slice(0, 1)}</span>`;
+    btn.innerHTML = `${icon}<span class="server-list-name">${antinukeEscapeHtml(s.name || "Server")}</span>`;
+    btn.addEventListener("click", () => {
+      antinukeSelectedGuildId = s.id;
+      const hid = $("antinukeServerSelect");
+      if (hid) hid.value = s.id;
+      renderAntinukeServerList();
+      loadAntinukeLayout(s.id);
+    });
+    box.appendChild(btn);
+  });
+}
+
+function antinukeEscapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function antinukeMessage(text, isError) {
+  const el = $("antinukeMessage");
+  if (!el) return;
+  el.textContent = text || "";
+  el.classList.toggle("error", !!isError);
+}
+
+function renderLayoutSection(title, items, nameKey) {
+  if (!items || !items.length) {
+    return `<div class="muted" style="margin:8px 0 16px;">No ${title.toLowerCase()} saved.</div>`;
+  }
+  const sorted = [...items].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const rows = sorted.map(item => {
+    const name = antinukeEscapeHtml(item[nameKey] || item.name || "—");
+    const cat = item.category_name ? `<span class="muted"> · ${antinukeEscapeHtml(item.category_name)}</span>` : "";
+    const slow = item.slowmode ? `<span class="muted"> · slowmode ${item.slowmode}s</span>` : "";
+    return `<div class="antinuke-row"><span class="antinuke-name"># ${name}</span>${cat}${slow}</div>`;
+  }).join("");
+  return `<h3 class="antinuke-h">${antinukeEscapeHtml(title)} <span class="muted">(${sorted.length})</span></h3><div class="antinuke-list">${rows}</div>`;
+}
+
+async function loadAntinukeLayout(guildId) {
+  const panel = $("antinukeLayoutPanel");
+  const body = $("antinukeLayoutBody");
+  const meta = $("antinukeMeta");
+  if (!guildId) {
+    if (panel) panel.hidden = true;
+    return;
+  }
+  antinukeMessage("Loading saved layout…");
+  if (body) body.innerHTML = `<div class="muted">Loading…</div>`;
+  if (panel) panel.hidden = false;
+  try {
+    const response = await request(`/api/servers/${encodeURIComponent(guildId)}/layout`);
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      antinukeMessage("Sign in with Discord to view layouts.", true);
+      if (panel) panel.hidden = true;
+      return;
+    }
+    if (response.status === 403) {
+      antinukeMessage(data.error || "You need Manage Server on that server.", true);
+      if (panel) panel.hidden = true;
+      return;
+    }
+    if (!response.ok) {
+      antinukeMessage(data.error || "Could not load layout.", true);
+      return;
+    }
+    if (!data.saved || !data.layout) {
+      antinukeMessage(data.message || "No saved layout for this server yet.");
+      if (meta) meta.textContent = data.guildName ? `${data.guildName} · not saved yet` : "Not saved yet";
+      if (body) {
+        body.innerHTML = `<div class="notice">No layout stored. The server owner can run <strong>!save layout</strong> in Discord. When they save again, this page shows the new layout automatically.</div>`;
+      }
+      return;
+    }
+    antinukeMessage("");
+    if (meta) {
+      meta.textContent = `${data.guildName || "Server"} · last saved ${data.timestamp || "unknown"} · read-only`;
+    }
+    const layout = data.layout || {};
+    const html = [
+      renderLayoutSection("Categories", layout.categories || [], "name"),
+      renderLayoutSection("Text channels", layout.text_channels || [], "name"),
+      renderLayoutSection("Voice channels", layout.voice_channels || [], "name")
+    ].join("");
+    if (body) body.innerHTML = html || `<div class="muted">Layout is empty.</div>`;
+  } catch (err) {
+    console.error(err);
+    antinukeMessage("Failed to load layout.", true);
+  }
+}
+
+async function ensureAntinukeServers() {
+  if (!managedServers.length) {
+    try {
+      const response = await request("/api/servers");
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && Array.isArray(data.servers)) {
+        managedServers = data.servers;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  renderAntinukeServerList();
+  if (antinukeSelectedGuildId) {
+    loadAntinukeLayout(antinukeSelectedGuildId);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = $("antinukeRefreshBtn");
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      managedServers = [];
+      await ensureAntinukeServers();
+      if (antinukeSelectedGuildId) loadAntinukeLayout(antinukeSelectedGuildId);
+    });
+  }
+});
 
 </script>
 </body>
