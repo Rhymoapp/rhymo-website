@@ -6181,7 +6181,7 @@ function showPage(id, push = true) {
     id = "home";
   }
   if (id === "antinuke") {
-    try { ensureAntinukeServers(); } catch (e) { console.error(e); }
+    try { ensureAntinukeServers(true); } catch (e) { console.error(e); }
   }
 
   document.querySelectorAll(".navbtn").forEach(b => {
@@ -10632,7 +10632,7 @@ function renderAntinukeServerList(placeholder) {
     return;
   }
   if (!managedServers.length) {
-    box.innerHTML = `<div class="server-list-empty">No manageable servers found. You need Manage Server on a server where Rhymo is present.</div>`;
+    box.innerHTML = `<div class="server-list-empty">No servers found where you have Manage Server, Administrator, or Owner.</div>`;
     return;
   }
   box.innerHTML = "";
@@ -10710,14 +10710,21 @@ async function loadAntinukeLayout(guildId) {
       return;
     }
     if (!response.ok) {
-      antinukeMessage(data.error || "Could not load layout.", true);
+      const msg = data.error || data.message || `Could not load layout (${response.status}).`;
+      antinukeMessage(msg, true);
+      if (body) body.innerHTML = `<div class="notice">${msg}</div>`;
       return;
     }
     if (!data.saved || !data.layout) {
-      antinukeMessage(data.message || "No saved layout for this server yet.");
+      const msg = data.message || "No saved layout for this server yet.";
+      antinukeMessage(msg);
       if (meta) meta.textContent = data.guildName ? `${data.guildName} · not saved yet` : "Not saved yet";
+      let extra = "";
+      if (data.debug) {
+        extra = `<p class="muted" style="margin-top:10px;font-size:12px;">Lookup id: ${data.debug.lookedUpId || "?"} · layouts in DB: ${data.debug.totalLayoutsInDb ?? "?"} · id in recent rows: ${data.debug.recentGuildIdsIncludeLookup ? "yes" : "no"}</p>`;
+      }
       if (body) {
-        body.innerHTML = `<div class="notice">No layout stored. The server owner can run <strong>!save layout</strong> in Discord. When they save again, this page shows the new layout automatically.</div>`;
+        body.innerHTML = `<div class="notice">${msg}<br><br>The server owner can run <strong>!save layout</strong> in Discord on this server. The website must use the same Neon database as the bot.</div>${extra}`;
       }
       return;
     }
@@ -10738,18 +10745,50 @@ async function loadAntinukeLayout(guildId) {
   }
 }
 
-async function ensureAntinukeServers() {
-  if (!managedServers.length) {
+async function ensureAntinukeServers(force = false) {
+  if (!currentUser) {
+    renderAntinukeServerList("Sign in with Discord to load servers you manage.");
+    antinukeMessage("Sign in with Discord first.", true);
+    return;
+  }
+
+  if (force || !managedServers.length) {
+    renderAntinukeServerList("Loading your servers...");
+    antinukeMessage("Loading servers…");
     try {
       const response = await request("/api/servers");
       const data = await response.json().catch(() => ({}));
-      if (response.ok && Array.isArray(data.servers)) {
-        managedServers = data.servers;
+      if (response.status === 401) {
+        renderAntinukeServerList("Your Discord session expired. Sign in again to load your servers.");
+        antinukeMessage("Session expired — sign in again.", true);
+        return;
+      }
+      if (!response.ok) {
+        const msg = data.error || data.message || "Could not load servers.";
+        renderAntinukeServerList(msg);
+        antinukeMessage(msg, true);
+        return;
+      }
+      managedServers = Array.isArray(data.servers) ? data.servers : [];
+      // Keep Server Management list in sync
+      if (typeof renderManagedServerList === "function" && managedServers.length) {
+        try { renderManagedServerList(); } catch (_) {}
       }
     } catch (e) {
       console.error(e);
+      renderAntinukeServerList("Could not load servers. Try Refresh.");
+      antinukeMessage("Could not load servers.", true);
+      return;
     }
   }
+
+  if (!managedServers.length) {
+    renderAntinukeServerList("No servers found where you have Manage Server, Administrator, or Owner on this Discord account.");
+    antinukeMessage("No manageable servers found for this account.");
+    return;
+  }
+
+  antinukeMessage(managedServers.length + " server(s) available.");
   renderAntinukeServerList();
   if (antinukeSelectedGuildId) {
     loadAntinukeLayout(antinukeSelectedGuildId);
@@ -10760,9 +10799,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = $("antinukeRefreshBtn");
   if (btn) {
     btn.addEventListener("click", async () => {
-      managedServers = [];
-      await ensureAntinukeServers();
-      if (antinukeSelectedGuildId) loadAntinukeLayout(antinukeSelectedGuildId);
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+      try {
+        await ensureAntinukeServers(true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Refresh";
+      }
     });
   }
 });
