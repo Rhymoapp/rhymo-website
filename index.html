@@ -1592,7 +1592,92 @@ body.drawer-open {
   gap: 28px;
   width: max-content;
   padding: 0 28px 0 0;
-  pointer-events: none;
+  pointer-events: auto;
+}
+.server-chip {
+  cursor: pointer;
+  border-radius: 16px;
+  padding: 6px 10px 6px 6px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.server-chip:hover,
+.server-chip:focus-visible {
+  background: rgba(139, 92, 246, 0.12);
+  outline: none;
+}
+.server-chip:active {
+  transform: scale(0.98);
+}
+/* Server info modal */
+.server-info-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(6, 4, 14, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.server-info-modal {
+  width: min(400px, 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: linear-gradient(160deg, rgba(28, 18, 48, 0.96), rgba(12, 8, 24, 0.98));
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  padding: 22px 20px 18px;
+  color: var(--text);
+}
+.server-info-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.server-info-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(167, 139, 250, 0.35);
+  background: rgba(99,102,241,0.25);
+  flex-shrink: 0;
+}
+.server-info-modal-icon.placeholder {
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 22px;
+}
+.server-info-modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+.server-info-modal-meta {
+  margin: 0;
+  color: var(--muted, #b7b0c9);
+  font-size: 0.92rem;
+}
+.server-info-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.server-info-modal-actions .btn {
+  flex: 1 1 120px;
+  text-align: center;
+  justify-content: center;
+}
+.server-info-modal-status {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted, #b7b0c9);
 }
 @keyframes serverMarquee {
   from { transform: translateX(0); }
@@ -1604,6 +1689,11 @@ body.drawer-open {
   gap: 12px;
   min-width: max-content;
   flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 .server-chip-icon {
   width: 52px;
@@ -9453,8 +9543,10 @@ function formatMemberCount(n) {
 }
 
 function buildServerChip(server) {
-  const chip = document.createElement("div");
+  const chip = document.createElement("button");
+  chip.type = "button";
   chip.className = "server-chip";
+  chip.setAttribute("aria-label", "View server " + String(server.name || ""));
 
   const name = String(server.name || "Discord Server");
   if (server.icon) {
@@ -9493,7 +9585,141 @@ function buildServerChip(server) {
   members.textContent = formatMemberCount(server.memberCount);
   meta.append(nameRow, members);
   chip.appendChild(meta);
+
+  chip.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openServerInfoModal(server);
+  });
   return chip;
+}
+
+function closeServerInfoModal() {
+  const el = document.getElementById("serverInfoModalBackdrop");
+  if (el) el.remove();
+}
+
+async function fetchServerInvite(guildId, refresh) {
+  const q = refresh ? "?refresh=1" : "";
+  const response = await fetch(
+    `${API_BASE_URL}/api/bot/servers/${encodeURIComponent(guildId)}/invite${q}`,
+    { cache: "no-store" }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "Could not get invite link.");
+  }
+  return data;
+}
+
+function openServerInfoModal(server) {
+  closeServerInfoModal();
+
+  const name = String(server.name || "Discord Server");
+  const members = formatMemberCount(server.memberCount);
+  const guildId = String(server.id || server.guildId || "");
+
+  const backdrop = document.createElement("div");
+  backdrop.id = "serverInfoModalBackdrop";
+  backdrop.className = "server-info-modal-backdrop";
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeServerInfoModal();
+  });
+
+  const modal = document.createElement("div");
+  modal.className = "server-info-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", name);
+
+  const head = document.createElement("div");
+  head.className = "server-info-modal-head";
+
+  if (server.icon) {
+    const img = document.createElement("img");
+    img.className = "server-info-modal-icon";
+    img.src = server.icon;
+    img.alt = "";
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => {
+      const ph = document.createElement("div");
+      ph.className = "server-info-modal-icon placeholder";
+      ph.textContent = name.slice(0, 1).toUpperCase();
+      img.replaceWith(ph);
+    };
+    head.appendChild(img);
+  } else {
+    const ph = document.createElement("div");
+    ph.className = "server-info-modal-icon placeholder";
+    ph.textContent = name.slice(0, 1).toUpperCase();
+    head.appendChild(ph);
+  }
+
+  const titles = document.createElement("div");
+  const h = document.createElement("h3");
+  h.className = "server-info-modal-title";
+  h.textContent = name;
+  const meta = document.createElement("p");
+  meta.className = "server-info-modal-meta";
+  meta.textContent = members + (guildId ? " · Rhymo is here" : "");
+  titles.append(h, meta);
+  head.appendChild(titles);
+
+  const status = document.createElement("p");
+  status.className = "server-info-modal-status";
+  status.textContent = guildId ? "Loading invite…" : "Server id unavailable.";
+
+  const actions = document.createElement("div");
+  actions.className = "server-info-modal-actions";
+
+  const joinBtn = document.createElement("a");
+  joinBtn.className = "btn primary";
+  joinBtn.textContent = "Join server";
+  joinBtn.href = "#";
+  joinBtn.target = "_blank";
+  joinBtn.rel = "noopener noreferrer";
+  joinBtn.style.pointerEvents = "none";
+  joinBtn.style.opacity = "0.6";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "btn";
+  closeBtn.textContent = "Close";
+  closeBtn.addEventListener("click", closeServerInfoModal);
+
+  actions.append(joinBtn, closeBtn);
+  modal.append(head, status, actions);
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  if (!guildId) {
+    status.textContent = "No server id available for invites.";
+    return;
+  }
+
+  (async () => {
+    try {
+      let data = await fetchServerInvite(guildId, false);
+      // If backend returned a nearly expired link, force refresh once
+      if (data.expiresAt) {
+        const exp = new Date(data.expiresAt).getTime();
+        if (Number.isFinite(exp) && exp < Date.now() + 60_000) {
+          data = await fetchServerInvite(guildId, true);
+        }
+      }
+      if (!data.url) throw new Error("No invite URL returned.");
+      joinBtn.href = data.url;
+      joinBtn.style.pointerEvents = "";
+      joinBtn.style.opacity = "";
+      status.textContent = "Invite ready — opens Discord.";
+      joinBtn.addEventListener("click", async (ev) => {
+        // If user reports expired later, next open refreshes; opportunistic re-fetch on click failure not possible cross-origin
+      });
+    } catch (err) {
+      status.textContent = err.message || "Could not load invite.";
+      joinBtn.textContent = "Invite unavailable";
+    }
+  })();
 }
 
 async function refreshHomeServers() {
