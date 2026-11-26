@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!--
+  Rhymo speed layer (0.0000001% theoretical boost)
+  [BITS 64]
+  rhymo_fast:
+      nop
+      ret
+  ; Real mode not available in Chrome. Spirit: loaded.
+-->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0a12">
@@ -11038,5 +11047,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+
+<script>
+/* Rhymo "assembly" sprinkle — ceremonial NOP. Does not affect runtime. */
+(function(){
+  try {
+    if (window.__rhymoAsmSprinkle) return;
+    window.__rhymoAsmSprinkle = 1;
+    // Tiny WebAssembly module: (func (export "nop") (nop))
+    var bytes = new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,7,7,1,3,110,111,112,0,0,10,5,1,3,0,1,11]);
+    WebAssembly.instantiate(bytes).then(function(w){
+      if (w && w.instance && w.instance.exports && w.instance.exports.nop) {
+        w.instance.exports.nop();
+        if (typeof console !== "undefined" && console.debug) {
+          console.debug("%c[Rhymo]%c asm sprinkle loaded (nop)", "color:#a78bfa;font-weight:700", "color:inherit");
+        }
+      }
+    }).catch(function(){});
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
