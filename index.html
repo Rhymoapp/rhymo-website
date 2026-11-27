@@ -5965,6 +5965,31 @@ body.layout-legacy {
     <p class="muted" id="promoPremiumStatus" style="margin-top:6px;"></p>
   </article>
 
+  <article class="panel full" id="promoCreatePanel" style="display:none;">
+    <h2>Make Promo Codes</h2>
+    <p class="muted">Owner only. Creates a global promo code users can redeem on their account.</p>
+    <div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px;">
+      <label style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px;">
+        <span class="muted">Code</span>
+        <input id="promoCreateCode" type="text" maxlength="64" placeholder="Enter new code" autocomplete="off" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(167,139,250,0.25);background:rgba(0,0,0,0.25);color:inherit;" />
+      </label>
+      <label style="display:flex;flex-direction:column;gap:6px;min-width:160px;">
+        <span class="muted">Duration</span>
+        <select id="promoCreateDuration" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(167,139,250,0.25);background:rgba(0,0,0,0.35);color:inherit;">
+          <option value="1">1 day</option>
+          <option value="3">3 days</option>
+          <option value="5">5 days</option>
+          <option value="7">7 days</option>
+          <option value="14" selected>2 weeks</option>
+          <option value="30">1 month</option>
+        </select>
+      </label>
+      <button type="button" class="btn primary" id="promoCreateBtn">Create code</button>
+    </div>
+    <p class="muted" id="promoCreateStatus" style="margin-top:10px;min-height:1.2em;"></p>
+  </article>
+
+
 
 <section class="page" id="page-terms">
   <div class="eyebrow">Legal</div>
@@ -8875,6 +8900,8 @@ async function checkOwner() {
   const changelogPanel = $("changelogAdminPanel");
   if (announcePanel) announcePanel.style.display = isOwner ? "block" : "none";
   if (changelogPanel) changelogPanel.style.display = isOwner ? "block" : "none";
+  const promoCreatePanel = document.getElementById("promoCreatePanel");
+  if (promoCreatePanel) promoCreatePanel.style.display = isOwner ? "block" : "none";
   updateOwnerBadges();
 }
 
@@ -11163,6 +11190,45 @@ async function redeemPromoCode() {
 }
 
 document.getElementById("promoRedeemBtn")?.addEventListener("click", redeemPromoCode);
+
+async function createPromoCode() {
+  const status = document.getElementById("promoCreateStatus");
+  const input = document.getElementById("promoCreateCode");
+  const select = document.getElementById("promoCreateDuration");
+  const btn = document.getElementById("promoCreateBtn");
+  if (!status || !input || !select) return;
+  if (!isOwner) {
+    status.textContent = "Owner only.";
+    return;
+  }
+  const code = String(input.value || "").trim();
+  const durationDays = Number(select.value) || 14;
+  if (!code || code.length < 3) {
+    status.textContent = "Enter a code (at least 3 characters).";
+    return;
+  }
+  status.textContent = "Creating…";
+  if (btn) btn.disabled = true;
+  try {
+    const response = await request("/api/premium/codes", {
+      method: "POST",
+      body: { code, durationDays, maxRedemptions: null }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      status.textContent = data.error || ("Create failed (" + response.status + ").");
+      return;
+    }
+    status.textContent = "Created code " + (data.code || code) + " for " + durationDays + " day(s).";
+    input.value = "";
+  } catch (e) {
+    status.textContent = (e && e.message) || "Create failed.";
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+document.getElementById("promoCreateBtn")?.addEventListener("click", createPromoCode);
+
 document.getElementById("promoCodeInput")?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
