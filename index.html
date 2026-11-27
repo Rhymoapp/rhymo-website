@@ -5953,6 +5953,19 @@ body.layout-legacy {
   </div>
 </section>
 
+
+  <article class="panel full" id="promoRedeemPanel">
+    <h2>Redeem Promo Code</h2>
+    <p class="muted">Enter a Rhymo promo code to unlock QoL, fun, and community perks on <strong>your account</strong> (works everywhere Rhymo is). Security features stay free for everyone.</p>
+    <div class="row" style="flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;">
+      <input id="promoCodeInput" type="text" maxlength="64" placeholder="e.g. RH82!19" autocomplete="off" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;border:1px solid rgba(167,139,250,0.25);background:rgba(0,0,0,0.25);color:inherit;" />
+      <button type="button" class="btn primary" id="promoRedeemBtn">Redeem</button>
+    </div>
+    <p class="muted" id="promoRedeemStatus" style="margin-top:10px;min-height:1.2em;"></p>
+    <p class="muted" id="promoPremiumStatus" style="margin-top:6px;"></p>
+  </article>
+
+
 <section class="page" id="page-terms">
   <div class="eyebrow">Legal</div>
   <h1>Terms of Service</h1>
@@ -11068,5 +11081,92 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
+<script>
+
+/* ===== PROMO REDEEM ===== */
+async function refreshPremiumStatus() {
+  const el = document.getElementById("promoPremiumStatus");
+  if (!el) return;
+  if (typeof isLoggedIn === "function" ? !isLoggedIn() : !window.user) {
+    el.textContent = "Sign in with Discord to redeem or view premium status.";
+    return;
+  }
+  try {
+    const response = await request("/api/premium/me");
+    if (!response.ok) {
+      el.textContent = "";
+      return;
+    }
+    const data = await response.json();
+    if (data.active) {
+      const when = data.expiresAt ? new Date(data.expiresAt).toLocaleString() : "unknown";
+      el.textContent = "Premium active until " + when + " (global on your account).";
+    } else {
+      el.textContent = "No active promo premium on your account.";
+    }
+  } catch (e) {
+    el.textContent = "";
+  }
+}
+
+async function redeemPromoCode() {
+  const input = document.getElementById("promoCodeInput");
+  const status = document.getElementById("promoRedeemStatus");
+  const btn = document.getElementById("promoRedeemBtn");
+  if (!input || !status) return;
+  if (typeof isLoggedIn === "function" ? !isLoggedIn() : !window.user) {
+    status.textContent = "Sign in with Discord first.";
+    return;
+  }
+  const code = String(input.value || "").trim();
+  if (!code) {
+    status.textContent = "Enter a code.";
+    return;
+  }
+  status.textContent = "Checking code…";
+  if (btn) btn.disabled = true;
+  try {
+    const response = await request("/api/premium/redeem", {
+      method: "POST",
+      body: { code }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      status.textContent = data.error || "Redeem failed.";
+      return;
+    }
+    const when = data.expiresAt ? new Date(data.expiresAt).toLocaleString() : "";
+    status.textContent = (data.message || "Redeemed!") + (when ? " Expires " + when + "." : "");
+    input.value = "";
+    refreshPremiumStatus();
+  } catch (e) {
+    status.textContent = e.message || "Redeem failed.";
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+document.getElementById("promoRedeemBtn")?.addEventListener("click", redeemPromoCode);
+document.getElementById("promoCodeInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    redeemPromoCode();
+  }
+});
+// Refresh when opening settings if possible
+(function(){
+  const orig = window.showPage;
+  if (typeof orig === "function") {
+    window.showPage = function(id) {
+      const r = orig.apply(this, arguments);
+      if (id === "settings") refreshPremiumStatus();
+      return r;
+    };
+  }
+  if (document.readyState === "complete") refreshPremiumStatus();
+  else window.addEventListener("load", () => setTimeout(refreshPremiumStatus, 500));
+})();
+
+</script>
 </body>
 </html>
