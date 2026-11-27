@@ -5958,7 +5958,7 @@ body.layout-legacy {
     <h2>Redeem Promo Code</h2>
     <p class="muted">Enter a Rhymo promo code to unlock QoL, fun, and community perks on <strong>your account</strong> (works everywhere Rhymo is). Security features stay free for everyone.</p>
     <div class="row" style="flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;">
-      <input id="promoCodeInput" type="text" maxlength="64" placeholder="e.g. RH82!19" autocomplete="off" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;border:1px solid rgba(167,139,250,0.25);background:rgba(0,0,0,0.25);color:inherit;" />
+      <input id="promoCodeInput" type="text" maxlength="64" placeholder="Enter promo code here…" autocomplete="off" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;border:1px solid rgba(167,139,250,0.25);background:rgba(0,0,0,0.25);color:inherit;" />
       <button type="button" class="btn primary" id="promoRedeemBtn">Redeem</button>
     </div>
     <p class="muted" id="promoRedeemStatus" style="margin-top:10px;min-height:1.2em;"></p>
@@ -11087,7 +11087,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function refreshPremiumStatus() {
   const el = document.getElementById("promoPremiumStatus");
   if (!el) return;
-  if (typeof isLoggedIn === "function" ? !isLoggedIn() : !window.user) {
+  if (!currentUser || !currentUser.id) {
     el.textContent = "Sign in with Discord to redeem or view premium status.";
     return;
   }
@@ -11114,7 +11114,7 @@ async function redeemPromoCode() {
   const status = document.getElementById("promoRedeemStatus");
   const btn = document.getElementById("promoRedeemBtn");
   if (!input || !status) return;
-  if (typeof isLoggedIn === "function" ? !isLoggedIn() : !window.user) {
+  if (!currentUser || !currentUser.id) {
     status.textContent = "Sign in with Discord first.";
     return;
   }
