@@ -6492,7 +6492,8 @@ if ($("welcomeSkipBtn")) $("welcomeSkipBtn").addEventListener("click", continueW
 
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
-  if (options.method === "POST" || options.method === "PATCH" || options.method === "DELETE") {
+  const method = (options.method || "GET").toUpperCase();
+  if (method === "POST" || method === "PATCH" || method === "DELETE" || method === "PUT") {
     if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   }
   try {
@@ -6500,8 +6501,14 @@ async function request(path, options = {}) {
     // Only send session id - never a client-claimed user id (prevents identity spoofing)
     if (savedUser?.sid) headers.set("X-Rhymo-Session", savedUser.sid);
   } catch {}
+  let body = options.body;
+  if (body != null && typeof body === "object" && !(body instanceof FormData) && !(body instanceof Blob)) {
+    body = JSON.stringify(body);
+  }
   return fetch(api(path), {
     ...options,
+    method,
+    body,
     headers,
     credentials: "include",
     cache: "no-store",
@@ -11132,7 +11139,13 @@ async function redeemPromoCode() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      status.textContent = data.error || "Redeem failed.";
+      status.textContent =
+        data.error ||
+        (response.status === 401 || response.status === 403
+          ? "Session expired — sign in with Discord again."
+          : response.status === 404
+            ? "Promo service not found — backend may need redeploy."
+            : "Redeem failed (" + response.status + ").");
       return;
     }
     const when = data.expiresAt ? new Date(data.expiresAt).toLocaleString() : "";
@@ -11140,7 +11153,10 @@ async function redeemPromoCode() {
     input.value = "";
     refreshPremiumStatus();
   } catch (e) {
-    status.textContent = e.message || "Redeem failed.";
+    const raw = String(e && e.message ? e.message : e || "");
+    status.textContent = /failed to fetch|networkerror|load failed/i.test(raw)
+      ? "Could not reach the Rhymo backend. Try again or re-sign in."
+      : (raw || "Redeem failed.");
   } finally {
     if (btn) btn.disabled = false;
   }
